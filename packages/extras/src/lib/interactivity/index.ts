@@ -18,9 +18,9 @@ const interactivity = (options?: InteractivityOptions) => {
     hovered: new Map(),
     interactiveObjects: [],
     target: currentWritable(options?.target ?? useThrelte().renderer.domElement),
-    // eslint-disable-next-line @typescript-eslint/no-empty-function
-    compute: () => {}, // will be replaced by the default or the user-provided function
-    filter: options?.filter
+    compute: () => { /* will be replaced by the default or the user-provided function */ }, 
+    filter: options?.filter,
+    update: () => { /* will be added in setupInteractivity */ },
   }
 
   state.compute = options?.compute ?? getDefaultComputeFunction(state)

@@ -56,6 +56,7 @@ export type State = {
   interactiveObjects: THREE.Object3D[]
   compute: ComputeFunction
   filter?: FilterFunction
+  update: () => void
 }
 
 export type ThrelteEvents = {

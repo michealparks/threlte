@@ -31,7 +31,7 @@ export const setupInteractivity = (state: State) => {
   function calculateDistance(event: DomEvent) {
     const dx = event.offsetX - state.initialClick[0]
     const dy = event.offsetY - state.initialClick[1]
-    return Math.round(Math.sqrt(dx * dx + dy * dy))
+    return Math.round(Math.hypot(dx, dy))
   }
 
   function cancelPointer(intersections: Intersection[]) {
@@ -64,21 +64,13 @@ export const setupInteractivity = (state: State) => {
   const enabled = memoize(state.enabled)
 
   const getHits = (): Intersection[] => {
-    const duplicates = new Set<string>()
+    if (!enabled.current) {
+      return []
+    }
 
     const intersections: Intersection[] = []
 
-    let hits = state.interactiveObjects
-      .flatMap((obj) => (enabled.current ? state.raycaster.intersectObject(obj, true) : []))
-      // Sort by distance
-      .sort((a, b) => a.distance - b.distance)
-      // Filter out duplicates
-      .filter((item) => {
-        const id = getIntersectionId(item as Intersection)
-        if (duplicates.has(id)) return false
-        duplicates.add(id)
-        return true
-      })
+    let hits = state.raycaster.intersectObjects(state.interactiveObjects, true)
 
     if (state.filter) hits = state.filter(hits, state)
 
@@ -103,6 +95,8 @@ export const setupInteractivity = (state: State) => {
     }
   }
 
+  let lastPointerMoveEvent: DomEvent
+
   const getEventHandler = (name: DomEventName): ((event: DomEvent) => void) => {
     // Deal with cancelation
     if (name === 'pointerleave' || name === 'pointercancel') {
@@ -122,6 +116,8 @@ export const setupInteractivity = (state: State) => {
       const isPointerMove = name === 'pointermove'
       const isClickEvent = name === 'click' || name === 'contextmenu' || name === 'dblclick'
 
+      if (isPointerMove) lastPointerMoveEvent = event
+
       /**
        * Will set up the raycaster. The default implementation will use the
        * mouse position on the renderers domElement.
@@ -140,7 +136,7 @@ export const setupInteractivity = (state: State) => {
       // If a click yields no results, pass it back to the user as a miss
       // Missed events have to come first in order to establish user-land side-effect clean up
       if (isClickEvent && !hits.length) {
-        if (delta <= 2) {
+        if (delta <= 0.1) {
           pointerMissed(event, state.interactiveObjects)
         }
       }
@@ -252,4 +248,9 @@ export const setupInteractivity = (state: State) => {
       if (target) disconnect(target)
     }
   })
+
+  const pointerMove = getEventHandler('pointermove')
+  state.update = () => {
+    pointerMove(lastPointerMoveEvent)
+  }
 }

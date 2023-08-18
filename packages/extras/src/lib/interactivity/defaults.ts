@@ -7,11 +7,9 @@ export const getDefaultComputeFunction = (state: State): ComputeFunction => {
   let width = 0
   let height = 0
 
-  const resizeObserver = new ResizeObserver((entries) => {
-    for (const entry of entries) {
-      width = entry.contentRect.width
-      height = entry.contentRect.height
-    }
+  const resizeObserver = new ResizeObserver(([entry]) => {
+    width = entry.contentRect.width
+    height = entry.contentRect.height
   })
 
   watch(state.target, (target) => {
