@@ -1,5 +1,17 @@
 # @threlte/core
 
+## 6.0.6
+
+### Patch Changes
+
+- 0602a68: Removed circular import, cleanup
+
+## 6.0.5
+
+### Patch Changes
+
+- c886c65: Set useLegacyLights to false if greater than or equal to r155
+
 ## 6.0.4
 
 ### Patch Changes
