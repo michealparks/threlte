@@ -116,7 +116,9 @@ export const setupInteractivity = (state: State) => {
       const isPointerMove = name === 'pointermove'
       const isClickEvent = name === 'click' || name === 'contextmenu' || name === 'dblclick'
 
-      if (isPointerMove) lastPointerMoveEvent = event
+      if (isPointerMove) {
+        lastPointerMoveEvent = event
+      }
 
       /**
        * Will set up the raycaster. The default implementation will use the
@@ -136,7 +138,7 @@ export const setupInteractivity = (state: State) => {
       // If a click yields no results, pass it back to the user as a miss
       // Missed events have to come first in order to establish user-land side-effect clean up
       if (isClickEvent && !hits.length) {
-        if (delta <= 0.1) {
+        if (delta <= 2) {
           pointerMissed(event, state.interactiveObjects)
         }
       }
@@ -251,6 +253,8 @@ export const setupInteractivity = (state: State) => {
 
   const pointerMove = getEventHandler('pointermove')
   state.update = () => {
-    pointerMove(lastPointerMoveEvent)
+    if (lastPointerMoveEvent) {
+      pointerMove(lastPointerMoveEvent)
+    }
   }
 }
