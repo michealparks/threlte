@@ -1,20 +1,18 @@
 <script lang="ts">
-  import { T, Canvas } from '$lib'
+  import * as THREE from 'three'
+  import { Canvas } from '$lib'
+  import Scene from './scene.svelte'
+
+  setInterval(() => (value = !value), 2000)
+
+  let value = true
 </script>
 
 <main>
-  <Canvas>
-    <T.PerspectiveCamera
-      makeDefault
-      position={[3, 3, 3]}
-      on:create={({ ref }) => ref.lookAt(0, 0, 0)}
-    />
-    <T.Mesh>
-      <T.MeshStandardMaterial color="hotpink" />
-      <T.BoxGeometry />
-    </T.Mesh>
-    <T.DirectionalLight />
-    <T.AmbientLight />
+  <Canvas
+    useLegacyLights={value}
+  >
+    <Scene />
   </Canvas>
 </main>
 
