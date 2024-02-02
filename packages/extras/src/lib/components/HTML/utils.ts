@@ -6,45 +6,39 @@ import {
   OrthographicCamera,
   PerspectiveCamera,
   Raycaster,
+  Vector2,
   Vector3
 } from 'three'
 
+const vec2 = new Vector2()
 const v1 = new Vector3()
 const v2 = new Vector3()
 const v3 = new Vector3()
 
-const isOrthographicCamera = (o: any): o is OrthographicCamera => {
-  return o.isOrthographicCamera
+const isOrthographicCamera = (object: Camera): object is OrthographicCamera => {
+  return 'isOrthographicCamera' in object
 }
 
-const isPerspectiveCamera = (o: any): o is PerspectiveCamera => {
-  return o.isPerspectiveCamera
+const isPerspectiveCamera = (object: Camera): object is PerspectiveCamera => {
+  return 'isPerspectiveCamera' in object
 }
 
 const isOrthographicCameraOrPerspectiveCamera = (
-  o: any
-): o is OrthographicCamera | PerspectiveCamera => {
-  return isOrthographicCamera(o) || isPerspectiveCamera(o)
+  object: Camera
+): object is OrthographicCamera | PerspectiveCamera => {
+  return isOrthographicCamera(object) || isPerspectiveCamera(object)
 }
 
 export const defaultCalculatePosition = (
-  obj: Object3D,
+  object: Object3D,
   camera: Camera,
   size: { width: number; height: number }
-): [number, number] => {
-  const objectPos = v1.setFromMatrixPosition(obj.matrixWorld)
+) => {
+  const objectPos = v1.setFromMatrixPosition(object.matrixWorld)
   objectPos.project(camera)
   const widthHalf = size.width / 2
   const heightHalf = size.height / 2
   return [objectPos.x * widthHalf + widthHalf, -(objectPos.y * heightHalf) + heightHalf]
-}
-
-export const isObjectBehindCamera = (el: Object3D, camera: Camera) => {
-  const objectPos = v1.setFromMatrixPosition(el.matrixWorld)
-  const cameraPos = v2.setFromMatrixPosition(camera.matrixWorld)
-  const deltaCamObj = objectPos.sub(cameraPos)
-  const camDir = camera.getWorldDirection(v3)
-  return deltaCamObj.angleTo(camDir) > Math.PI / 2
 }
 
 export const isObjectVisible = (
@@ -54,23 +48,33 @@ export const isObjectVisible = (
   occlude: Object3D[]
 ) => {
   const elPos = v1.setFromMatrixPosition(el.matrixWorld)
-  const screenPos = elPos.clone()
+  const screenPos = v2.copy(v1)
   screenPos.project(camera)
-  raycaster.setFromCamera(screenPos, camera)
+  raycaster.setFromCamera(vec2.set(screenPos.x, screenPos.y), camera)
   const intersects = raycaster.intersectObjects(occlude, true)
+
   if (intersects.length) {
     const intersectionDistance = intersects[0].distance
     const pointDistance = elPos.distanceTo(raycaster.ray.origin)
     return pointDistance < intersectionDistance
   }
+
   return true
 }
 
-export const objectScale = (el: Object3D, camera: Camera) => {
+export const isObjectBehindCamera = (object: Object3D, camera: Camera) => {
+  const objectPos = v1.setFromMatrixPosition(object.matrixWorld)
+  const cameraPos = v2.setFromMatrixPosition(camera.matrixWorld)
+  const deltaCamObj = objectPos.sub(cameraPos)
+  const camDir = camera.getWorldDirection(v3)
+  return deltaCamObj.angleTo(camDir) > Math.PI / 2
+}
+
+export const objectScale = (object: Object3D, camera: Camera) => {
   if (isOrthographicCamera(camera)) {
     return camera.zoom
   } else if (isPerspectiveCamera(camera)) {
-    const objectPos = v1.setFromMatrixPosition(el.matrixWorld)
+    const objectPos = v1.setFromMatrixPosition(object.matrixWorld)
     const cameraPos = v2.setFromMatrixPosition(camera.matrixWorld)
     const vFOV = (camera.fov * Math.PI) / 180
     const dist = objectPos.distanceTo(cameraPos)

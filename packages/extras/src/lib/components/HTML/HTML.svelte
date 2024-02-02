@@ -13,6 +13,18 @@
     Mesh
   } from 'three'
   import { useHasEventListeners } from '../../hooks/useHasEventListeners'
+  import {
+    compileStyles,
+    defaultCalculatePosition,
+    epsilon,
+    getCameraCSSMatrix,
+    getObjectCSSMatrix,
+    isObjectBehindCamera,
+    isObjectVisible,
+    objectScale,
+    objectZIndex,
+    updateStyles
+  } from './utils'
   import type { HTMLProps } from './HTML.svelte'
   import VertexShader from './vertex.glsl?raw'
 
@@ -22,29 +34,27 @@
   // Group Properties
   export let transform: $$PropsWithDefaults['transform'] = false
   export let calculatePosition: $$PropsWithDefaults['calculatePosition'] = defaultCalculatePosition
-  export let eps = 0.001
+  export let eps: $$PropsWithDefaults['eps'] = 0.001
+  export let occlude: $$PropsWithDefaults['occlude'] = true
+  export let zIndexRange: $$PropsWithDefaults['zIndexRange'] = [16777271, 0]
+  export let pointerEvents: $$PropsWithDefaults['pointerEvents'] = 'auto'
   export let prepend: $$PropsWithDefaults['prepend']
   export let center: $$PropsWithDefaults['center']
   export let fullscreen: $$PropsWithDefaults['fullscreen']
   export let distanceFactor: $$PropsWithDefaults['distanceFactor']
   export let sprite: $$PropsWithDefaults['sprite'] = false
-
-  export let occlude: $$PropsWithDefaults['occlude'] = true
   export let onOcclude: $$PropsWithDefaults['onOcclude']
   export let castShadow: $$PropsWithDefaults['castShadow']
   export let receiveShadow: $$PropsWithDefaults['receiveShadow']
   export let material: $$PropsWithDefaults['material']
   export let geometry: $$PropsWithDefaults['geometry']
-  export let zIndexRange = [16777271, 0]
   export let as = 'div'
   export let wrapperClass: $$PropsWithDefaults['wrapperClass']
-  export let pointerEvents = 'auto'
   export let portal: $$Props['portal'] | undefined = undefined
 
   const raycaster = new Raycaster()
   const v1 = new Vector3()
   const v2 = new Vector3()
-  const v3 = new Vector3()
 
   const portalAction = (el: HTMLElement) => {
     const target = portal ?? renderer.domElement.parentElement
@@ -60,110 +70,6 @@
       }
     }
   }
-
-  function defaultCalculatePosition(
-    el: Object3D,
-    camera: Camera,
-    size: { width: number; height: number }
-  ) {
-    const objectPos = v1.setFromMatrixPosition(el.matrixWorld)
-    objectPos.project(camera)
-    const widthHalf = size.width / 2
-    const heightHalf = size.height / 2
-    return [objectPos.x * widthHalf + widthHalf, -(objectPos.y * heightHalf) + heightHalf]
-  }
-
-  type CalculatePosition = typeof defaultCalculatePosition
-
-  function isObjectBehindCamera(el: Object3D, camera: Camera) {
-    const objectPos = v1.setFromMatrixPosition(el.matrixWorld)
-    const cameraPos = v2.setFromMatrixPosition(camera.matrixWorld)
-    const deltaCamObj = objectPos.sub(cameraPos)
-    const camDir = camera.getWorldDirection(v3)
-    return deltaCamObj.angleTo(camDir) > Math.PI / 2
-  }
-
-  function isObjectVisible(
-    el: Object3D,
-    camera: Camera,
-    raycaster: Raycaster,
-    occlude: Object3D[]
-  ) {
-    const elPos = v1.setFromMatrixPosition(el.matrixWorld)
-    const screenPos = elPos.clone()
-    screenPos.project(camera)
-    raycaster.setFromCamera(screenPos, camera)
-    const intersects = raycaster.intersectObjects(occlude, true)
-    if (intersects.length) {
-      const intersectionDistance = intersects[0].distance
-      const pointDistance = elPos.distanceTo(raycaster.ray.origin)
-      return pointDistance < intersectionDistance
-    }
-    return true
-  }
-
-  function objectScale(el: Object3D, camera: Camera) {
-    if (camera instanceof OrthographicCamera) {
-      return camera.zoom
-    } else if (camera instanceof PerspectiveCamera) {
-      const objectPos = v1.setFromMatrixPosition(el.matrixWorld)
-      const cameraPos = v2.setFromMatrixPosition(camera.matrixWorld)
-      const vFOV = (camera.fov * Math.PI) / 180
-      const dist = objectPos.distanceTo(cameraPos)
-      const scaleFOV = 2 * Math.tan(vFOV / 2) * dist
-      return 1 / scaleFOV
-    } else {
-      return 1
-    }
-  }
-
-  function objectZIndex(el: Object3D, camera: Camera, zIndexRange: Array<number>) {
-    if (camera instanceof PerspectiveCamera || camera instanceof OrthographicCamera) {
-      const objectPos = v1.setFromMatrixPosition(el.matrixWorld)
-      const cameraPos = v2.setFromMatrixPosition(camera.matrixWorld)
-      const dist = objectPos.distanceTo(cameraPos)
-      const A = (zIndexRange[1] - zIndexRange[0]) / (camera.far - camera.near)
-      const B = zIndexRange[1] - A * camera.far
-      return Math.round(A * dist + B)
-    }
-    return undefined
-  }
-
-  const epsilon = (value: number) => (Math.abs(value) < 1e-10 ? 0 : value)
-
-  function getCSSMatrix(matrix: Matrix4, multipliers: number[], prepend = '') {
-    let matrix3d = 'matrix3d('
-    for (let i = 0; i !== 16; i++) {
-      matrix3d += epsilon(multipliers[i] * matrix.elements[i]) + (i !== 15 ? ',' : ')')
-    }
-    return prepend + matrix3d
-  }
-
-  const getCameraCSSMatrix = ((multipliers: number[]) => {
-    return (matrix: Matrix4) => getCSSMatrix(matrix, multipliers)
-  })([1, -1, 1, 1, 1, -1, 1, 1, 1, -1, 1, 1, 1, -1, 1, 1])
-
-  const getObjectCSSMatrix = ((scaleMultipliers: (n: number) => number[]) => {
-    return (matrix: Matrix4, factor: number) =>
-      getCSSMatrix(matrix, scaleMultipliers(factor), 'translate(-50%,-50%)')
-  })((f: number) => [
-    1 / f,
-    1 / f,
-    1 / f,
-    1,
-    -1 / f,
-    -1 / f,
-    -1 / f,
-    -1,
-    1 / f,
-    1 / f,
-    1 / f,
-    1,
-    1,
-    1,
-    1,
-    1
-  ])
 
   type PointerEventsProperties =
     | 'auto'

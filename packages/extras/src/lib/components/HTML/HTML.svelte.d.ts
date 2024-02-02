@@ -28,7 +28,6 @@ interface Propssss extends Props<Group> {
   receiveShadow?: boolean // Receive shadow for occlusion plane
 }
 
-
 export type HTMLProps = Props<Group> & {
   transform?: boolean
   calculatePosition?: (
