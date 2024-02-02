@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { T, useThrelte, useFrame } from '@threlte/core'
   import {
     Vector3,
     Group,
@@ -11,19 +12,44 @@
     DoubleSide,
     Mesh
   } from 'three'
-  import type { Props } from '@threlte/core'
-  import { T, useThrelte, useFrame } from '@threlte/core'
+  import { useHasEventListeners } from '../../hooks/useHasEventListeners'
+  import type { HTMLProps } from './HTML.svelte'
   import VertexShader from './vertex.glsl?raw'
+
+  type $$Props = HTMLProps
+  type $$PropsWithDefaults = Required<$$Props>
+
+  // Group Properties
+  export let transform: $$PropsWithDefaults['transform'] = false
+  export let calculatePosition: $$PropsWithDefaults['calculatePosition'] = defaultCalculatePosition
+  export let eps = 0.001
+  export let prepend: $$PropsWithDefaults['prepend']
+  export let center: $$PropsWithDefaults['center']
+  export let fullscreen: $$PropsWithDefaults['fullscreen']
+  export let distanceFactor: $$PropsWithDefaults['distanceFactor']
+  export let sprite: $$PropsWithDefaults['sprite'] = false
+
+  export let occlude: $$PropsWithDefaults['occlude'] = true
+  export let onOcclude: $$PropsWithDefaults['onOcclude']
+  export let castShadow: $$PropsWithDefaults['castShadow']
+  export let receiveShadow: $$PropsWithDefaults['receiveShadow']
+  export let material: $$PropsWithDefaults['material']
+  export let geometry: $$PropsWithDefaults['geometry']
+  export let zIndexRange = [16777271, 0]
+  export let as = 'div'
+  export let wrapperClass: $$PropsWithDefaults['wrapperClass']
+  export let pointerEvents = 'auto'
+  export let portal: $$Props['portal'] | undefined = undefined
 
   const raycaster = new Raycaster()
   const v1 = new Vector3()
   const v2 = new Vector3()
   const v3 = new Vector3()
 
-  function portalAction (el: HTMLElement) {
+  const portalAction = (el: HTMLElement) => {
     const target = portal ?? renderer.domElement.parentElement
     if (!target) {
-      console.warn('HTML: target is undefined.')
+      console.warn('<HTML>: target is undefined.')
       return
     }
     target.appendChild(el)
@@ -35,7 +61,11 @@
     }
   }
 
-  function defaultCalculatePosition(el: Object3D, camera: Camera, size: { width: number; height: number }) {
+  function defaultCalculatePosition(
+    el: Object3D,
+    camera: Camera,
+    size: { width: number; height: number }
+  ) {
     const objectPos = v1.setFromMatrixPosition(el.matrixWorld)
     objectPos.project(camera)
     const widthHalf = size.width / 2
@@ -53,7 +83,12 @@
     return deltaCamObj.angleTo(camDir) > Math.PI / 2
   }
 
-  function isObjectVisible(el: Object3D, camera: Camera, raycaster: Raycaster, occlude: Object3D[]) {
+  function isObjectVisible(
+    el: Object3D,
+    camera: Camera,
+    raycaster: Raycaster,
+    occlude: Object3D[]
+  ) {
     const elPos = v1.setFromMatrixPosition(el.matrixWorld)
     const screenPos = elPos.clone()
     screenPos.project(camera)
@@ -109,8 +144,26 @@
   })([1, -1, 1, 1, 1, -1, 1, 1, 1, -1, 1, 1, 1, -1, 1, 1])
 
   const getObjectCSSMatrix = ((scaleMultipliers: (n: number) => number[]) => {
-    return (matrix: Matrix4, factor: number) => getCSSMatrix(matrix, scaleMultipliers(factor), 'translate(-50%,-50%)')
-  })((f: number) => [1 / f, 1 / f, 1 / f, 1, -1 / f, -1 / f, -1 / f, -1, 1 / f, 1 / f, 1 / f, 1, 1, 1, 1, 1])
+    return (matrix: Matrix4, factor: number) =>
+      getCSSMatrix(matrix, scaleMultipliers(factor), 'translate(-50%,-50%)')
+  })((f: number) => [
+    1 / f,
+    1 / f,
+    1 / f,
+    1,
+    -1 / f,
+    -1 / f,
+    -1 / f,
+    -1,
+    1 / f,
+    1 / f,
+    1 / f,
+    1,
+    1,
+    1,
+    1,
+    1
+  ])
 
   type PointerEventsProperties =
     | 'auto'
@@ -124,55 +177,6 @@
     | 'stroke'
     | 'all'
     | 'inherit'
-
-  interface HTMLProps extends Props<Group> {
-    prepend?: boolean
-    center?: boolean
-    fullscreen?: boolean
-    eps?: number
-    portal?: HTMLElement
-    distanceFactor?: number
-    sprite?: boolean
-    transform?: boolean
-    zIndexRange?: Array<number>
-    calculatePosition?: CalculatePosition
-    as?: string
-    wrapperClass?: string
-    pointerEvents?: PointerEventsProperties
-
-    // Occlusion based off work by Jerome Etienne and James Baicoianu
-    // https://www.youtube.com/watch?v=ScZcUEDGjJI
-    // as well as Joe Pea in CodePen: https://codepen.io/trusktr/pen/RjzKJx
-    occlude?: Object3D[] | boolean | 'raycast' | 'blending'
-    onOcclude?: (visible: boolean) => null
-    material?: THREE.Material // Material for occlusion plane
-    geometry?: THREE.BufferGeometry // Material for occlusion plane
-    castShadow?: boolean // Cast shadow for occlusion plane
-    receiveShadow?: boolean // Receive shadow for occlusion plane
-  }
-
-  type $$Props = HTMLProps
-  type $$PropsWithDefaults = Required<$$Props>
-
-  export let eps = 0.001
-  export let prepend: $$PropsWithDefaults['prepend']
-  export let center: $$PropsWithDefaults['center']
-  export let fullscreen: $$PropsWithDefaults['fullscreen']
-  export let distanceFactor: $$PropsWithDefaults['distanceFactor']
-  export let sprite: $$PropsWithDefaults['sprite'] = false
-  export let transform = false
-  export let occlude: $$PropsWithDefaults['occlude'] = true
-  export let onOcclude: $$PropsWithDefaults['onOcclude']
-  export let castShadow: $$PropsWithDefaults['castShadow']
-  export let receiveShadow: $$PropsWithDefaults['receiveShadow']
-  export let material: $$PropsWithDefaults['material']
-  export let geometry: $$PropsWithDefaults['geometry']
-  export let zIndexRange = [16777271, 0]
-  export let calculatePosition = defaultCalculatePosition
-  export let as = 'div'
-  export let wrapperClass: $$PropsWithDefaults['wrapperClass']
-  export let pointerEvents = 'auto'
-  export let portal: $$Props['portal'] | undefined = undefined
 
   const { renderer, camera, scene, size, viewport } = useThrelte()
 
@@ -193,8 +197,7 @@
   let isMeshSizeSet = false
 
   $: isRayCastOcclusion =
-    (occlude && occlude !== 'blending') || 
-    (Array.isArray(occlude) && occlude.length > 0)
+    (occlude && occlude !== 'blending') || (Array.isArray(occlude) && occlude.length > 0)
 
   $: {
     const canvas = renderer.domElement
@@ -265,14 +268,21 @@
       element.style.zIndex = `${objectZIndex(group, camera.current, zRange)}`
 
       if (transform) {
-        const { isOrthographicCamera, top, left, bottom, right } = camera.current as OrthographicCamera
+        const { isOrthographicCamera, top, left, bottom, right } =
+          camera.current as OrthographicCamera
         const cameraMatrix = getCameraCSSMatrix(camera.current.matrixWorldInverse)
         const cameraTransform = isOrthographicCamera
-          ? `scale(${fov})translate(${epsilon(-(right + left) / 2)}px,${epsilon((top + bottom) / 2)}px)`
+          ? `scale(${fov})translate(${epsilon(-(right + left) / 2)}px,${epsilon(
+              (top + bottom) / 2
+            )}px)`
           : `translateZ(${fov}px)`
         let matrix = group.matrixWorld
         if (sprite) {
-          matrix = camera.current.matrixWorldInverse.clone().transpose().copyPosition(matrix).scale(group.scale)
+          matrix = camera.current.matrixWorldInverse
+            .clone()
+            .transpose()
+            .copyPosition(matrix)
+            .scale(group.scale)
           matrix.elements[3] = matrix.elements[7] = matrix.elements[11] = 0
           matrix.elements[15] = 1
         }
@@ -281,10 +291,14 @@
         element.style.perspective = isOrthographicCamera ? '' : `${fov}px`
         if (transformOuterRef && transformInnerRef) {
           transformOuterRef.style.transform = `${cameraTransform}${cameraMatrix}translate(${halfWidth}px,${halfHeight}px)`
-          transformInnerRef.style.transform = getObjectCSSMatrix(matrix, 1 / ((distanceFactor || 10) / 400))
+          transformInnerRef.style.transform = getObjectCSSMatrix(
+            matrix,
+            1 / ((distanceFactor || 10) / 400)
+          )
         }
       } else {
-        const scale = distanceFactor === undefined ? 1 : objectScale(group, camera.current) * distanceFactor
+        const scale =
+          distanceFactor === undefined ? 1 : objectScale(group, camera.current) * distanceFactor
         element.style.transform = `translate3d(${vec[0]}px,${vec[1]}px,0) scale(${scale})`
       }
       oldPosition = vec
@@ -306,7 +320,11 @@
                 } else if ($$restProps.scale instanceof Vector3) {
                   occlusionMesh.scale.copy($$restProps.scale.clone().divideScalar(1))
                 } else {
-                  occlusionMesh.scale.set(1 / $$restProps.scale[0], 1 / $$restProps.scale[1], 1 / $$restProps.scale[2])
+                  occlusionMesh.scale.set(
+                    1 / $$restProps.scale[0],
+                    1 / $$restProps.scale[1],
+                    1 / $$restProps.scale[2]
+                  )
                 }
               }
             } else {
@@ -342,9 +360,16 @@
   $: vertexShader = transform ? undefined : VertexShader
 </script>
 
-<T is={group} {...$$restProps}>
+<T
+  is={group}
+  {...$$restProps}
+>
   {#if occlude && !isRayCastOcclusion}
-    <T is={occlusionMesh} {castShadow} {receiveShadow}>
+    <T
+      is={occlusionMesh}
+      {castShadow}
+      {receiveShadow}
+    >
       {#if geometry}
         <T.PlaneGeometry />
       {/if}
@@ -364,9 +389,9 @@
   this={as}
   use:portalAction
   bind:this={element}
-  style:position='absolute'
-  style:top='0'
-  style:left='0'
+  style:position="absolute"
+  style:top="0"
+  style:left="0"
   style:pointer-events={transform ? 'none' : 'auto'}
   style:overflow={transform ? 'hidden' : undefined}
   style:transform={transform ? undefined : `translate3d(${pos[0]}px,${pos[1]}px,0)`}
@@ -374,17 +399,17 @@
   {#if transform}
     <div
       bind:this={transformOuterRef}
-      style:position='absolute'
-      style:top='0'
-      style:left='0'
+      style:position="absolute"
+      style:top="0"
+      style:left="0"
       style:width={`${width}px`}
       style:height={`${height}px`}
-      style:transform-style='preserve-3d'
-      style:pointer-events='none'
+      style:transform-style="preserve-3d"
+      style:pointer-events="none"
     >
       <div
         bind:this={transformInnerRef}
-        style:position='absolute'
+        style:position="absolute"
         style:pointer-events={pointerEvents}
       >
         <div
@@ -397,7 +422,7 @@
     </div>
   {:else}
     <div
-      style:position='absolute'
+      style:position="absolute"
       style:transform={center ? 'translate3d(-50%,-50%,0)' : 'none'}
       style:top={fullscreen ? `${-height / 2}px` : undefined}
       style:left={fullscreen ? `${-width / 2}px` : undefined}
