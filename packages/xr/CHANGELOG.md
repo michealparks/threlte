@@ -1,5 +1,23 @@
 # @threlte/xr
 
+## 0.1.2
+
+### Patch Changes
+
+- 3cc3fdcc: Removed bun types from @threlte/core tsconfig to fix useLoader type export (affects possibly other packages)
+
+## 0.1.1
+
+### Patch Changes
+
+- 56b5fee5: Replace useFrame with useTask internally
+
+## 0.1.0
+
+### Minor Changes
+
+- 44488636: Declared beta
+
 ## 0.0.13
 
 ### Patch Changes

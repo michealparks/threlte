@@ -1,5 +1,147 @@
 # @threlte/extras
 
+## 8.5.1
+
+### Patch Changes
+
+- a31b5a3: Fix GroundedSkybox import for r161
+
+## 8.5.0
+
+### Minor Changes
+
+- e702d7e9: Added a new useFBO hook to extras
+
+## 8.4.0
+
+### Minor Changes
+
+- 2b11b030: Add port of FakeGlowMaterial r3f component from ektogamat
+
+## 8.3.0
+
+### Minor Changes
+
+- e6f83529: Bumped version of troika-three-text, added prop `colorRanges` to `<Text>`
+
+## 8.2.1
+
+### Patch Changes
+
+- 0214300f: On-demand rendering for damped OrbitControls
+
+## 8.2.0
+
+### Minor Changes
+
+- dce129b4: Add port of Billboard component from drei
+
+## 8.1.2
+
+### Patch Changes
+
+- e7b24a2f: fix Gizmo click events when the Canvas is not taking up the full viewport
+
+## 8.1.1
+
+### Patch Changes
+
+- aa6e2ce4: On-demand rendering for the `<TrackballControls>` as well as JSDoc test for tsdocs.dev
+
+## 8.1.0
+
+### Minor Changes
+
+- b9f5db5c: Add TrackballControls
+
+## 8.0.10
+
+### Patch Changes
+
+- 722f8c27: Fix instancedMesh deprecation warning
+
+## 8.0.9
+
+### Patch Changes
+
+- 04ac53aa: fixed useTexture signature
+
+## 8.0.8
+
+### Patch Changes
+
+- 87c45a86: Changed color interface from number to THREE.ColorRepresentation in `<Gizmo>`
+
+## 8.0.7
+
+### Patch Changes
+
+- 5c07b714: `<Gizmo>` div position fix
+
+## 8.0.6
+
+### Patch Changes
+
+- 514824bf: Performance improvements on `<Gizmo>`
+- 430e89cf: Added tonemapping and padding as well as visual optimizations to `<Gizmo>`
+
+## 8.0.5
+
+### Patch Changes
+
+- aaa94569: Perf bug fixed in `<Gizmo>`
+
+## 8.0.4
+
+### Patch Changes
+
+- 018ee0c5: Improved Gizmo visuals
+- 97f2e889: Allow reactive <Portal> ids
+- 2df1367f: Add a gizmo component for heads-up camera control
+
+## 8.0.3
+
+### Patch Changes
+
+- 6729814b: Fixed eslint config and fixed some linting errors
+
+## 8.0.2
+
+### Patch Changes
+
+- 3cc3fdcc: Removed bun types from @threlte/core tsconfig to fix useLoader type export (affects possibly other packages)
+
+## 8.0.1
+
+### Patch Changes
+
+- 8b62e472: useTexture release fix
+- ea50d08f: Fixed frame guards of `<AnimatedSpriteMaterial>`
+
+## 8.0.0
+
+### Major Changes
+
+- 33367cbf: @threlte/core ^7 is now required as useTask is used by default
+
+## 7.5.4
+
+### Patch Changes
+
+- fa8c1677: Added support for reverse animation direction in `<AnimatedSpriteMaterial>`
+
+## 7.5.3
+
+### Patch Changes
+
+- 050a7128: Set `pointerEvents` for `noTransform` divs
+
+## 7.5.2
+
+### Patch Changes
+
+- 2ae76e18: Threlte 7 compatibility
+
 ## 7.5.1
 
 ### Patch Changes
@@ -443,7 +585,10 @@ Note: We're considering this a bug fix, but it might be a breaking change for yo
   - Before:
 
   ```ts
-  const { gltf } = useGltf<'MeshA' | 'MeshB' | 'Object3DA', 'MaterialA' | 'MaterialB'>('/some/url')
+  const { gltf } = useGltf<
+    "MeshA" | "MeshB" | "Object3DA",
+    "MaterialA" | "MaterialB"
+  >("/some/url");
   ```
 
   - After:
@@ -451,15 +596,15 @@ Note: We're considering this a bug fix, but it might be a breaking change for yo
   ```ts
   const { gltf } = useGltf<{
     nodes: {
-      MeshA: THREE.Mesh
-      MeshB: THREE.Mesh
-      Object3DA: THREE.Object3D
-    }
+      MeshA: THREE.Mesh;
+      MeshB: THREE.Mesh;
+      Object3DA: THREE.Object3D;
+    };
     materials: {
-      MaterialA: THREE.MeshStandardMaterial
-      MaterialB: THREE.MeshBasicMaterial
-    }
-  }>('/some/url')
+      MaterialA: THREE.MeshStandardMaterial;
+      MaterialB: THREE.MeshBasicMaterial;
+    };
+  }>("/some/url");
   ```
 
 ## 4.4.1

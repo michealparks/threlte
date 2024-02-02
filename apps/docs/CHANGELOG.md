@@ -1,5 +1,35 @@
 # @threlte/docs-next
 
+## 0.10.0
+
+### Minor Changes
+
+- e702d7e9: Added a new useFBO hook to extras
+
+## 0.9.0
+
+### Minor Changes
+
+- 2b11b030: Add port of FakeGlowMaterial r3f component from ektogamat
+
+## 0.8.0
+
+### Minor Changes
+
+- dce129b4: Add port of Billboard component from drei
+
+## 0.7.0
+
+### Minor Changes
+
+- b9f5db5c: Add TrackballControls
+
+## 0.6.4
+
+### Patch Changes
+
+- 2df1367f: Add a gizmo component for heads-up camera control
+
 ## 0.6.3
 
 ### Patch Changes

@@ -1,5 +1,21 @@
 # @threlte/extras
 
+## 2.0.0
+
+### Major Changes
+
+- 04c9e7df: Replace internal usage of useFrame with useTask.
+
+  ### Note
+
+  `@threlte/core@7` is now required.
+
+## 1.1.4
+
+### Patch Changes
+
+- 3cc3fdcc: Removed bun types from @threlte/core tsconfig to fix useLoader type export (affects possibly other packages)
+
 ## 1.1.3
 
 ### Patch Changes
