@@ -1,304 +1,26 @@
 <script lang="ts">
   import {
-    createRawEventDispatcher,
-    forwardEventHandlers,
-    T,
-    useTask,
-    useThrelte
-  } from '@threlte/core'
-  import { derived, writable, type Writable } from 'svelte/store'
-  import {
+    Vector3,
     Group,
-    Object3D as ThreeeObject3D,
-    OrthographicCamera,
+    Object3D,
+    Matrix4,
+    Camera,
     PerspectiveCamera,
-    Raycaster
+    OrthographicCamera,
+    Raycaster,
+    DoubleSide,
+    Mesh
   } from 'three'
-  import { useHasEventListeners } from '../../hooks/useHasEventListeners'
-  import {
-    compileStyles,
-    defaultCalculatePosition,
-    epsilon,
-    getCameraCSSMatrix,
-    getObjectCSSMatrix,
-    isObjectBehindCamera,
-    isObjectVisible,
-    objectScale,
-    objectZIndex,
-    updateStyles
-  } from './utils'
-
-  import type { HTMLEvents, HTMLProps, HTMLSlots } from './HTML.svelte'
-
-  type $$Props = HTMLProps
-  type $$PropsWithDefaults = Required<$$Props>
-  type $$Events = HTMLEvents
-  type $$Slots = HTMLSlots
-
-  // Group Properties
-  export let transform: $$PropsWithDefaults['transform'] = false
-  export let calculatePosition: $$PropsWithDefaults['calculatePosition'] = defaultCalculatePosition
-  export let eps: $$PropsWithDefaults['eps'] = 0.001
-  export let occlude: $$PropsWithDefaults['occlude'] = false
-  export let zIndexRange: $$PropsWithDefaults['zIndexRange'] = [16777271, 0]
-  export let sprite: $$PropsWithDefaults['sprite'] = false
-  export let pointerEvents: $$PropsWithDefaults['pointerEvents'] = 'auto'
-  export let center: $$PropsWithDefaults['center'] = false
-  export let fullscreen: $$PropsWithDefaults['fullscreen'] = false
-  export let distanceFactor: $$Props['distanceFactor'] | undefined = undefined
-  export let as: $$PropsWithDefaults['as'] = 'div'
-  export let portal: $$Props['portal'] | undefined = undefined
-
-  const dispatch = createRawEventDispatcher<{
-    visibilitychange: boolean
-  }>()
-
-  export let ref = new Group()
-
-  const { renderer, camera, scene, size } = useThrelte()
-
-  const isViableCamera = (c: any): c is PerspectiveCamera | OrthographicCamera => {
-    return c.isPerspectiveCamera || c.isOrthographicCamera
-  }
-
-  const getCamera = (): PerspectiveCamera | OrthographicCamera => {
-    if (!isViableCamera($camera)) {
-      throw new Error('Only PerspectiveCamera or OrthographicCamera supported for component <HTML>')
-    }
-    return $camera
-  }
+  import type { Props } from '@threlte/core'
+  import { T, useThrelte, useFrame } from '@threlte/core'
+  import VertexShader from './vertex.glsl?raw'
 
   const raycaster = new Raycaster()
+  const v1 = new Vector3()
+  const v2 = new Vector3()
+  const v3 = new Vector3()
 
-  let oldPosition = [0, 0]
-  let oldZoom = 0
-  export let visible = true
-  let el = document.createElement(as)
-
-  let transformOuterRef: HTMLDivElement
-  let transformInnerRef: HTMLDivElement
-
-  const { hasEventListeners } = useHasEventListeners<typeof dispatch>()
-
-  let raytraceTarget =
-    typeof occlude === 'boolean' && occlude === true
-      ? [scene]
-      : Array.isArray(occlude)
-      ? occlude
-      : undefined
-  $: raytraceTarget =
-    typeof occlude === 'boolean' && occlude === true
-      ? [scene]
-      : Array.isArray(occlude)
-      ? occlude
-      : undefined
-
-  const widthHalf = derived(size, (size) => size.width / 2)
-  const heightHalf = derived(size, (size) => size.height / 2)
-
-  let styles: {
-    common: {
-      el: Writable<Partial<CSSStyleDeclaration>>
-    }
-    transform: {
-      el: Writable<Partial<CSSStyleDeclaration>>
-      outerRef: Writable<Partial<CSSStyleDeclaration>>
-      innerRef: Writable<Partial<CSSStyleDeclaration>>
-    }
-    noTransform: {
-      el: Writable<Partial<CSSStyleDeclaration>>
-      div: Writable<Partial<CSSStyleDeclaration>>
-    }
-  } = {
-    common: {
-      el: writable({})
-    },
-    transform: {
-      el: writable({
-        position: 'absolute',
-        top: '0',
-        left: '0',
-        pointerEvents: 'none',
-        overflow: 'hidden',
-        display: 'block',
-        width: `${$size.width}px`,
-        height: `${$size.height}px`
-      }),
-      outerRef: writable({
-        position: 'absolute',
-        top: '0',
-        left: '0',
-        width: `${$size.width}px`,
-        height: `${$size.height}px`,
-        transformStyle: 'preserve-3d',
-        pointerEvents: 'none'
-      }),
-      innerRef: writable({
-        position: 'absolute',
-        pointerEvents
-      })
-    },
-    noTransform: {
-      el: writable({}),
-      div: writable({
-        position: 'absolute',
-        transform: center ? 'translate3d(-50%,-50%,0)' : 'none',
-        top: fullscreen ? `${-$heightHalf}px` : undefined,
-        left: fullscreen ? `${-$widthHalf}px` : undefined,
-        width: fullscreen ? `${$size.width}px` : undefined,
-        height: fullscreen ? `${$size.height}px` : undefined
-      })
-    }
-  }
-
-  $: updateStyles(styles.transform.el, {
-    width: `${$size.width}px`,
-    height: `${$size.height}px`
-  })
-  $: updateStyles(styles.transform.outerRef, {
-    width: `${$size.width}px`,
-    height: `${$size.height}px`
-  })
-  $: updateStyles(styles.transform.innerRef, {
-    pointerEvents
-  })
-  $: updateStyles(styles.noTransform.div, {
-    pointerEvents
-  })
-  $: updateStyles(styles.noTransform.div, {
-    transform: center ? 'translate3d(-50%, -50%, 0)' : 'none'
-  })
-  $: updateStyles(styles.noTransform.div, {
-    top: fullscreen ? `${-$heightHalf}px` : undefined,
-    left: fullscreen ? `${-$widthHalf}px` : undefined,
-    width: fullscreen ? `${$size.width}px` : undefined,
-    height: fullscreen ? `${$size.height}px` : undefined
-  })
-
-  const transformElStyles = derived([styles.transform.el, styles.common.el], ([vA, vB]) => {
-    return {
-      ...vA,
-      ...vB
-    }
-  })
-  const transformOuterRefStyles = derived(styles.transform.outerRef, (v) => v)
-  const transformInnerRefStyles = derived(styles.transform.innerRef, (v) => v)
-  const noTransformElStyles = derived(styles.noTransform.el, (v) => v)
-  const noTransformDivStyles = derived(styles.noTransform.div, (v) => v)
-
-  /**
-   * Check ancestor visibility
-   */
-  const getAncestorVisibility = (): boolean => {
-    let ancestorsAreVisible = true
-    let parent: ThreeeObject3D | null = ref.parent
-    traverse: while (parent) {
-      if ('visible' in parent && !parent.visible) {
-        ancestorsAreVisible = false
-        break traverse
-      }
-      parent = parent.parent
-    }
-    return ancestorsAreVisible
-  }
-
-  let showEl = getAncestorVisibility()
-
-  useTask(async () => {
-    showEl = getAncestorVisibility()
-
-    const camera = getCamera()
-
-    camera.updateMatrixWorld()
-    ref.updateWorldMatrix(true, false)
-
-    const vec = transform ? oldPosition : calculatePosition(ref, camera, $size)
-
-    if (
-      transform ||
-      Math.abs(oldZoom - camera.zoom) > eps ||
-      Math.abs(oldPosition[0] - vec[0]) > eps ||
-      Math.abs(oldPosition[1] - vec[1]) > eps
-    ) {
-      const isBehindCamera = isObjectBehindCamera(ref, camera)
-
-      const previouslyVisible = visible
-      if (raytraceTarget) {
-        const isvisible = isObjectVisible(ref, camera, raycaster, raytraceTarget)
-        visible = isvisible && !isBehindCamera
-      } else {
-        visible = !isBehindCamera
-      }
-
-      if (previouslyVisible !== visible) {
-        if (hasEventListeners('visibilitychange')) dispatch('visibilitychange', visible)
-        else {
-          updateStyles(styles.common.el, {
-            display: visible ? 'block' : 'none'
-          })
-        }
-      }
-
-      updateStyles(styles.common.el, {
-        zIndex: `${objectZIndex(ref, camera, zIndexRange)}`
-      })
-      if (transform) {
-        const fov = camera.projectionMatrix.elements[5] * $heightHalf
-        const { isOrthographicCamera, top, left, bottom, right } = camera as OrthographicCamera
-
-        let matrix = ref.matrixWorld
-        if (sprite) {
-          matrix = camera.matrixWorldInverse
-            .clone()
-            .transpose()
-            .copyPosition(matrix)
-            .scale(ref.scale)
-          matrix.elements[3] = matrix.elements[7] = matrix.elements[11] = 0
-          matrix.elements[15] = 1
-        }
-        updateStyles(styles.transform.el, {
-          perspective: isOrthographicCamera ? '' : `${fov}px`
-        })
-        if (transformOuterRef && transformInnerRef) {
-          // prettier-ignore
-          const cameraTransform = isOrthographicCamera
-            ? `scale(${fov}) translate(${epsilon(-(right + left) / 2)}px,${epsilon((top + bottom) / 2)}px)`
-            : `translateZ(${fov}px)`
-
-          const cameraMatrix = getCameraCSSMatrix(camera.matrixWorldInverse)
-
-          updateStyles(styles.transform.outerRef, {
-            transform: `${cameraTransform}${cameraMatrix}translate(${$widthHalf}px, ${$heightHalf}px)`
-          })
-          updateStyles(styles.transform.innerRef, {
-            transform: getObjectCSSMatrix(matrix, 1 / ((distanceFactor || 10) / 400))
-          })
-        }
-      } else {
-        const scale = distanceFactor === undefined ? 1 : objectScale(ref, camera) * distanceFactor
-        updateStyles(styles.noTransform.el, {
-          transform: `translate3d(${vec[0]}px, ${vec[1]}px, 0) scale(${scale})`
-        })
-      }
-      oldPosition = vec
-      oldZoom = camera.zoom
-    }
-  })
-
-  const buildDefaultNonTransformStyles = (_: HTMLElement) => {
-    if (!ref || transform) return
-    scene.updateMatrixWorld()
-    const vec = calculatePosition(ref, $camera, $size)
-    updateStyles(styles.noTransform.el, {
-      position: 'absolute',
-      top: '0',
-      left: '0',
-      transform: `translate3d(${vec[0]}px, ${vec[1]}px, 0)`,
-      transformOrigin: '0 0'
-    })
-  }
-
-  const portalAction = (el: HTMLElement) => {
+  function portalAction (el: HTMLElement) {
     const target = portal ?? renderer.domElement.parentElement
     if (!target) {
       console.warn('HTML: target is undefined.')
@@ -313,54 +35,378 @@
     }
   }
 
-  const component = forwardEventHandlers()
+  function defaultCalculatePosition(el: Object3D, camera: Camera, size: { width: number; height: number }) {
+    const objectPos = v1.setFromMatrixPosition(el.matrixWorld)
+    objectPos.project(camera)
+    const widthHalf = size.width / 2
+    const heightHalf = size.height / 2
+    return [objectPos.x * widthHalf + widthHalf, -(objectPos.y * heightHalf) + heightHalf]
+  }
+
+  type CalculatePosition = typeof defaultCalculatePosition
+
+  function isObjectBehindCamera(el: Object3D, camera: Camera) {
+    const objectPos = v1.setFromMatrixPosition(el.matrixWorld)
+    const cameraPos = v2.setFromMatrixPosition(camera.matrixWorld)
+    const deltaCamObj = objectPos.sub(cameraPos)
+    const camDir = camera.getWorldDirection(v3)
+    return deltaCamObj.angleTo(camDir) > Math.PI / 2
+  }
+
+  function isObjectVisible(el: Object3D, camera: Camera, raycaster: Raycaster, occlude: Object3D[]) {
+    const elPos = v1.setFromMatrixPosition(el.matrixWorld)
+    const screenPos = elPos.clone()
+    screenPos.project(camera)
+    raycaster.setFromCamera(screenPos, camera)
+    const intersects = raycaster.intersectObjects(occlude, true)
+    if (intersects.length) {
+      const intersectionDistance = intersects[0].distance
+      const pointDistance = elPos.distanceTo(raycaster.ray.origin)
+      return pointDistance < intersectionDistance
+    }
+    return true
+  }
+
+  function objectScale(el: Object3D, camera: Camera) {
+    if (camera instanceof OrthographicCamera) {
+      return camera.zoom
+    } else if (camera instanceof PerspectiveCamera) {
+      const objectPos = v1.setFromMatrixPosition(el.matrixWorld)
+      const cameraPos = v2.setFromMatrixPosition(camera.matrixWorld)
+      const vFOV = (camera.fov * Math.PI) / 180
+      const dist = objectPos.distanceTo(cameraPos)
+      const scaleFOV = 2 * Math.tan(vFOV / 2) * dist
+      return 1 / scaleFOV
+    } else {
+      return 1
+    }
+  }
+
+  function objectZIndex(el: Object3D, camera: Camera, zIndexRange: Array<number>) {
+    if (camera instanceof PerspectiveCamera || camera instanceof OrthographicCamera) {
+      const objectPos = v1.setFromMatrixPosition(el.matrixWorld)
+      const cameraPos = v2.setFromMatrixPosition(camera.matrixWorld)
+      const dist = objectPos.distanceTo(cameraPos)
+      const A = (zIndexRange[1] - zIndexRange[0]) / (camera.far - camera.near)
+      const B = zIndexRange[1] - A * camera.far
+      return Math.round(A * dist + B)
+    }
+    return undefined
+  }
+
+  const epsilon = (value: number) => (Math.abs(value) < 1e-10 ? 0 : value)
+
+  function getCSSMatrix(matrix: Matrix4, multipliers: number[], prepend = '') {
+    let matrix3d = 'matrix3d('
+    for (let i = 0; i !== 16; i++) {
+      matrix3d += epsilon(multipliers[i] * matrix.elements[i]) + (i !== 15 ? ',' : ')')
+    }
+    return prepend + matrix3d
+  }
+
+  const getCameraCSSMatrix = ((multipliers: number[]) => {
+    return (matrix: Matrix4) => getCSSMatrix(matrix, multipliers)
+  })([1, -1, 1, 1, 1, -1, 1, 1, 1, -1, 1, 1, 1, -1, 1, 1])
+
+  const getObjectCSSMatrix = ((scaleMultipliers: (n: number) => number[]) => {
+    return (matrix: Matrix4, factor: number) => getCSSMatrix(matrix, scaleMultipliers(factor), 'translate(-50%,-50%)')
+  })((f: number) => [1 / f, 1 / f, 1 / f, 1, -1 / f, -1 / f, -1 / f, -1, 1 / f, 1 / f, 1 / f, 1, 1, 1, 1, 1])
+
+  type PointerEventsProperties =
+    | 'auto'
+    | 'none'
+    | 'visiblePainted'
+    | 'visibleFill'
+    | 'visibleStroke'
+    | 'visible'
+    | 'painted'
+    | 'fill'
+    | 'stroke'
+    | 'all'
+    | 'inherit'
+
+  interface HTMLProps extends Props<Group> {
+    prepend?: boolean
+    center?: boolean
+    fullscreen?: boolean
+    eps?: number
+    portal?: HTMLElement
+    distanceFactor?: number
+    sprite?: boolean
+    transform?: boolean
+    zIndexRange?: Array<number>
+    calculatePosition?: CalculatePosition
+    as?: string
+    wrapperClass?: string
+    pointerEvents?: PointerEventsProperties
+
+    // Occlusion based off work by Jerome Etienne and James Baicoianu
+    // https://www.youtube.com/watch?v=ScZcUEDGjJI
+    // as well as Joe Pea in CodePen: https://codepen.io/trusktr/pen/RjzKJx
+    occlude?: Object3D[] | boolean | 'raycast' | 'blending'
+    onOcclude?: (visible: boolean) => null
+    material?: THREE.Material // Material for occlusion plane
+    geometry?: THREE.BufferGeometry // Material for occlusion plane
+    castShadow?: boolean // Cast shadow for occlusion plane
+    receiveShadow?: boolean // Receive shadow for occlusion plane
+  }
+
+  type $$Props = HTMLProps
+  type $$PropsWithDefaults = Required<$$Props>
+
+  export let eps = 0.001
+  export let prepend: $$PropsWithDefaults['prepend']
+  export let center: $$PropsWithDefaults['center']
+  export let fullscreen: $$PropsWithDefaults['fullscreen']
+  export let distanceFactor: $$PropsWithDefaults['distanceFactor']
+  export let sprite: $$PropsWithDefaults['sprite'] = false
+  export let transform = false
+  export let occlude: $$PropsWithDefaults['occlude'] = true
+  export let onOcclude: $$PropsWithDefaults['onOcclude']
+  export let castShadow: $$PropsWithDefaults['castShadow']
+  export let receiveShadow: $$PropsWithDefaults['receiveShadow']
+  export let material: $$PropsWithDefaults['material']
+  export let geometry: $$PropsWithDefaults['geometry']
+  export let zIndexRange = [16777271, 0]
+  export let calculatePosition = defaultCalculatePosition
+  export let as = 'div'
+  export let wrapperClass: $$PropsWithDefaults['wrapperClass']
+  export let pointerEvents = 'auto'
+  export let portal: $$Props['portal'] | undefined = undefined
+
+  const { renderer, camera, scene, size, viewport } = useThrelte()
+
+  $: width = $size.width
+  $: height = $size.height
+  $: halfWidth = width / 2
+  $: halfHeight = height / 2
+  $: fov = $camera.projectionMatrix.elements[5] * halfHeight
+
+  const group = new Group()
+  const occlusionMesh = new Mesh()
+
+  let element = document.createElement(as)
+  let oldZoom = 0
+  let oldPosition = [0, 0]
+  let transformOuterRef: HTMLDivElement = null!
+  let transformInnerRef: HTMLDivElement = null!
+  let isMeshSizeSet = false
+
+  $: isRayCastOcclusion =
+    (occlude && occlude !== 'blending') || 
+    (Array.isArray(occlude) && occlude.length > 0)
+
+  $: {
+    const canvas = renderer.domElement
+
+    if (occlude === 'blending') {
+      canvas.style.zIndex = `${Math.floor(zIndexRange[0] / 2)}`
+      canvas.style.position = 'absolute'
+      canvas.style.pointerEvents = 'none'
+    } else {
+      canvas.style.zIndex = null!
+      canvas.style.position = null!
+      canvas.style.pointerEvents = null!
+    }
+  }
+
+  $: {
+    if (wrapperClass) element.className = wrapperClass
+  }
+
+  let visible = true
+
+  useFrame(() => {
+    // @todo
+    // isMeshSizeSet = false
+
+    camera.current.updateMatrixWorld()
+    group.updateWorldMatrix(true, false)
+    const vec = transform ? oldPosition : calculatePosition(group, camera.current, $size)
+
+    if (
+      transform ||
+      Math.abs(oldZoom - camera.current.zoom) > eps ||
+      Math.abs(oldPosition[0] - vec[0]) > eps ||
+      Math.abs(oldPosition[1] - vec[1]) > eps
+    ) {
+      const isBehindCamera = isObjectBehindCamera(group, camera.current)
+      let raytraceTarget: null | undefined | boolean | Object3D[] = false
+
+      if (isRayCastOcclusion) {
+        if (Array.isArray(occlude)) {
+          raytraceTarget = occlude as Object3D[]
+        } else if (occlude !== 'blending') {
+          raytraceTarget = [scene]
+        }
+      }
+
+      const previouslyVisible = visible
+
+      if (raytraceTarget) {
+        const isvisible = isObjectVisible(group, camera.current, raycaster, raytraceTarget)
+        visible = isvisible && !isBehindCamera
+      } else {
+        visible = !isBehindCamera
+      }
+
+      if (previouslyVisible !== visible) {
+        if (onOcclude) onOcclude(!visible)
+        else element.style.display = visible ? 'block' : 'none'
+      }
+
+      const halfRange = Math.floor(zIndexRange[0] / 2)
+      const zRange = occlude
+        ? isRayCastOcclusion //
+          ? [zIndexRange[0], halfRange]
+          : [halfRange - 1, 0]
+        : zIndexRange
+
+      element.style.zIndex = `${objectZIndex(group, camera.current, zRange)}`
+
+      if (transform) {
+        const { isOrthographicCamera, top, left, bottom, right } = camera.current as OrthographicCamera
+        const cameraMatrix = getCameraCSSMatrix(camera.current.matrixWorldInverse)
+        const cameraTransform = isOrthographicCamera
+          ? `scale(${fov})translate(${epsilon(-(right + left) / 2)}px,${epsilon((top + bottom) / 2)}px)`
+          : `translateZ(${fov}px)`
+        let matrix = group.matrixWorld
+        if (sprite) {
+          matrix = camera.current.matrixWorldInverse.clone().transpose().copyPosition(matrix).scale(group.scale)
+          matrix.elements[3] = matrix.elements[7] = matrix.elements[11] = 0
+          matrix.elements[15] = 1
+        }
+        element.style.width = `${width}px`
+        element.style.height = `${height}px`
+        element.style.perspective = isOrthographicCamera ? '' : `${fov}px`
+        if (transformOuterRef && transformInnerRef) {
+          transformOuterRef.style.transform = `${cameraTransform}${cameraMatrix}translate(${halfWidth}px,${halfHeight}px)`
+          transformInnerRef.style.transform = getObjectCSSMatrix(matrix, 1 / ((distanceFactor || 10) / 400))
+        }
+      } else {
+        const scale = distanceFactor === undefined ? 1 : objectScale(group, camera.current) * distanceFactor
+        element.style.transform = `translate3d(${vec[0]}px,${vec[1]}px,0) scale(${scale})`
+      }
+      oldPosition = vec
+      oldZoom = camera.current.zoom
+    }
+
+    if (!isRayCastOcclusion && !isMeshSizeSet) {
+      if (transform) {
+        if (transformOuterRef) {
+          const el = transformOuterRef.children[0]
+
+          if (el?.clientWidth && el?.clientHeight) {
+            const { isOrthographicCamera } = camera.current as OrthographicCamera
+
+            if (isOrthographicCamera || geometry) {
+              if ($$restProps.scale) {
+                if (!Array.isArray($$restProps.scale)) {
+                  occlusionMesh.scale.setScalar(1 / ($$restProps.scale as number))
+                } else if ($$restProps.scale instanceof Vector3) {
+                  occlusionMesh.scale.copy($$restProps.scale.clone().divideScalar(1))
+                } else {
+                  occlusionMesh.scale.set(1 / $$restProps.scale[0], 1 / $$restProps.scale[1], 1 / $$restProps.scale[2])
+                }
+              }
+            } else {
+              const ratio = (distanceFactor || 10) / 400
+              const w = el.clientWidth * ratio
+              const h = el.clientHeight * ratio
+
+              occlusionMesh.scale.set(w, h, 1)
+            }
+
+            isMeshSizeSet = true
+          }
+        }
+      } else {
+        const ele = element.children[0]
+
+        if (ele?.clientWidth && ele?.clientHeight) {
+          const ratio = 1 // / viewport.factor
+          const w = ele.clientWidth * ratio
+          const h = ele.clientHeight * ratio
+
+          occlusionMesh.scale.set(w, h, 1)
+
+          isMeshSizeSet = true
+        }
+
+        occlusionMesh.lookAt(camera.current.position)
+      }
+    }
+  })
+
+  $: pos = calculatePosition(group, camera.current, $size)
+  $: vertexShader = transform ? undefined : VertexShader
 </script>
 
-<T
-  is={ref}
-  {...$$restProps}
-  let:ref
-  bind:this={$component}
->
-  <slot
-    name="threlte"
-    {ref}
-  />
+<T is={group} {...$$restProps}>
+  {#if occlude && !isRayCastOcclusion}
+    <T is={occlusionMesh} {castShadow} {receiveShadow}>
+      {#if geometry}
+        <T.PlaneGeometry />
+      {/if}
+
+      {#if material}
+        <T.ShaderMaterial
+          side={DoubleSide}
+          {vertexShader}
+          fragmentShader={`void main() { gl_FragColor = vec4(0.0, 0.0, 0.0, 0.0); }`}
+        />
+      {/if}
+    </T>
+  {/if}
 </T>
 
-{#if transform}
-  <svelte:element
-    this={as}
-    use:portalAction
-    bind:this={el}
-    style={compileStyles($transformElStyles)}
-  >
+<svelte:element
+  this={as}
+  use:portalAction
+  bind:this={element}
+  style:position='absolute'
+  style:top='0'
+  style:left='0'
+  style:pointer-events={transform ? 'none' : 'auto'}
+  style:overflow={transform ? 'hidden' : undefined}
+  style:transform={transform ? undefined : `translate3d(${pos[0]}px,${pos[1]}px,0)`}
+>
+  {#if transform}
     <div
       bind:this={transformOuterRef}
-      style={compileStyles($transformOuterRefStyles)}
+      style:position='absolute'
+      style:top='0'
+      style:left='0'
+      style:width={`${width}px`}
+      style:height={`${height}px`}
+      style:transform-style='preserve-3d'
+      style:pointer-events='none'
     >
       <div
         bind:this={transformInnerRef}
-        style={compileStyles($transformInnerRefStyles)}
+        style:position='absolute'
+        style:pointer-events={pointerEvents}
       >
-        {#if showEl}
+        <div
+          class={$$restProps.class}
+          style={$$restProps.style}
+        >
           <slot />
-        {/if}
+        </div>
       </div>
     </div>
-  </svelte:element>
-{:else}
-  <svelte:element
-    this={as}
-    bind:this={el}
-    use:portalAction
-    use:buildDefaultNonTransformStyles
-    style={compileStyles($noTransformElStyles)}
-  >
-    <div style={compileStyles($noTransformDivStyles)}>
-      {#if showEl}
-        <slot />
-      {/if}
+  {:else}
+    <div
+      style:position='absolute'
+      style:transform={center ? 'translate3d(-50%,-50%,0)' : 'none'}
+      style:top={fullscreen ? `${-height / 2}px` : undefined}
+      style:left={fullscreen ? `${-width / 2}px` : undefined}
+      style:width={fullscreen ? `${width / 2}px` : undefined}
+      style:height={fullscreen ? `${height}px` : undefined}
+      style={$$restProps.style}
+      class={$$restProps.class}
+    >
+      <slot />
     </div>
-  </svelte:element>
-{/if}
+  {/if}
+</svelte:element>
