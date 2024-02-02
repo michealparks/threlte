@@ -1,12 +1,15 @@
 <script lang="ts">
-  import { T, useThrelte, useFrame } from '@threlte/core'
+    import {
+    createRawEventDispatcher,
+    forwardEventHandlers,
+    T,
+    useTask,
+    useThrelte
+  } from '@threlte/core'
   import {
     Vector3,
     Group,
     Object3D,
-    Matrix4,
-    Camera,
-    PerspectiveCamera,
     OrthographicCamera,
     Raycaster,
     DoubleSide,
@@ -30,6 +33,8 @@
 
   type $$Props = HTMLProps
   type $$PropsWithDefaults = Required<$$Props>
+  type $$Events = HTMLEvents
+  type $$Slots = HTMLSlots
 
   // Group Properties
   export let transform: $$PropsWithDefaults['transform'] = false
@@ -37,24 +42,22 @@
   export let eps: $$PropsWithDefaults['eps'] = 0.001
   export let occlude: $$PropsWithDefaults['occlude'] = true
   export let zIndexRange: $$PropsWithDefaults['zIndexRange'] = [16777271, 0]
-  export let pointerEvents: $$PropsWithDefaults['pointerEvents'] = 'auto'
-  export let prepend: $$PropsWithDefaults['prepend']
-  export let center: $$PropsWithDefaults['center']
-  export let fullscreen: $$PropsWithDefaults['fullscreen']
-  export let distanceFactor: $$PropsWithDefaults['distanceFactor']
   export let sprite: $$PropsWithDefaults['sprite'] = false
+  export let pointerEvents: $$PropsWithDefaults['pointerEvents'] = 'auto'
+  export let center: $$PropsWithDefaults['center'] = false
+  export let fullscreen: $$PropsWithDefaults['fullscreen'] = false
+  export let distanceFactor: $$Props['distanceFactor'] | undefined = undefined
+  export let as: $$PropsWithDefaults['as'] = 'div'
+  export let prepend: $$PropsWithDefaults['prepend']
   export let onOcclude: $$PropsWithDefaults['onOcclude']
   export let castShadow: $$PropsWithDefaults['castShadow']
   export let receiveShadow: $$PropsWithDefaults['receiveShadow']
   export let material: $$PropsWithDefaults['material']
   export let geometry: $$PropsWithDefaults['geometry']
-  export let as = 'div'
   export let wrapperClass: $$PropsWithDefaults['wrapperClass']
   export let portal: $$Props['portal'] | undefined = undefined
 
   const raycaster = new Raycaster()
-  const v1 = new Vector3()
-  const v2 = new Vector3()
 
   const portalAction = (el: HTMLElement) => {
     const target = portal ?? renderer.domElement.parentElement
@@ -92,7 +95,7 @@
   $: halfHeight = height / 2
   $: fov = $camera.projectionMatrix.elements[5] * halfHeight
 
-  const group = new Group()
+  const ref = new Group()
   const occlusionMesh = new Mesh()
 
   let element = document.createElement(as)
@@ -125,13 +128,13 @@
 
   let visible = true
 
-  useFrame(() => {
+  useTask(() => {
     // @todo
     // isMeshSizeSet = false
 
     camera.current.updateMatrixWorld()
-    group.updateWorldMatrix(true, false)
-    const vec = transform ? oldPosition : calculatePosition(group, camera.current, $size)
+    ref.updateWorldMatrix(true, false)
+    const vec = transform ? oldPosition : calculatePosition(ref, camera.current, $size)
 
     if (
       transform ||
@@ -139,7 +142,7 @@
       Math.abs(oldPosition[0] - vec[0]) > eps ||
       Math.abs(oldPosition[1] - vec[1]) > eps
     ) {
-      const isBehindCamera = isObjectBehindCamera(group, camera.current)
+      const isBehindCamera = isObjectBehindCamera(ref, camera.current)
       let raytraceTarget: null | undefined | boolean | Object3D[] = false
 
       if (isRayCastOcclusion) {
@@ -153,7 +156,7 @@
       const previouslyVisible = visible
 
       if (raytraceTarget) {
-        const isvisible = isObjectVisible(group, camera.current, raycaster, raytraceTarget)
+        const isvisible = isObjectVisible(ref, camera.current, raycaster, raytraceTarget)
         visible = isvisible && !isBehindCamera
       } else {
         visible = !isBehindCamera
@@ -171,7 +174,7 @@
           : [halfRange - 1, 0]
         : zIndexRange
 
-      element.style.zIndex = `${objectZIndex(group, camera.current, zRange)}`
+      element.style.zIndex = `${objectZIndex(ref, camera.current, zRange)}`
 
       if (transform) {
         const { isOrthographicCamera, top, left, bottom, right } =
@@ -182,13 +185,13 @@
               (top + bottom) / 2
             )}px)`
           : `translateZ(${fov}px)`
-        let matrix = group.matrixWorld
+        let matrix = ref.matrixWorld
         if (sprite) {
           matrix = camera.current.matrixWorldInverse
             .clone()
             .transpose()
             .copyPosition(matrix)
-            .scale(group.scale)
+            .scale(ref.scale)
           matrix.elements[3] = matrix.elements[7] = matrix.elements[11] = 0
           matrix.elements[15] = 1
         }
@@ -204,7 +207,7 @@
         }
       } else {
         const scale =
-          distanceFactor === undefined ? 1 : objectScale(group, camera.current) * distanceFactor
+          distanceFactor === undefined ? 1 : objectScale(ref, camera.current) * distanceFactor
         element.style.transform = `translate3d(${vec[0]}px,${vec[1]}px,0) scale(${scale})`
       }
       oldPosition = vec
@@ -262,13 +265,16 @@
     }
   })
 
-  $: pos = calculatePosition(group, camera.current, $size)
+  $: pos = calculatePosition(ref, camera.current, $size)
   $: vertexShader = transform ? undefined : VertexShader
+
+  const component = forwardEventHandlers()
 </script>
 
 <T
-  is={group}
+  is={ref}
   {...$$restProps}
+  bind:this={$component}
 >
   {#if occlude && !isRayCastOcclusion}
     <T
