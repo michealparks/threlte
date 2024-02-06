@@ -1,20 +1,12 @@
 <script lang="ts">
-    import {
+  import {
     createRawEventDispatcher,
     forwardEventHandlers,
     T,
     useTask,
     useThrelte
   } from '@threlte/core'
-  import {
-    Vector3,
-    Group,
-    Object3D,
-    OrthographicCamera,
-    Raycaster,
-    DoubleSide,
-    Mesh
-  } from 'three'
+  import { Vector3, Group, Object3D, OrthographicCamera, Raycaster, DoubleSide, Mesh } from 'three'
   import { useHasEventListeners } from '../../hooks/useHasEventListeners'
   import {
     compileStyles,
