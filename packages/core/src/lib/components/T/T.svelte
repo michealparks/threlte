@@ -1,17 +1,15 @@
 <script lang="ts">
-  import { getContext, setContext } from 'svelte'
-  import { writable, type Writable } from 'svelte/store'
-  import type { Object3D } from 'three'
   import DisposableObject from '../../internal/DisposableObject.svelte'
   import SceneGraphObject from '../../internal/SceneGraphObject.svelte'
-  import type { DisposableThreeObject } from '../../types'
+  import { useParent, createParent } from '../../hooks/useParent'
   import { useAttach } from './utils/useAttach'
   import { useCamera } from './utils/useCamera'
   import { useCreateEvent } from './utils/useCreateEvent'
   import { useEvents } from './utils/useEvents'
   import { usePlugins } from './utils/usePlugins'
   import { useProps } from './utils/useProps'
-  import type { Props, Events, Slots, AnyClass, MaybeInstance } from './types'
+  import type { Props, Events, Slots, MaybeInstance } from './types'
+  import { isClass, argsIsConstructorParameters, isDisposableObject, extendsObject3D } from './utils/utils'
 
   type Type = $$Generic
 
@@ -29,18 +27,8 @@
   export let makeDefault: AllProps['makeDefault'] = undefined as unknown as AllProps['makeDefault']
   export let dispose: AllProps['dispose'] = undefined as unknown as AllProps['dispose']
 
-  type ThrelteThreeParentContext = Writable<any | undefined>
-  const parent = getContext<ThrelteThreeParentContext>('threlte-hierarchical-parent-context')
-
-  // Type Gaurds
-  const isClass = (type: any): type is AnyClass => {
-    return typeof type === 'function' && /^\s*class\s+/.test(type.toString())
-  }
-  const argsIsConstructorParameters = (args: any): args is ConstructorParameters<AnyClass> => {
-    return Array.isArray(args)
-  }
-
-  // Create Event
+  const parent = useParent()
+  const refStore = createParent()
   const createEvent = useCreateEvent()
 
   // We can't create the object in a reactive statement due to providing context
@@ -54,7 +42,10 @@
   // The ref is created, emit the event
   createEvent.updateRef(ref)
 
+  $: refStore.set(ref)
+
   let initialized = false
+
   // When "is" or "args" change, we need to create a new ref.
   const maybeSetRef = () => {
     // Because reactive statements run immediately, we need to ignore the first run.
@@ -80,13 +71,9 @@
   $: publicRef = ref
   export { publicRef as ref }
 
-  const refStore = writable(ref)
-  $: refStore.set(ref)
-  setContext<ThrelteThreeParentContext>('threlte-hierarchical-parent-context', refStore)
-
   // Plugins are initialized here so that pluginsProps
   // is available in the props update
-  const plugins = usePlugins({ ref: ref, props: $$props })
+  const plugins = usePlugins({ ref, props: $$props })
   const pluginsProps = plugins?.pluginsProps ?? []
 
   // Props
@@ -113,14 +100,6 @@
   $: plugins?.updateRef(ref)
   $: plugins?.updateProps($$props)
   $: plugins?.updateRestProps($$restProps)
-
-  const extendsObject3D = (object: any): object is Object3D => {
-    return !!(object as any).isObject3D
-  }
-
-  const isDisposableObject = (object: any): object is DisposableThreeObject => {
-    return (object as any).dispose !== undefined
-  }
 </script>
 
 {#if isDisposableObject(ref)}

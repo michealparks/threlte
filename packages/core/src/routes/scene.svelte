@@ -5,17 +5,19 @@
   let ref: Mesh
 
   useTask(() => {
-    if (!ref) return
     ref.rotation.x += 0.01
     ref.rotation.y += 0.01
   })
 </script>
 
-<T.PerspectiveCamera
+<!-- <T.PerspectiveCamera
   makeDefault
   position={[3, 3, 3]}
-  on:create={({ ref }) => ref.lookAt(0, 0, 0)}
-/>
+  on:create={({ ref }) => {
+    console.log('create')
+    ref.lookAt(0, 0, 0)
+  }}
+/> -->
 
 <T.Mesh
   castShadow

@@ -1,6 +1,7 @@
 import type { ComponentConstructorOptions, ComponentProps, SvelteComponent } from 'svelte'
 import * as THREE from 'three'
 import TComp from './T.svelte'
+import TRunesComp from './TRunes.svelte'
 import type { Events, Props, Slots } from './types'
 
 type Extensions = Record<string, any>
@@ -51,14 +52,17 @@ const proxyTConstructor = (is: keyof typeof THREE) => {
     },
     apply(_target, _thisArg, argArray) {
       const module = catalogue[is] || THREE[is]
+
       if (!module) {
         throw new Error(
           `No Three.js module found for ${is}. Did you forget to extend the catalogue?`
         )
       }
+
       // This must be mutated and not copied to preserve binding.
       argArray[1].is = module
-      return (TComp as any)(null, argArray[1])
+
+      return (TRunesComp as any)(null, argArray[1])
     }
   })
 }
@@ -89,7 +93,7 @@ export const T = new Proxy(function() {}, {
     return new TComp(castedArgs)
   },
   apply(_target, _thisArg, argArray) {
-    return (TComp as any)(null, argArray[1])
+    return (TRunesComp as any)(null, argArray[1])
   },
   get(_, is: keyof typeof THREE) {
     return proxyTConstructor(is)

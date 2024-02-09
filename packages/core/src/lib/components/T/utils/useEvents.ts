@@ -18,9 +18,9 @@ const isEventDispatcher = (
   return !!value?.addEventListener
 }
 
-export const useEvents = () => {
+export const useEvents = ($$events?: any) => {
   const dispatch = createRawEventDispatcher()
-  const getEvents = useGetEvents()
+  const getEvents = useGetEvents($$events)
 
   const eventHandlerProxy = (
     event?: {

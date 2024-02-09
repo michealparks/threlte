@@ -37,8 +37,8 @@ type RawEventDispatcher<EventMap extends Record<string, unknown>> = Dispatcher<E
  */
 export const createRawEventDispatcher = <
   EventMap extends Record<string, unknown> = any
->(): RawEventDispatcher<EventMap> => {
-  const getEvents = useGetEvents()
+>(events?: any): RawEventDispatcher<EventMap> => {
+  const getEvents = useGetEvents(events)
 
   const dispatchRawEvent: Dispatcher<EventMap> = (type, value) => {
     const callbacks = getEvents()[type]
