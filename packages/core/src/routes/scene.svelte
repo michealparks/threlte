@@ -5,6 +5,7 @@
   let ref: Mesh
 
   useTask(() => {
+    if (!ref) return
     ref.rotation.x += 0.01
     ref.rotation.y += 0.01
   })

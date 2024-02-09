@@ -1,8 +1,8 @@
 import { onMount } from 'svelte'
-import { get_current_component } from 'svelte/internal'
 import { writable } from 'svelte/store'
 import { createRawEventDispatcher } from '../../../lib/createRawEventDispatcher'
 import { watch } from '../../../lib/storeUtils'
+import { useGetEvents } from '../../../lib/useGetEvents'
 
 /**
  * Typeguard to check if a value is extending THREE.EventDispatcher
@@ -20,7 +20,7 @@ const isEventDispatcher = (
 
 export const useEvents = () => {
   const dispatch = createRawEventDispatcher()
-  const component = get_current_component()
+  const getEvents = useGetEvents()
 
   const eventHandlerProxy = (
     event?: {
@@ -58,7 +58,7 @@ export const useEvents = () => {
 
   // get all event callbacks from component
   onMount(() => {
-    eventNames.set(Object.keys(component.$$.callbacks))
+    eventNames.set(Object.keys(getEvents()))
   })
 
   const updateRef = (newRef: any) => {
