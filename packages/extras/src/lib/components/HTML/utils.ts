@@ -96,7 +96,7 @@ export const getCSSMatrix = (mat4: Matrix4, m: number[], prepend = '') => {
     ${epsilon(m[0] * e[0])},${epsilon(m[1] * e[1])},${epsilon(m[2] * e[2])},${epsilon(m[3] * e[3])},
     ${epsilon(m[4] * e[4])},${epsilon(m[5] * e[5])},${epsilon(m[6] * e[6])},${epsilon(m[7] * e[7])},
     ${epsilon(m[8] * e[8])},${epsilon(m[9] * e[9])},${epsilon(m[10] * e[10])},${epsilon(m[11] * e[11])},
-    ${epsilon(m[12] * e[12])},${epsilon(m[13] * e[13])},${epsilon(m[14] * e[14])},${epsilon(m[15] * e[15])},
+    ${epsilon(m[12] * e[12])},${epsilon(m[13] * e[13])},${epsilon(m[14] * e[14])},${epsilon(m[15] * e[15])}
   )`
 }
 

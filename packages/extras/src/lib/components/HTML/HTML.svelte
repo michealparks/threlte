@@ -290,6 +290,7 @@
 
 <svelte:element
   this={as}
+  id='el'
   use:portalAction
   bind:this={element}
   style:position="absolute"
