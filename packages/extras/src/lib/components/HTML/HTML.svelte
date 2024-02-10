@@ -9,7 +9,6 @@
   import { Vector3, Group, Object3D, OrthographicCamera, Raycaster, DoubleSide, Mesh, PerspectiveCamera, Matrix4 } from 'three'
   import { useHasEventListeners } from '../../hooks/useHasEventListeners'
   import {
-    compileStyles,
     defaultCalculatePosition,
     epsilon,
     getCameraCSSMatrix,
@@ -18,7 +17,6 @@
     isObjectVisible,
     objectScale,
     objectZIndex,
-    updateStyles
   } from './utils'
   import type { HTMLEvents, HTMLProps, HTMLSlots } from './HTML.svelte'
   import VertexShader from './vertex'
@@ -32,7 +30,7 @@
   export let transform: $$PropsWithDefaults['transform'] = false
   export let calculatePosition: $$PropsWithDefaults['calculatePosition'] = defaultCalculatePosition
   export let eps: $$PropsWithDefaults['eps'] = 0.001
-  export let occlude: $$PropsWithDefaults['occlude'] = true
+  export let occlude: $$PropsWithDefaults['occlude'] = false
   export let zIndexRange: $$PropsWithDefaults['zIndexRange'] = [16777271, 0]
   export let sprite: $$PropsWithDefaults['sprite'] = false
   export let pointerEvents: $$PropsWithDefaults['pointerEvents'] = 'auto'

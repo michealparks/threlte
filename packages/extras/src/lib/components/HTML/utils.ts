@@ -125,29 +125,3 @@ export const getObjectCSSMatrix = ((scaleMultipliers: (n: number) => number[]) =
   1,
   1
 ])
-
-const styleDeclarationKeyToCssString = (s: string): string => {
-  return s
-    .split(/(?=[A-Z])/)
-    .join('-')
-    .toLowerCase()
-}
-
-export const compileStyles = (styles: Partial<CSSStyleDeclaration>): string => {
-  return Object.entries(styles)
-    .filter(([_, value]) => !!value)
-    .map(([key, value]) => `${styleDeclarationKeyToCssString(key)}: ${value}`)
-    .join('; ')
-}
-
-export const updateStyles = (
-  store: Writable<Partial<CSSStyleDeclaration>>,
-  styles: Partial<CSSStyleDeclaration>
-): void => {
-  store.update((values) => {
-    return {
-      ...values,
-      ...styles
-    }
-  })
-}

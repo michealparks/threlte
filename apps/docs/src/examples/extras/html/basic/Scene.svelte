@@ -1,6 +1,6 @@
 <script lang="ts">
   import { T } from '@threlte/core'
-  import { HTML, OrbitControls } from '@threlte/extras'
+  import { HTML, OrbitControls, Grid } from '@threlte/extras'
   import { spring } from 'svelte/motion'
   import { Color, MeshStandardMaterial } from 'three'
   import { DEG2RAD } from 'three/src/math/MathUtils'
@@ -43,7 +43,7 @@
 
 <T.AmbientLight intensity={0.3} />
 
-<T.GridHelper />
+<Grid cellColor='white' sectionColor='white' />
 
 <T.Mesh
   position.y={0.5}
