@@ -2,6 +2,19 @@ import type { Events, Props, Slots } from '@threlte/core'
 import { SvelteComponent } from 'svelte'
 import type { Camera, Group, Object3D } from 'three'
 
+type PointerEventsProperties =
+  | 'auto'
+  | 'none'
+  | 'visiblePainted'
+  | 'visibleFill'
+  | 'visibleStroke'
+  | 'visible'
+  | 'painted'
+  | 'fill'
+  | 'stroke'
+  | 'all'
+  | 'inherit'
+
 interface Propssss extends Props<Group> {
   prepend?: boolean
   center?: boolean

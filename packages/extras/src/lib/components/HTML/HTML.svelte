@@ -1,20 +1,12 @@
 <script lang="ts">
-    import {
+  import {
     createRawEventDispatcher,
     forwardEventHandlers,
     T,
     useTask,
     useThrelte
   } from '@threlte/core'
-  import {
-    Vector3,
-    Group,
-    Object3D,
-    OrthographicCamera,
-    Raycaster,
-    DoubleSide,
-    Mesh
-  } from 'three'
+  import { Vector3, Group, Object3D, OrthographicCamera, Raycaster, DoubleSide, Mesh } from 'three'
   import { useHasEventListeners } from '../../hooks/useHasEventListeners'
   import {
     compileStyles,
@@ -28,7 +20,7 @@
     objectZIndex,
     updateStyles
   } from './utils'
-  import type { HTMLProps } from './HTML.svelte'
+  import type { HTMLEvents, HTMLProps, HTMLSlots } from './HTML.svelte'
   import VertexShader from './vertex.glsl?raw'
 
   type $$Props = HTMLProps
@@ -57,37 +49,16 @@
   export let wrapperClass: $$PropsWithDefaults['wrapperClass']
   export let portal: $$Props['portal'] | undefined = undefined
 
-  const raycaster = new Raycaster()
+  const dispatch = createRawEventDispatcher<{
+    visibilitychange: boolean
+  }>()
 
-  const portalAction = (el: HTMLElement) => {
-    const target = portal ?? renderer.domElement.parentElement
-    if (!target) {
-      console.warn('<HTML>: target is undefined.')
-      return
-    }
-    target.appendChild(el)
-    return {
-      destroy: () => {
-        if (!el.parentNode) return
-        el.parentNode.removeChild(el)
-      }
-    }
-  }
-
-  type PointerEventsProperties =
-    | 'auto'
-    | 'none'
-    | 'visiblePainted'
-    | 'visibleFill'
-    | 'visibleStroke'
-    | 'visible'
-    | 'painted'
-    | 'fill'
-    | 'stroke'
-    | 'all'
-    | 'inherit'
+  export let ref = new Group()
 
   const { renderer, camera, scene, size, viewport } = useThrelte()
+  const { hasEventListeners } = useHasEventListeners<typeof dispatch>()
+
+  const raycaster = new Raycaster()
 
   $: width = $size.width
   $: height = $size.height
@@ -95,7 +66,6 @@
   $: halfHeight = height / 2
   $: fov = $camera.projectionMatrix.elements[5] * halfHeight
 
-  const ref = new Group()
   const occlusionMesh = new Mesh()
 
   let element = document.createElement(as)
@@ -267,6 +237,21 @@
 
   $: pos = calculatePosition(ref, camera.current, $size)
   $: vertexShader = transform ? undefined : VertexShader
+
+  const portalAction = (el: HTMLElement) => {
+    const target = portal ?? renderer.domElement.parentElement
+    if (!target) {
+      console.warn('<HTML>: target is undefined.')
+      return
+    }
+    target.appendChild(el)
+    return {
+      destroy: () => {
+        if (!el.parentNode) return
+        el.parentNode.removeChild(el)
+      }
+    }
+  }
 
   const component = forwardEventHandlers()
 </script>
