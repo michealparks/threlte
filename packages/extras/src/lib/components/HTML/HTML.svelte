@@ -6,7 +6,7 @@
     useTask,
     useThrelte
   } from '@threlte/core'
-  import { Vector3, Group, Object3D, OrthographicCamera, Raycaster, DoubleSide, Mesh } from 'three'
+  import { Vector3, Group, Object3D, OrthographicCamera, Raycaster, DoubleSide, Mesh, PerspectiveCamera, Matrix4 } from 'three'
   import { useHasEventListeners } from '../../hooks/useHasEventListeners'
   import {
     compileStyles,
@@ -21,7 +21,7 @@
     updateStyles
   } from './utils'
   import type { HTMLEvents, HTMLProps, HTMLSlots } from './HTML.svelte'
-  import VertexShader from './vertex.glsl?raw'
+  import VertexShader from './vertex'
 
   type $$Props = HTMLProps
   type $$PropsWithDefaults = Required<$$Props>
@@ -55,8 +55,10 @@
 
   export let ref = new Group()
 
-  const { renderer, camera, scene, size, viewport } = useThrelte()
+  const { renderer, camera, scene, size } = useThrelte()
   const { hasEventListeners } = useHasEventListeners<typeof dispatch>()
+
+  let matrix = new Matrix4()
 
   const raycaster = new Raycaster()
 
@@ -98,7 +100,7 @@
 
   let visible = true
 
-  useTask(() => {
+  const { start } = useTask(() => {
     // @todo
     // isMeshSizeSet = false
 
@@ -144,7 +146,7 @@
           : [halfRange - 1, 0]
         : zIndexRange
 
-      element.style.zIndex = `${objectZIndex(ref, camera.current, zRange)}`
+      element.style.zIndex = `${objectZIndex(ref, camera.current as OrthographicCamera | PerspectiveCamera, zRange)}`
 
       if (transform) {
         const { isOrthographicCamera, top, left, bottom, right } =
@@ -155,26 +157,27 @@
               (top + bottom) / 2
             )}px)`
           : `translateZ(${fov}px)`
-        let matrix = ref.matrixWorld
+
         if (sprite) {
-          matrix = camera.current.matrixWorldInverse
-            .clone()
+          matrix
+            .copy(camera.current.matrixWorldInverse)
             .transpose()
             .copyPosition(matrix)
             .scale(ref.scale)
           matrix.elements[3] = matrix.elements[7] = matrix.elements[11] = 0
           matrix.elements[15] = 1
+        } else {
+          matrix.copy(ref.matrixWorld)
         }
+
         element.style.width = `${width}px`
         element.style.height = `${height}px`
         element.style.perspective = isOrthographicCamera ? '' : `${fov}px`
-        if (transformOuterRef && transformInnerRef) {
-          transformOuterRef.style.transform = `${cameraTransform}${cameraMatrix}translate(${halfWidth}px,${halfHeight}px)`
-          transformInnerRef.style.transform = getObjectCSSMatrix(
-            matrix,
-            1 / ((distanceFactor || 10) / 400)
-          )
-        }
+        transformOuterRef.style.transform = `${cameraTransform}${cameraMatrix}translate(${halfWidth}px,${halfHeight}px)`
+        transformInnerRef.style.transform = getObjectCSSMatrix(
+          matrix,
+          1 / ((distanceFactor || 10) / 400)
+        )
       } else {
         const scale =
           distanceFactor === undefined ? 1 : objectScale(ref, camera.current) * distanceFactor
@@ -186,44 +189,43 @@
 
     if (!isRayCastOcclusion && !isMeshSizeSet) {
       if (transform) {
-        if (transformOuterRef) {
-          const el = transformOuterRef.children[0]
+        const el = transformOuterRef.children[0]
 
-          if (el?.clientWidth && el?.clientHeight) {
-            const { isOrthographicCamera } = camera.current as OrthographicCamera
+        if (el?.clientWidth && el?.clientHeight) {
+          const { isOrthographicCamera } = camera.current as OrthographicCamera
 
-            if (isOrthographicCamera || geometry) {
-              if ($$restProps.scale) {
-                if (!Array.isArray($$restProps.scale)) {
-                  occlusionMesh.scale.setScalar(1 / ($$restProps.scale as number))
-                } else if ($$restProps.scale instanceof Vector3) {
-                  occlusionMesh.scale.copy($$restProps.scale.clone().divideScalar(1))
-                } else {
-                  occlusionMesh.scale.set(
-                    1 / $$restProps.scale[0],
-                    1 / $$restProps.scale[1],
-                    1 / $$restProps.scale[2]
-                  )
-                }
+          if (isOrthographicCamera || geometry) {
+            const scale = $$restProps.scale
+            if (scale) {
+              if (!Array.isArray(scale)) {
+                occlusionMesh.scale.setScalar(1 / (scale as number))
+              } else if (scale instanceof Vector3) {
+                occlusionMesh.scale.copy(scale.clone().divideScalar(1))
+              } else {
+                occlusionMesh.scale.set(
+                  1 / scale[0],
+                  1 / scale[1],
+                  1 / scale[2]
+                )
               }
-            } else {
-              const ratio = (distanceFactor || 10) / 400
-              const w = el.clientWidth * ratio
-              const h = el.clientHeight * ratio
-
-              occlusionMesh.scale.set(w, h, 1)
             }
+          } else {
+            const ratio = (distanceFactor ?? 10) / 400
+            const w = el.clientWidth * ratio
+            const h = el.clientHeight * ratio
 
-            isMeshSizeSet = true
+            occlusionMesh.scale.set(w, h, 1)
           }
+
+          isMeshSizeSet = true
         }
       } else {
-        const ele = element.children[0]
+        const el = element.children[0]
 
-        if (ele?.clientWidth && ele?.clientHeight) {
+        if (el?.clientWidth && el?.clientHeight) {
           const ratio = 1 // / viewport.factor
-          const w = ele.clientWidth * ratio
-          const h = ele.clientHeight * ratio
+          const w = el.clientWidth * ratio
+          const h = el.clientHeight * ratio
 
           occlusionMesh.scale.set(w, h, 1)
 
@@ -233,7 +235,11 @@
         occlusionMesh.lookAt(camera.current.position)
       }
     }
-  })
+  }, { autoStart: false })
+
+  $: if (!transform || (transform && transformInnerRef && transformOuterRef)) {
+    start()
+  }
 
   $: pos = calculatePosition(ref, camera.current, $size)
   $: vertexShader = transform ? undefined : VertexShader

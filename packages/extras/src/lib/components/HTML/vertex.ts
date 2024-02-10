@@ -4,6 +4,7 @@
   (make it always face the camera) if "transfrom" 
   is false. 
 */
+export default `/* glsl */
 #include <common>
 
 void main() {
@@ -29,4 +30,4 @@ void main() {
   mvPosition.xy += rotatedPosition;
 
   gl_Position = projectionMatrix * mvPosition;
-}
+}`

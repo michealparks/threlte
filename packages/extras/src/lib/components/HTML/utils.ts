@@ -23,17 +23,11 @@ const isPerspectiveCamera = (object: Camera): object is PerspectiveCamera => {
   return 'isPerspectiveCamera' in object
 }
 
-const isOrthographicCameraOrPerspectiveCamera = (
-  object: Camera
-): object is OrthographicCamera | PerspectiveCamera => {
-  return isOrthographicCamera(object) || isPerspectiveCamera(object)
-}
-
 export const defaultCalculatePosition = (
   object: Object3D,
   camera: Camera,
   size: { width: number; height: number }
-) => {
+): [number, number] => {
   const objectPos = v1.setFromMatrixPosition(object.matrixWorld)
   objectPos.project(camera)
   const widthHalf = size.width / 2
@@ -46,7 +40,7 @@ export const isObjectVisible = (
   camera: Camera,
   raycaster: Raycaster,
   occlude: Object3D[]
-) => {
+): boolean => {
   const elPos = v1.setFromMatrixPosition(el.matrixWorld)
   const screenPos = v2.copy(v1)
   screenPos.project(camera)
@@ -62,7 +56,7 @@ export const isObjectVisible = (
   return true
 }
 
-export const isObjectBehindCamera = (object: Object3D, camera: Camera) => {
+export const isObjectBehindCamera = (object: Object3D, camera: Camera): boolean => {
   const objectPos = v1.setFromMatrixPosition(object.matrixWorld)
   const cameraPos = v2.setFromMatrixPosition(camera.matrixWorld)
   const deltaCamObj = objectPos.sub(cameraPos)
@@ -70,7 +64,7 @@ export const isObjectBehindCamera = (object: Object3D, camera: Camera) => {
   return deltaCamObj.angleTo(camDir) > Math.PI / 2
 }
 
-export const objectScale = (object: Object3D, camera: Camera) => {
+export const objectScale = (object: Object3D, camera: Camera): number => {
   if (isOrthographicCamera(camera)) {
     return camera.zoom
   } else if (isPerspectiveCamera(camera)) {
@@ -85,26 +79,25 @@ export const objectScale = (object: Object3D, camera: Camera) => {
   }
 }
 
-export const objectZIndex = (el: Object3D, camera: Camera, zIndexRange: Array<number>) => {
-  if (isOrthographicCameraOrPerspectiveCamera(camera)) {
-    const objectPos = v1.setFromMatrixPosition(el.matrixWorld)
-    const cameraPos = v2.setFromMatrixPosition(camera.matrixWorld)
-    const dist = objectPos.distanceTo(cameraPos)
-    const A = (zIndexRange[1] - zIndexRange[0]) / (camera.far - camera.near)
-    const B = zIndexRange[1] - A * camera.far
-    return Math.round(A * dist + B)
-  }
-  return undefined
+export const objectZIndex = (el: Object3D, camera: OrthographicCamera | PerspectiveCamera, zIndexRange: Array<number>): number | undefined => {
+  const objectPos = v1.setFromMatrixPosition(el.matrixWorld)
+  const cameraPos = v2.setFromMatrixPosition(camera.matrixWorld)
+  const dist = objectPos.distanceTo(cameraPos)
+  const A = (zIndexRange[1] - zIndexRange[0]) / (camera.far - camera.near)
+  const B = zIndexRange[1] - A * camera.far
+  return Math.round(A * dist + B)
 }
 
 export const epsilon = (value: number) => (Math.abs(value) < 1e-10 ? 0 : value)
 
-export const getCSSMatrix = (matrix: Matrix4, multipliers: number[], prepend = '') => {
-  let matrix3d = 'matrix3d('
-  for (let i = 0; i !== 16; i++) {
-    matrix3d += epsilon(multipliers[i] * matrix.elements[i]) + (i !== 15 ? ',' : ')')
-  }
-  return prepend + matrix3d
+export const getCSSMatrix = (mat4: Matrix4, m: number[], prepend = '') => {
+  const { elements: e } = mat4
+  return `${prepend}matrix3d(
+    ${epsilon(m[0] * e[0])},${epsilon(m[1] * e[1])},${epsilon(m[2] * e[2])},${epsilon(m[3] * e[3])},
+    ${epsilon(m[4] * e[4])},${epsilon(m[5] * e[5])},${epsilon(m[6] * e[6])},${epsilon(m[7] * e[7])},
+    ${epsilon(m[8] * e[8])},${epsilon(m[9] * e[9])},${epsilon(m[10] * e[10])},${epsilon(m[11] * e[11])},
+    ${epsilon(m[12] * e[12])},${epsilon(m[13] * e[13])},${epsilon(m[14] * e[14])},${epsilon(m[15] * e[15])},
+  )`
 }
 
 export const getCameraCSSMatrix = ((multipliers: number[]) => {
