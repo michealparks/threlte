@@ -43,7 +43,7 @@
 
 <T.AmbientLight intensity={0.3} />
 
-<Grid cellColor='white' sectionColor='white' />
+<!-- <Grid cellColor='white' sectionColor='white' /> -->
 
 <T.Mesh
   position.y={0.5}
@@ -75,8 +75,10 @@
   </HTML>
 
   <HTML
-    position.x={0.75}
+    position.z={-0.75}
     transform
+    occlude
+    center
     pointerEvents="none"
   >
     <p
