@@ -79,7 +79,11 @@ export const objectScale = (object: Object3D, camera: Camera): number => {
   }
 }
 
-export const objectZIndex = (el: Object3D, camera: OrthographicCamera | PerspectiveCamera, zIndexRange: Array<number>): number | undefined => {
+export const objectZIndex = (
+  el: Object3D,
+  camera: OrthographicCamera | PerspectiveCamera,
+  zIndexRange: Array<number>
+): number | undefined => {
   const objectPos = v1.setFromMatrixPosition(el.matrixWorld)
   const cameraPos = v2.setFromMatrixPosition(camera.matrixWorld)
   const dist = objectPos.distanceTo(cameraPos)
@@ -95,8 +99,12 @@ export const getCSSMatrix = (mat4: Matrix4, m: number[], prepend = '') => {
   return `${prepend}matrix3d(
     ${epsilon(m[0] * e[0])},${epsilon(m[1] * e[1])},${epsilon(m[2] * e[2])},${epsilon(m[3] * e[3])},
     ${epsilon(m[4] * e[4])},${epsilon(m[5] * e[5])},${epsilon(m[6] * e[6])},${epsilon(m[7] * e[7])},
-    ${epsilon(m[8] * e[8])},${epsilon(m[9] * e[9])},${epsilon(m[10] * e[10])},${epsilon(m[11] * e[11])},
-    ${epsilon(m[12] * e[12])},${epsilon(m[13] * e[13])},${epsilon(m[14] * e[14])},${epsilon(m[15] * e[15])}
+    ${epsilon(m[8] * e[8])},${epsilon(m[9] * e[9])},${epsilon(m[10] * e[10])},${epsilon(
+    m[11] * e[11]
+  )},
+    ${epsilon(m[12] * e[12])},${epsilon(m[13] * e[13])},${epsilon(m[14] * e[14])},${epsilon(
+    m[15] * e[15]
+  )}
   )`
 }
 
@@ -125,3 +133,30 @@ export const getObjectCSSMatrix = ((scaleMultipliers: (n: number) => number[]) =
   1,
   1
 ])
+
+export const getViewportFactor = (
+  camera: Camera,
+  target: THREE.Vector3,
+  size: {
+    width: number
+    height: number
+  }
+): number => {
+  if (isOrthographicCamera(camera)) {
+    return 1
+  }
+
+  if (isPerspectiveCamera(camera)) {
+    const { width, height } = size
+    const distance = camera.getWorldPosition(v1).distanceTo(target)
+
+    // convert vertical fov to radians
+    const fov = (camera.fov * Math.PI) / 180
+    // visible height
+    const h = 2 * Math.tan(fov / 2) * distance
+    const w = h * (width / height)
+    return width / w
+  }
+
+  throw new Error('getViewportFactor needs a Perspective or Orthographic Camera')
+}

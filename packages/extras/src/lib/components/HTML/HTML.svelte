@@ -12,6 +12,7 @@
     defaultCalculatePosition,
     epsilon,
     getCameraCSSMatrix,
+    getViewportFactor,
     getObjectCSSMatrix,
     isObjectBehindCamera,
     isObjectVisible,
@@ -65,6 +66,7 @@
   $: halfWidth = width / 2
   $: halfHeight = height / 2
   $: fov = $camera.projectionMatrix.elements[5] * halfHeight
+  $: viewportFactor = getViewportFactor($camera, new Vector3(), $size)
 
   const occlusionMesh = new Mesh()
 
@@ -221,7 +223,7 @@
         const el = element.children[0]
 
         if (el?.clientWidth && el?.clientHeight) {
-          const ratio = 1 // / viewport.factor
+          const ratio = 1 / viewportFactor
           const w = el.clientWidth * ratio
           const h = el.clientHeight * ratio
 
