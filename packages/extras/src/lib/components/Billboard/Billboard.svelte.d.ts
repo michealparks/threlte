@@ -4,9 +4,7 @@ import type { Group } from 'three'
 
 export type BillboardProps = Props<Group> & {
   follow?: boolean
-  lockX?: boolean
-  lockY?: boolean
-  lockZ?: boolean
+  lockAxis?: 'x' | 'y' | 'z' | 'none'
 }
 
 export type BillboardEvents = Events<Group>

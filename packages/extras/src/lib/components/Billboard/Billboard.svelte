@@ -1,6 +1,6 @@
 <script lang="ts">
-  import { Euler, Group, Quaternion } from 'three'
-  import { T, useTask, useThrelte } from '@threlte/core'
+  import { Euler, Group, Quaternion, Vector3 } from 'three'
+  import { T, useStage, useTask, useThrelte } from '@threlte/core'
   import type { BillboardEvents, BillboardProps, BillboardSlots } from './Billboard.svelte'
 
   type $$Props = Required<BillboardProps>
@@ -8,52 +8,39 @@
   type $$Slots = BillboardSlots
 
   export let follow: $$Props['follow'] = true
-  export let lockX: $$Props['lockX'] = false
-  export let lockY: $$Props['lockY'] = false
-  export let lockZ: $$Props['lockZ'] = false
+  export let lockAxis: $$Props['lockAxis'] = 'none'
 
   let inner: Group
-  let localRef: Group
+  export let ref = new Group()
 
-  const { camera } = useThrelte()
+  const { camera, renderStage } = useThrelte()
+  const stage = useStage(Symbol('before-render'), { before: renderStage })
 
   const q = new Quaternion()
 
-  const prevRotation = new Euler()
-
   const { start, stop } = useTask(
     () => {
-      // save previous rotation in case we're locking an axis
-      prevRotation.copy(localRef.rotation)
-
       // always face the camera
-      localRef.updateMatrix()
-      localRef.updateWorldMatrix(false, false)
-      localRef.getWorldQuaternion(q)
-      $camera.getWorldQuaternion(inner.quaternion).premultiply(q.invert())
-
-      // readjust any axis that is locked
-      if (lockX) localRef.rotation.x = prevRotation.x
-      if (lockY) localRef.rotation.y = prevRotation.y
-      if (lockZ) localRef.rotation.z = prevRotation.z
+      ref.updateMatrix()
+      ref.updateWorldMatrix(false, false)
+      ref.getWorldQuaternion(q)
+      camera.current.getWorldQuaternion(inner.quaternion).premultiply(q.invert())
     },
-    { autoStart: false }
+    { autoStart: false, stage }
   )
 
-  $: if (follow && localRef) {
+  $: if (follow) {
     start()
   } else {
     stop()
   }
 </script>
 
-<T.Group
-  bind:ref={localRef}
-  matrixAutoUpdate={false}
-  matrixWorldAutoUpdate={false}
+<T
+  is={ref}
   {...$$restProps}
 >
   <T.Group bind:ref={inner}>
-    <slot ref={localRef} />
+    <slot {ref} />
   </T.Group>
-</T.Group>
+</T>
