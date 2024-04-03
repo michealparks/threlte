@@ -1,5 +1,40 @@
 # @threlte/extras
 
+## 8.11.2
+
+### Patch Changes
+
+- 4867f80: Improve MeshLineGeometry performance, fix interactivity NaN bug
+
+## 8.11.1
+
+### Patch Changes
+
+- 82c93bc: Remove unused 'filter' prop from InstancedSprite
+
+## 8.11.0
+
+### Minor Changes
+
+- 842fef9: Added Mask component to Extras
+- a3866b0: NEW COMPONENT: InstancedSprite
+
+### Patch Changes
+
+- e6c4250: Add `<Image>` component.
+
+## 8.10.3
+
+### Patch Changes
+
+- d3cd996: Minor grid improvements
+
+## 8.10.2
+
+### Patch Changes
+
+- 345035c: Add `<Outlines>` component
+
 ## 8.10.1
 
 ### Patch Changes
