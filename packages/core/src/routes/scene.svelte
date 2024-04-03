@@ -8,6 +8,10 @@
     ref.rotation.x += 0.01
     ref.rotation.y += 0.01
   })
+
+  let hasEvent = true
+  setInterval(() => (hasEvent = !hasEvent), 2000)
+  setInterval(() => ref.dispatchEvent({ type: 'bob' }), 2000)
 </script>
 
 <T.PerspectiveCamera
@@ -20,6 +24,8 @@
   castShadow
   receiveShadow
   bind:ref
+  on:click={hasEvent ? () => console.log('click') : undefined}
+  on:bob={(event) => console.log(event)}
 >
   <T.MeshStandardMaterial color="hotpink" />
   <T.BoxGeometry />

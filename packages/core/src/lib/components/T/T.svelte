@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { useComponentEvents } from '../../internal/useComponentEvents'
   import DisposableObject from '../../internal/DisposableObject.svelte'
   import SceneGraphObject from '../../internal/SceneGraphObject.svelte'
   import { createParentContext, useParent } from '../../hooks/useParent'
@@ -28,6 +29,7 @@
   export let dispose: AllProps['dispose'] = undefined as unknown as AllProps['dispose']
 
   const parent = useParent()
+  const componentEvents = useComponentEvents()
 
   // Create Event
   const createEvent = useCreateEvent()
@@ -46,15 +48,18 @@
       return
     }
     ref = determineRef(is, args)
+    publicRef = ref
+
     // The ref is recreated, emit the event
     createEvent.updateRef(ref)
+    componentEvents.ref.set(ref)
   }
   $: is, args, maybeSetRef()
 
   // In order to prevent updates by outside mutations on ref,
   // we need to create a publicly exposed ref.
   let publicRef = ref
-  $: publicRef = ref
+
   export { publicRef as ref }
 
   const parentContext = createParentContext(ref)

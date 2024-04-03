@@ -1,18 +1,14 @@
+import { useComponentEvents } from '../../../internal/useComponentEvents'
+import { watch, currentWritable } from '../../../lib/storeUtils'
 import { onDestroy, onMount } from 'svelte'
-import { createRawEventDispatcher } from '../../../lib/createRawEventDispatcher'
 
 export const useCreateEvent = () => {
-  const dispatchRaw = createRawEventDispatcher<{
-    create: {
-      ref: any
-      cleanup: (callback: () => void) => void
-    }
-  }>()
+  const { events, ref: componentEventsRef } = useComponentEvents()
 
   const cleanupFunctions: (() => void)[] = []
 
-  let ref: any | undefined = undefined
-  let mounted = false
+  const ref = currentWritable<unknown | undefined>(undefined)
+  const mounted = currentWritable(false)
 
   const dispatchCreateEvent = () => {
     // call every cleanup function
@@ -26,18 +22,29 @@ export const useCreateEvent = () => {
       cleanupFunctions.push(callback)
     }
 
-    dispatchRaw('create', { ref, cleanup })
+    console.log(ref.current)
+    events.current.create?.forEach((fn) => fn({ ref: ref.current, cleanup }))
   }
 
-  const updateRef = (newRef: any) => {
-    ref = newRef
-    if (!mounted) return
-    dispatchCreateEvent()
+  const updateRef = (newRef: unknown) => {
+    ref.set(newRef)
   }
+
+  watch(
+    [ref, componentEventsRef, events, mounted],
+    ([$ref, $componentEventsRef, $events, $mounted]) => {
+      const { create } = $events
+
+      if ($ref === undefined || create === undefined || !$mounted) return
+
+      if ($ref === $componentEventsRef) {
+        dispatchCreateEvent()
+      }
+    }
+  )
 
   onMount(() => {
-    dispatchCreateEvent()
-    mounted = true
+    mounted.set(true)
   })
 
   onDestroy(() => {

@@ -1,4 +1,5 @@
-import { get_current_component } from 'svelte/internal'
+import { watch } from '../lib/storeUtils'
+import { useComponentEvents } from '../internal/useComponentEvents'
 
 type Dispatcher<EventMap extends Record<string, unknown>> = <Type extends keyof EventMap>(
   type: Type,
@@ -38,10 +39,13 @@ type RawEventDispatcher<EventMap extends Record<string, unknown>> = Dispatcher<E
 export const createRawEventDispatcher = <
   EventMap extends Record<string, unknown> = any
 >(): RawEventDispatcher<EventMap> => {
-  const component = get_current_component()
+  const { events } = useComponentEvents()
+
+  // watch(events, ($events) => console.log($events))
 
   const dispatchRawEvent: Dispatcher<EventMap> = (type, value) => {
-    const callbacks = component.$$.callbacks[type]
+    const callbacks = events.current[type]
+    console.log(callbacks, type, value)
     if (callbacks) {
       callbacks.forEach((fn: (...args: any[]) => any) => {
         fn(value)
@@ -50,7 +54,7 @@ export const createRawEventDispatcher = <
   }
 
   const hasEventListener: HasEventListener<EventMap> = (type) => {
-    return Boolean(component.$$.callbacks[type])
+    return Boolean(events.current[type])
   }
 
   Object.defineProperty(dispatchRawEvent, 'hasEventListener', {

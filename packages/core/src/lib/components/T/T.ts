@@ -1,7 +1,13 @@
-import type { ComponentConstructorOptions, ComponentProps, SvelteComponent } from 'svelte'
+import {
+  setContext,
+  type ComponentConstructorOptions,
+  type ComponentProps,
+  type SvelteComponent
+} from 'svelte'
 import * as THREE from 'three'
 import TComp from './T.svelte'
 import type { Events, Props, Slots } from './types'
+import { createComponentEventsContext } from '../../internal/useComponentEvents'
 
 type Extensions = Record<string, any>
 
@@ -43,11 +49,21 @@ const augmentConstructorArgs = (
   }
 }
 
+const instantiateTComp = (args: ComponentConstructorOptions<ComponentProps<TComp<any>>>) => {
+  const { events } = createComponentEventsContext()
+
+  const instance = new TComp(args)
+
+  events.set(instance.$$.callbacks)
+
+  return instance
+}
+
 const proxyTConstructor = (is: keyof typeof THREE) => {
-  return new Proxy(class {}, {
-    construct(_, [args]) {
+  return new Proxy(function () {}, {
+    construct(_, [args, ...rest], ...rest2) {
       const castedArgs = args as ComponentConstructorOptions<ComponentProps<TComp<any>>>
-      return new TComp(augmentConstructorArgs(castedArgs, is))
+      return instantiateTComp(augmentConstructorArgs(castedArgs, is))
     }
   })
 }
@@ -72,12 +88,12 @@ const proxyTConstructor = (is: keyof typeof THREE) => {
  * </T.Mesh>
  * ```
  */
-export const T = new Proxy(class {}, {
+export const T = new Proxy(function () {}, {
   construct(_, [args]) {
     const castedArgs = args as ComponentConstructorOptions<ComponentProps<TComp<any>>>
-    return new TComp(castedArgs)
+    return instantiateTComp(castedArgs)
   },
-  get(_, is: keyof typeof THREE) {
+  get(_, is: keyof typeof THREE, ...args) {
     return proxyTConstructor(is)
   }
 }) as unknown as typeof TComp & {
