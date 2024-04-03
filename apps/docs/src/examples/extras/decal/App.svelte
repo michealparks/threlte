@@ -1,6 +1,6 @@
 <script lang="ts">
   import { Canvas } from '@threlte/core'
-  import { Pane, List, Checkbox, Point, Slider } from 'svelte-tweakpane-ui'
+  import { Pane, Checkbox, Slider } from 'svelte-tweakpane-ui'
   import Scene from './Scene.svelte'
 
   let debug = false

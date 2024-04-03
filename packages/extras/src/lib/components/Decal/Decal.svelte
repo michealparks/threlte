@@ -1,7 +1,7 @@
 <script lang="ts">
   import { T, useParent } from '@threlte/core'
   import { Mesh, Vector3, Euler, Matrix4, Object3D, Texture } from 'three'
-  import { DecalGeometry } from 'three/examples/jsm/Addons.js'
+  import { DecalGeometry } from 'three/addons/geometries/DecalGeometry.js'
 
   type DecalProps = {
     debug?: boolean

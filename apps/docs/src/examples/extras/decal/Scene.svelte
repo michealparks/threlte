@@ -37,8 +37,9 @@
 
 {#if $texture}
   <T.Mesh on:click={(event) => addDecal(event)}>
-    <T.TorusKnotGeometry args={[0.5, 0.15, 128, 128]} />
+    <T.SphereGeometry />
     <T.MeshToonMaterial color="turquoise" />
+
     {#each decals as { position }}
       <Decal
         {debug}
