@@ -1,9 +1,28 @@
 import { SvelteComponent } from 'svelte'
 import type { Props } from '@threlte/core'
-import type { GroundProjectedEnv } from 'three/examples/jsm/objects/GroundProjectedEnv.js'
-import { ColorSpace } from 'three'
+import type { GroundedSkybox } from 'three/examples/jsm/objects/GroundedSkybox.js'
+import { ColorSpace, Texture } from 'three'
 
-export type EnvironmentProps = {
+export interface EnvProps {
+  children?: unknown
+  frames?: number
+  near?: number
+  far?: number
+  resolution?: number
+
+  /**
+   * Boolean to toggle whether to use envmap as a scene background.
+   */
+  isBackground?: boolean | 'only'
+
+  /** deprecated, use backgroundBlurriness */
+  // blur?: number
+  backgroundBlurriness?: number
+  backgroundIntensity?: number
+  backgroundRotation?: [x: number, y: number, z: number]
+  environmentIntensity?: number
+  environmentRotation?: [x: number, y: number, z: number]
+
   /**
    * Defaults to "/"
    */
@@ -12,14 +31,11 @@ export type EnvironmentProps = {
    * Provide a string to use an equirectangular envmap and a string array to use a cubic envmap
    */
   files: string | string[]
-  /**
-   * Boolean to toggle whether to use envmap as a scene background.
-   */
-  isBackground?: boolean
+  map?: Texture
   /**
    * Props for ground projection. Scalar recommended to 100. Depending on envmap and project requirements, good starting point is radius: 200, height: 5.
    */
-  groundProjection?: Props<GroundProjectedEnv>
+  groundProjection?: Props<GroundedSkybox>
   /**
    * Use `ldr` for .png, .jpg and `hdr` for .hdr file formats
    */
@@ -30,4 +46,4 @@ export type EnvironmentProps = {
   colorSpace?: ColorSpace
 }
 
-export default class Environment extends SvelteComponent<EnvironmentProps> {}
+export default class Environment extends SvelteComponent<EnvProps> {}

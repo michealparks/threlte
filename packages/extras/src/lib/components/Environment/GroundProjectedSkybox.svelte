@@ -3,7 +3,11 @@
   import type { Texture } from 'three'
   import { revision } from '../../lib/revision'
 
-  export let envMap: Texture
+  interface Props {
+    map: Texture | undefined
+  }
+
+  let { map, ...props }: Props = $props()
 
   const url =
     revision > 160
@@ -13,12 +17,12 @@
   const module = import(/* @vite-ignore */ url)
 </script>
 
-{#if envMap}
+{#if map}
   {#await module then result}
     <T
       is={revision > 160 ? result.GroundedSkybox : result.GroundProjectedSkybox}
-      args={[envMap]}
-      {...$$restProps}
+      args={[map]}
+      {...props}
     />
   {/await}
 {/if}
