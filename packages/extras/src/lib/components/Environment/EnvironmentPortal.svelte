@@ -10,7 +10,7 @@
     near = 1,
     far = 1000,
     resolution = 256,
-    frames = 1,
+    frames = 2,
     isBackground = false,
     backgroundBlurriness,
     backgroundIntensity,
@@ -19,6 +19,7 @@
     environmentRotation,
     files,
     map,
+    children,
     ...props
   }: EnvProps = $props()
 
@@ -43,25 +44,32 @@
     })
   })
 
-  let count = $state(1)
+  let count = $state(0)
 
-  const { start, stop } = useTask(
+  const { start } = useTask(
     () => {
       camera.update(renderer, virtualScene)
     },
     { autoStart: false }
   )
 
+  const { start: startCount, stop: stopCount } = useTask(() => {
+    camera.update(renderer, virtualScene)
+    count += 1
+  }, { autoStart: false, autoInvalidate: false })
+
   $effect.pre(() => {
+    console.log(count, frames)
     if (frames === Number.POSITIVE_INFINITY) {
       start()
     } else if (count < frames) {
-      start()
-      count += 1
+      startCount()
     } else {
-      stop()
+      stopCount()
     }
   })
+
+  console.log(children)
 </script>
 
 <SceneGraphObject object={virtualScene}>
@@ -79,5 +87,6 @@
       {files}
     />
   {/if}
-  <slot />
+
+  {@render children()}
 </SceneGraphObject>

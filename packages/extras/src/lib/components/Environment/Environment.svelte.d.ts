@@ -35,7 +35,7 @@ export interface EnvProps {
   /**
    * Props for ground projection. Scalar recommended to 100. Depending on envmap and project requirements, good starting point is radius: 200, height: 5.
    */
-  groundProjection?: Props<GroundedSkybox>
+  groundProjection?: Props<GroundedSkybox> | undefined
   /**
    * Use `ldr` for .png, .jpg and `hdr` for .hdr file formats
    */
