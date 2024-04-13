@@ -14,9 +14,6 @@ export interface EnvProps {
    * Boolean to toggle whether to use envmap as a scene background.
    */
   isBackground?: boolean | 'only'
-
-  /** deprecated, use backgroundBlurriness */
-  // blur?: number
   backgroundBlurriness?: number
   backgroundIntensity?: number
   backgroundRotation?: [x: number, y: number, z: number]
@@ -30,7 +27,7 @@ export interface EnvProps {
   /**
    * Provide a string to use an equirectangular envmap and a string array to use a cubic envmap
    */
-  files: string | string[]
+  files?: string | string[]
   map?: Texture
   /**
    * Props for ground projection. Scalar recommended to 100. Depending on envmap and project requirements, good starting point is radius: 200, height: 5.

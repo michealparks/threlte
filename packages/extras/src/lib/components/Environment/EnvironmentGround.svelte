@@ -1,8 +1,8 @@
 <script lang="ts">
   import type { Scene } from 'three'
-  import type { EnvProps } from './Environment.svelte'
+  import type { EnvProps } from './Environment'
   import EnvironmentMap from './EnvironmentMap.svelte'
-  import GroundProjectedSkybox from './GroundProjectedSkybox.svelte'
+  import GroundedSkybox from './GroundedSkybox.svelte'
   import { useEnvironment } from './useEnvironment'
 
   let { groundProjection, scene, ...props }: EnvProps & { scene: Scene } = $props()
@@ -17,7 +17,7 @@
   {scene}
   {...props}
 />
-<GroundProjectedSkybox
+<GroundedSkybox
   map={$texture}
   {...props}
   {...groundProjection}

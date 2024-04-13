@@ -2,7 +2,7 @@
   import { setEnvProps } from './utils'
   import { SceneGraphObject, useTask, useThrelte } from '@threlte/core'
   import { Scene, CubeCamera, WebGLCubeRenderTarget, HalfFloatType } from 'three'
-  import type { EnvProps } from './Environment.svelte'
+  import type { EnvProps } from './Environment'
   import EnvironmentCube from './EnvironmentCube.svelte'
   import EnvironmentMap from './EnvironmentMap.svelte'
 
@@ -47,9 +47,7 @@
   let count = $state(0)
 
   const { start } = useTask(
-    () => {
-      camera.update(renderer, virtualScene)
-    },
+    () => camera.update(renderer, virtualScene),
     { autoStart: false }
   )
 
@@ -59,7 +57,6 @@
   }, { autoStart: false, autoInvalidate: false })
 
   $effect.pre(() => {
-    console.log(count, frames)
     if (frames === Number.POSITIVE_INFINITY) {
       start()
     } else if (count < frames) {

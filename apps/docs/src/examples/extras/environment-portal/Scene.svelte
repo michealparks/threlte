@@ -49,7 +49,7 @@
 
 <Environment
   isBackground
-  resolution={64}
+  resolution={32}
 >
   <T.Mesh
     position={[10, 2, 0]}

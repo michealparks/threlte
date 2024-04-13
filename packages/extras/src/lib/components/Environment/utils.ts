@@ -9,11 +9,11 @@ export function setEnvProps(
 ) {
   const oldEnvironment = scene.environment
   const oldEnvironmentIntensity = scene.environmentIntensity
-  const oldEnvironmentRotation = scene.environmentRotation?.clone?.()
+  const oldEnvironmentRotation = scene.environmentRotation?.clone()
   const oldBackground = scene.background
   const oldBackgroundBlurriness = scene.backgroundBlurriness
   const oldBackgroundIntensity = scene.backgroundIntensity
-  const oldBackgroundRotation = scene.backgroundRotation?.clone?.()
+  const oldBackgroundRotation = scene.backgroundRotation?.clone()
 
   if (isBackground !== 'only') {
     scene.environment = texture

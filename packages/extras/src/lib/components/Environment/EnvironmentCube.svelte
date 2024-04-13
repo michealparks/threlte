@@ -1,5 +1,5 @@
 <script lang="ts">
-  import type { EnvProps } from './Environment.svelte'
+  import type { EnvProps } from './Environment'
   import { setEnvProps } from './utils'
   import type { Scene } from 'three'
   import { useEnvironment } from './useEnvironment'

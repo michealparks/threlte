@@ -4,7 +4,7 @@
   import EnvironmentMap from './EnvironmentMap.svelte'
   import EnvironmentPortal from './EnvironmentPortal.svelte'
   import EnvironmentCube from './EnvironmentCube.svelte'
-  import type { EnvProps } from './Environment.svelte'
+  import type { EnvProps } from './Environment'
 
   let { ...props }: EnvProps = $props()
 

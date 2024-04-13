@@ -96,8 +96,7 @@
 <div>
   <Canvas>
     <Environment
-      {path}
-      {files}
+      files="https://threejs.org/examples/textures/equirectangular/blouberg_sunrise_2_1k.hdr"
       {isBackground}
       groundProjection={useGround ? { radius, height, scale: scaleArray } : undefined}
     />
