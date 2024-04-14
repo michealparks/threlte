@@ -54,9 +54,9 @@ type Extensions = Record<string, unknown>
 const extendT = (extensions: Extensions) => {
   for (const [key, value] of Object.entries(extensions)) {
     if (typeof value === 'function') {
-      T[key] = (...args) => {
+      T[key] = (anchor, props) => {
         setIsContext(value)
-        return TComp(...args) as TComponent
+        return TComp(anchor, props) as TComponent
       }
     }
   }
