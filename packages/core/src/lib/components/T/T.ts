@@ -51,6 +51,8 @@ type Extensions = Record<string, unknown>
  * <T.OrbitControls />
  * ```
  */
+export const extend = (extensions: Extensions) => extendT(extensions)
+
 const extendT = (extensions: Extensions) => {
   for (const [key, value] of Object.entries(extensions)) {
     if (typeof value === 'function') {
@@ -61,7 +63,5 @@ const extendT = (extensions: Extensions) => {
     }
   }
 }
-
-export const extend = (extensions: Extensions) => extendT(extensions)
 
 extendT(THREE)
