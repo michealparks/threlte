@@ -2,30 +2,15 @@ import type { SvelteComponent } from 'svelte'
 import * as THREE from 'three'
 import TComp from './T.svelte'
 import type { Events, Props, Slots } from './types'
-import { setIsContext, type ThreeObject } from './utils/useIsContext'
+import { setIsContext } from './utils/useIsContext'
 
-type Extensions = Record<string, ThreeObject>
-
-const catalogue: Extensions = {}
-
-/**
- * Extends the default THREE namespace and allows using custom Three.js objects with `<T>`.
- *
- * @example
- * ```svelte
- * <script>
- * 	import { extend, T } from 'threlte'
- * 	import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js'
- *
- * 	extend({ OrbitControls })
- * </script>
- *
- * <T.OrbitControls />
- * ```
- */
-export const extend = (extensions: Extensions) => {
-  Object.assign(catalogue, extensions)
-}
+type TComponent = typeof TComp & {
+  [Key in keyof typeof THREE]: typeof SvelteComponent<
+    Props<(typeof THREE)[Key]>,
+    Events<(typeof THREE)[Key]>,
+    Slots<(typeof THREE)[Key]>
+  >
+} & Record<string, typeof SvelteComponent>
 
 /**
  * ## `<T>`
@@ -47,30 +32,36 @@ export const extend = (extensions: Extensions) => {
  * </T.Mesh>
  * ```
  */
-export const T = new Proxy(function () {}, {
-  apply(_target, _thisArg, argArray) {
-    return TComp(...argArray)
-  },
-  get(_target, is: keyof typeof THREE) {
-    // Handle snippets
-    if (typeof is !== 'string') {
-      return TComp
+export const T = TComp as TComponent
+
+type Extensions = Record<string, unknown>
+
+/**
+ * Extends the default THREE namespace and allows using custom Three.js objects with `<T>`.
+ *
+ * @example
+ * ```svelte
+ * <script>
+ * 	import { extend, T } from 'threlte'
+ * 	import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js'
+ *
+ * 	extend({ OrbitControls })
+ * </script>
+ *
+ * <T.OrbitControls />
+ * ```
+ */
+const extendT = (extensions: Extensions) => {
+  for (const [key, value] of Object.entries(extensions)) {
+    if (typeof value === 'function') {
+      T[key] = (...args) => {
+        setIsContext(value)
+        return TComp(...args) as TComponent
+      }
     }
-
-    const module = THREE[is] || catalogue[is]
-
-    if (module === undefined) {
-      throw new Error(`No Three.js module found for ${is}. Did you forget to extend the catalogue?`)
-    }
-
-    setIsContext(module)
-
-    return TComp
   }
-}) as unknown as typeof TComp & {
-  [Key in keyof typeof THREE]: typeof SvelteComponent<
-    Props<(typeof THREE)[Key]>,
-    Events<(typeof THREE)[Key]>,
-    Slots<(typeof THREE)[Key]>
-  >
-} & Record<string, typeof SvelteComponent>
+}
+
+export const extend = (extensions: Extensions) => extendT(extensions)
+
+extendT(THREE)
