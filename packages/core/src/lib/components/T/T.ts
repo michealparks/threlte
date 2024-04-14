@@ -38,12 +38,20 @@ type TType = typeof TComp & {
 
 const createT = (value: ValueOf<typeof THREE>): TType =>
   class T extends TComp<TType> {
-    constructor(args: ComponentConstructorOptions = {}) {
+    constructor(args: ComponentConstructorOptions) {
       args.props ??= {}
       args.props.is = value
       super(args)
     }
   }
+
+const extendT = (extensions: Extensions) => {
+  for (const [key, value] of Object.entries(extensions)) {
+    if (typeof value === 'function') {
+      T[key] = 'render' in TComp ? TComp : createT(value)
+    }
+  }
+}
 
 /**
  * Extends the default THREE namespace and allows using custom Three.js objects with `<T>`.
@@ -60,14 +68,6 @@ const createT = (value: ValueOf<typeof THREE>): TType =>
  * <T.OrbitControls />
  * ```
  */
-const extendT = (extensions: Extensions) => {
-  for (const [key, value] of Object.entries(extensions)) {
-    if (typeof value === 'function') {
-      T[key] = 'render' in TComp ? TComp : createT(value)
-    }
-  }
-}
-
 export const extend = (extensions: Extensions) => extendT(extensions)
 
 extendT(THREE)
