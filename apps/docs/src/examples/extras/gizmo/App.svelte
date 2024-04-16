@@ -1,5 +1,6 @@
 <script lang="ts">
   import { Canvas, T, currentWritable, type CurrentWritable } from '@threlte/core'
+  import { Object3D } from 'three'
   import { Gizmo, OrbitControls } from '@threlte/extras'
   import {
     Checkbox,
@@ -111,6 +112,7 @@
       position={[20, 20, 20]}
       fov={36}
       target={[0, 0, 0]}
+      up={[0, 0, 1]}
     >
       <OrbitControls
         bind:ref={orbitControls}

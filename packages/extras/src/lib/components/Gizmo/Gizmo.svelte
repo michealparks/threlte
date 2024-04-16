@@ -1,10 +1,8 @@
 <script lang="ts">
   import { HierarchicalObject, T, useTask, useThrelte } from '@threlte/core'
-  import { onDestroy, onMount } from 'svelte'
+  import { onMount } from 'svelte'
   import {
-    CanvasTexture,
     CapsuleGeometry,
-    Color,
     Euler,
     Object3D,
     OrthographicCamera,
@@ -15,10 +13,10 @@
     Vector2,
     Vector3,
     Vector4,
-    type ColorRepresentation,
     type Intersection
   } from 'three'
   import type { GizmoEvents, GizmoProps, GizmoSlots } from './Gizmo'
+  import { getSpriteTexture } from './getSpriteTexture'
 
   type $$Props = GizmoProps
   type $$Events = GizmoEvents
@@ -39,7 +37,8 @@
   export let paddingX: Required<$$Props>['paddingX'] = 0
   export let paddingY: Required<$$Props>['paddingY'] = 0
 
-  $: centerVec = new Vector3(...center)
+  const centerVec = new Vector3(center[0], center[1], center[2])
+  $: centerVec.set(center[0], center[1], center[2])
 
   const { autoRenderTask, renderer, camera, invalidate } = useThrelte()
 
@@ -56,10 +55,9 @@
   useTask(
     renderTask?.key ?? Symbol('threlte-extras-gizmo-render'),
     () => {
-      const autoClear = renderer.autoClear
+      const { autoClear, toneMapping } = renderer
       renderer.autoClear = false
       renderer.getViewport(viewport)
-      const toneMapping = renderer.toneMapping
       renderer.toneMapping = toneMapped ? renderer.toneMapping : 0
 
       const x =
@@ -147,22 +145,20 @@
     return delta < threshold
   }
 
+  const dummy = new Object3D()
+
   /**
    * @returns boolean that indicates if the target and the current rotation are equal.
    */
   const handleIntersection = (intersection: Intersection<Object3D>): boolean => {
-    const object = intersection.object
+    const { object } = intersection
     const targetPos = object.userData.targetPosition as [number, number, number]
     const targetEuler = object.userData.targetEuler as [number, number, number]
 
     radius = camera.current.position.distanceTo(centerVec)
-    targetPosition
-      .set(...targetPos)
-      .multiplyScalar(radius)
-      .add(centerVec)
-    targetQuaternion.setFromEuler(new Euler(...targetEuler))
+    targetPosition.fromArray(targetPos).multiplyScalar(radius).add(centerVec)
+    targetQuaternion.setFromEuler(new Euler().fromArray(targetEuler))
 
-    const dummy = new Object3D()
     dummy.position.copy(centerVec)
 
     dummy.lookAt(camera.current.position)
@@ -209,23 +205,37 @@
   onMount(() => {
     renderer.domElement.parentElement?.appendChild(clickTarget)
     clickTarget.addEventListener('click', handleClick)
-  })
 
-  onDestroy(() => {
-    renderer.domElement.parentElement?.removeChild(clickTarget)
-    clickTarget.removeEventListener('click', handleClick)
+    return () => {
+      renderer.domElement.parentElement?.removeChild(clickTarget)
+      clickTarget.removeEventListener('click', handleClick)
+    }
   })
 
   // Used to test which axis (pos or neg) are closer to the camera.
-  const point = new Vector3()
-  let p = [0, 0, 0]
+  let point = new Vector3()
+  const lastPoint = new Vector3()
+
+  // Used to decrease atifacts of intersecting axis stems.
+  let frontMostAxisIndex = 0
+  let usePolygonOffset = false
+
+  const defaultUp = new Vector3()
+  $: defaultUp.copy($camera.up)
 
   useTask(
     animationTask?.key ?? Symbol('threlte-extras-gizmo-animation'),
     (delta) => {
       point.set(0, 0, 1).applyQuaternion(camera.current.quaternion)
-      if (point.x !== p[0] || point.y !== p[1] || point.z !== p[2]) {
-        p = [point.x, point.y, point.z]
+      if (point.x !== lastPoint.x || point.y !== lastPoint.y || point.z !== lastPoint.z) {
+        // Trigger reactivity in the template
+        point = point
+        lastPoint.copy(point)
+
+        const max = Math.max(point.x, point.y, point.z)
+        frontMostAxisIndex = max === point.x ? 0 : max === point.y ? 1 : 2
+        usePolygonOffset = point.x < 0 || point.y < 0 || point.z < 0
+
         root.quaternion.copy(camera.current.quaternion).invert()
         invalidate()
       }
@@ -270,50 +280,8 @@
 
   $: textureSize = findClosestPow2LargerThan(size * 0.3 * renderer.getPixelRatio())
 
-  /**
-   * Keep track of the textures to be able to dispose them when they are no
-   * longer needed.
-   */
-  const textures: Record<string, CanvasTexture> = {}
-
-  const color = new Color()
-  const getSpriteTexture = (size: number, colorRepresentation: ColorRepresentation, text = '') => {
-    color.set(colorRepresentation)
-    const key = `${color.getHexString()}-${text}`
-    if (textures[key]) {
-      textures[key].dispose()
-    }
-    const canvas = document.createElement('canvas')
-    canvas.width = size
-    canvas.height = size
-
-    const context = canvas.getContext('2d')!
-    context.beginPath()
-    context.arc(size / 2, size / 2, size / 4, 0, 2 * Math.PI)
-    context.closePath()
-    context.fillStyle = color.convertSRGBToLinear().getStyle()
-    context.fill()
-
-    if (text) {
-      const textSize = Math.abs(size * (24 / 64))
-      context.font = `${textSize}px Arial`
-      context.textAlign = 'center'
-      context.fillStyle = '#000000'
-      const textY = size * (41 / 64)
-      context.fillText(text, size / 2, textY)
-    }
-
-    const texture = new CanvasTexture(canvas)
-    textures[key] = texture
-    return texture
-  }
-
   const stemGeometry = new CapsuleGeometry(0.025, 0.78)
   stemGeometry.rotateZ(Math.PI / 2)
-
-  // Used to decrease atifacts of intersecting axis stems.
-  $: frontMostAxisIndex = p.indexOf(Math.max(...p))
-  $: usePolygonOffset = p.some((v) => v < 0)
 </script>
 
 <HierarchicalObject>
@@ -326,11 +294,11 @@
       bind:ref={posX}
       position.x={1}
       userData.targetPosition={[1, 0, 0]}
-      userData.targetEuler={[0, Math.PI * 0.5, 0]}
+      userData.targetEuler={[0, Math.PI / 2, 0]}
     >
       <T.SpriteMaterial
         map={getSpriteTexture(textureSize, xColor, 'X')}
-        opacity={p[0] >= 0 ? 1 : 0.5}
+        opacity={point.x >= 0 ? 1 : 0.5}
       />
     </T.Sprite>
 
@@ -341,9 +309,9 @@
       <T is={stemGeometry} />
       <T.MeshBasicMaterial
         transparent
-        opacity={p[0] >= 0 ? 1 : 0.5}
+        opacity={point.x >= 0 ? 1 : 0.5}
         color={xColor}
-        polygonOffset={usePolygonOffset && frontMostAxisIndex === 0 && p[0] < 0.75}
+        polygonOffset={usePolygonOffset && frontMostAxisIndex === 0 && point.x < 0.75}
         {polygonOffsetFactor}
       />
     </T.Mesh>
@@ -358,7 +326,7 @@
     >
       <T.SpriteMaterial
         map={getSpriteTexture(textureSize, xColor)}
-        opacity={p[0] >= 0 ? 0.5 : 1}
+        opacity={point.x >= 0 ? 0.5 : 1}
       />
     </T.Sprite>
 
@@ -372,7 +340,7 @@
     >
       <T.SpriteMaterial
         map={getSpriteTexture(textureSize, yColor, 'Y')}
-        opacity={p[1] >= 0 ? 1 : 0.5}
+        opacity={point.y >= 0 ? 1 : 0.5}
       />
     </T.Sprite>
 
@@ -384,9 +352,9 @@
       <T is={stemGeometry} />
       <T.MeshBasicMaterial
         transparent
-        opacity={p[1] >= 0 ? 1 : 0.5}
+        opacity={point.y >= 0 ? 1 : 0.5}
         color={yColor}
-        polygonOffset={usePolygonOffset && frontMostAxisIndex === 1 && p[1] < 0.75}
+        polygonOffset={usePolygonOffset && frontMostAxisIndex === 1 && point.y < 0.75}
         {polygonOffsetFactor}
       />
     </T.Mesh>
@@ -401,7 +369,7 @@
     >
       <T.SpriteMaterial
         map={getSpriteTexture(textureSize, yColor)}
-        opacity={p[1] >= 0 ? 0.5 : 1}
+        opacity={point.y >= 0 ? 0.5 : 1}
       />
     </T.Sprite>
 
@@ -415,7 +383,7 @@
     >
       <T.SpriteMaterial
         map={getSpriteTexture(textureSize, zColor, 'Z')}
-        opacity={p[2] >= 0 ? 1 : 0.5}
+        opacity={point.z >= 0 ? 1 : 0.5}
       />
     </T.Sprite>
 
@@ -427,9 +395,9 @@
       <T is={stemGeometry} />
       <T.MeshBasicMaterial
         transparent
-        opacity={p[2] >= 0 ? 1 : 0.5}
+        opacity={point.z >= 0 ? 1 : 0.5}
         color={zColor}
-        polygonOffset={usePolygonOffset && frontMostAxisIndex === 2 && p[2] < 0.75}
+        polygonOffset={usePolygonOffset && frontMostAxisIndex === 2 && point.z < 0.75}
         {polygonOffsetFactor}
       />
     </T.Mesh>
@@ -444,7 +412,7 @@
     >
       <T.SpriteMaterial
         map={getSpriteTexture(textureSize, zColor)}
-        opacity={p[2] >= 0 ? 0.5 : 1}
+        opacity={point.z >= 0 ? 0.5 : 1}
       />
     </T.Sprite>
   </T>
