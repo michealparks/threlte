@@ -1,41 +1,32 @@
 <script lang="ts">
-  import { getContext, onDestroy, setContext } from 'svelte'
-  import { writable, type Writable } from 'svelte/store'
+  import { getContext, setContext } from 'svelte'
   import { useThrelteInternal } from '../hooks/useThrelteInternal'
-  import type { DisposableObjectProperties } from './DisposableObject.svelte'
+  import type { DisposableThreeObject } from '../types'
 
-  type ThrelteDisposeContext = Writable<boolean>
+  interface Props {
+    object?: DisposableThreeObject
+    dispose?: boolean
+  }
 
-  let { object, dispose }: DisposableObjectProperties = $props()
+  let { object, dispose }: Props = $props()
 
   const { collectDisposableObjects, addDisposableObjects, removeDisposableObjects } =
     useThrelteInternal()
 
-  let previousObject = object
+  const key = Symbol('threlte-disposable-object-context')
+  const parent = getContext<{ dispose: boolean } | undefined>(key)
 
-  const contextName = 'threlte-disposable-object-context'
-  const parentDispose = getContext<ThrelteDisposeContext | undefined>(contextName)
+  let mergedDispose = $derived(dispose ?? parent?.dispose ?? true)
+  let disposables = $derived(mergedDispose ? collectDisposableObjects(object) : [])
 
-  const mergedDispose = writable(dispose ?? $parentDispose ?? true)
-  $effect.pre(() => mergedDispose.set(dispose ?? $parentDispose ?? true))
-
-  setContext<ThrelteDisposeContext>(contextName, mergedDispose)
-
-  let disposables = $mergedDispose ? collectDisposableObjects(object) : []
-  addDisposableObjects(disposables)
-
-  $effect.pre(() => {
-    if (object !== previousObject) {
-      removeDisposableObjects(disposables)
-      disposables = $mergedDispose ? collectDisposableObjects(object) : []
-      addDisposableObjects(disposables)
-      previousObject = object
+  setContext(key, {
+    get dispose() {
+      return mergedDispose
     }
   })
 
-  onDestroy(() => {
-    removeDisposableObjects(disposables)
+  $effect.pre(() => {
+    addDisposableObjects(disposables)
+    return () => removeDisposableObjects(disposables)
   })
 </script>
-
-<slot />

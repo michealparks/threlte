@@ -1,12 +1,11 @@
 <script lang="ts">
-  import { untrack } from 'svelte'
   import { useIsContext } from './utils/useIsContext'
   import DisposableObject from '../../internal/DisposableObject.svelte'
   import SceneGraphObject from '../../internal/SceneGraphObject.svelte'
   import { createParentContext, useParent } from '../../hooks/useParent'
   import { determineRef, isDisposableObject, extendsObject3D } from './utils/utils'
   import { useAttach } from './utils/useAttach'
-  import { isCamera, useCamera } from './utils/useCamera'
+  import { isCamera } from './utils/useCamera'
   import { useCreateEvent } from './utils/useCreateEvent'
   import { useEvents } from './utils/useEvents'
   import { usePlugins } from './utils/usePlugins'
@@ -79,6 +78,7 @@
   const { updateProp } = useProps()
   Object.keys(props).forEach((key) => {
     $effect.pre(() => {
+      console.log('prop-update', props[key])
       updateProp(internalRef, key, props[key], {
         manualCamera: manual,
         pluginsProps
@@ -128,9 +128,9 @@
 {#if extendsObject3D(internalRef)}
   <SceneGraphObject object={internalRef}>
     {#if children}
-      <slot ref={internalRef} />
+      {@render children({ ref: internalRef })}
     {/if}
   </SceneGraphObject>
 {:else if children}
-  <slot ref={internalRef} />
+  {@render children({ ref: internalRef })}
 {/if}
