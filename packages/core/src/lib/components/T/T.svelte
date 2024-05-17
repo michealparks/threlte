@@ -78,7 +78,6 @@
   const { updateProp } = useProps()
   Object.keys(props).forEach((key) => {
     $effect.pre(() => {
-      console.log('prop-update', props[key])
       updateProp(internalRef, key, props[key], {
         manualCamera: manual,
         pluginsProps
@@ -127,10 +126,8 @@
 
 {#if extendsObject3D(internalRef)}
   <SceneGraphObject object={internalRef}>
-    {#if children}
-      {@render children({ ref: internalRef })}
-    {/if}
+    <slot ref={internalRef} />
   </SceneGraphObject>
-{:else if children}
-  {@render children({ ref: internalRef })}
+{:else}
+  <slot ref={internalRef} />
 {/if}

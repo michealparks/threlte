@@ -1,3 +1,10 @@
+<script
+  context="module"
+  lang="ts"
+>
+  const contextKey = Symbol('threlte-disposable-object')
+</script>
+
 <script lang="ts">
   import { getContext, setContext } from 'svelte'
   import { useThrelteInternal } from '../hooks/useThrelteInternal'
@@ -13,20 +20,21 @@
   const { collectDisposableObjects, addDisposableObjects, removeDisposableObjects } =
     useThrelteInternal()
 
-  const key = Symbol('threlte-disposable-object-context')
-  const parent = getContext<{ dispose: boolean } | undefined>(key)
+  const parent = getContext<{ dispose: boolean } | undefined>(contextKey)
+
+  console.log(parent)
 
   let mergedDispose = $derived(dispose ?? parent?.dispose ?? true)
   let disposables = $derived(mergedDispose ? collectDisposableObjects(object) : [])
 
-  setContext(key, {
-    get dispose() {
-      return mergedDispose
-    }
-  })
-
   $effect.pre(() => {
     addDisposableObjects(disposables)
     return () => removeDisposableObjects(disposables)
+  })
+
+  setContext(contextKey, {
+    get dispose() {
+      return mergedDispose
+    }
   })
 </script>

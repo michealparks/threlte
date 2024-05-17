@@ -1,8 +1,12 @@
 <script lang="ts">
   import HierarchicalObject from './HierarchicalObject.svelte'
-  import type { SceneGraphObjectProperties } from './SceneGraphObject.svelte'
+  import type { Object3D } from 'three'
 
-  let { object }: SceneGraphObjectProperties = $props()
+  interface Props {
+    object: Object3D
+  }
+
+  let { object }: Props = $props()
 </script>
 
 <HierarchicalObject

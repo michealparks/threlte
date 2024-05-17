@@ -30,30 +30,25 @@
 </script>
 
 <script lang="ts">
-  let {
-    object,
-    onChildMount,
-    onChildDestroy,
-    parent = $bindable()
-  }: HierarchicalObjectProperties & { parent: Object3D | undefined } = $props()
+  export let object: HierarchicalObjectProperties['object'] = undefined
 
+  export let onChildMount: HierarchicalObjectProperties['onChildMount'] = undefined
   const onChildMountProxy: HierarchicalObjectProperties['onChildMount'] = (child) => {
     // maybe call provided method
     onChildMount?.(child)
   }
 
+  export let onChildDestroy: HierarchicalObjectProperties['onChildDestroy'] = undefined
   const onChildDestroyProxy: HierarchicalObjectProperties['onChildDestroy'] = (child) => {
     // maybe call provided method
     onChildDestroy?.(child)
   }
 
   const { invalidate } = useThrelte()
-  const parentStore = useParent()
 
-  parent = $parentStore
-  $effect.pre(() => {
-    parent = $parentStore
-  })
+  const parentStore = useParent()
+  export let parent: Object3D | undefined = $parentStore
+  $: parent = $parentStore
 
   /**
    * Get the parent methods …
@@ -63,7 +58,6 @@
     parentCallbacks.onChildMount?.(object)
     invalidate()
   }
-
   const objectStore = createObjectStore(object, (newObject, oldObject) => {
     if (oldObject) {
       parentCallbacks.onChildDestroy?.(oldObject)
@@ -74,8 +68,7 @@
       invalidate()
     }
   })
-  $effect.pre(() => objectStore.set(object))
-
+  $: objectStore.set(object)
   onDestroy(() => {
     if (object) {
       parentCallbacks.onChildDestroy?.(object)
