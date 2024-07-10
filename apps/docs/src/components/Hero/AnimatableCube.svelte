@@ -13,7 +13,10 @@
       {#snippet children({ transform })}
         <Transform {...transform}>
           <T.Mesh frustumCulled={false}>
-            <T is={$cubeGeometry} dispose={false} />
+            <T
+              is={$cubeGeometry}
+              dispose={false}
+            />
             <T.MeshStandardMaterial
               transparent
               roughness={0.418}
@@ -21,7 +24,13 @@
               color="#ff1f00"
               emissive="#000105"
             >
-              <Sync color opacity emissive roughness metalness />
+              <Sync
+                color
+                opacity
+                emissive
+                roughness
+                metalness
+              />
             </T.MeshStandardMaterial>
           </T.Mesh>
         </Transform>

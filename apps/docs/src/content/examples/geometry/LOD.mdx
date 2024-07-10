@@ -22,7 +22,10 @@ This is an adaption of Three.js [own documentation](https://threejs.org/docs/#ap
         }}
       >
         <T.IcosahedronGeometry args={[10, 3 - i]} />
-        <T.MeshStandardMaterial {color} wireframe />
+        <T.MeshStandardMaterial
+          {color}
+          wireframe
+        />
       </T.Mesh>
     {/each}
   {/snippet}

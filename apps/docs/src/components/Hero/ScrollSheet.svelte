@@ -27,6 +27,9 @@
   }
 </script>
 
-<Sheet bind:sheet {name}>
+<Sheet
+  bind:sheet
+  {name}
+>
   <slot />
 </Sheet>

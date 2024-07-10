@@ -26,7 +26,11 @@
   })
 </script>
 
-<details bind:open {id} class="block {_class}">
+<details
+  bind:open
+  {id}
+  class="block {_class}"
+>
   <summary class="cursor-pointer select-none list-none font-bold">
     <div class="mb-0 flex flex-row items-center">
       <slot name="summary" />

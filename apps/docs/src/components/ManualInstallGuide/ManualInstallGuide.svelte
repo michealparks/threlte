@@ -58,7 +58,11 @@
 <div
   class="grid grid-cols-1 items-start justify-start gap-x-4 gap-y-2 max-md:justify-items-start md:grid-cols-[auto_auto] md:gap-y-2 md:[&>button]:my-1"
 >
-  <InstallButton disabled active class="cursor-not-allowed">@threlte/core</InstallButton>
+  <InstallButton
+    disabled
+    active
+    class="cursor-not-allowed">@threlte/core</InstallButton
+  >
 
   <p class="my-0 self-center text-sm md:text-base">
     Compose Three.js scenes in a declarative and state-driven way. Three.js is required as a peer
@@ -76,7 +80,10 @@
   >
 
   <p class="my-0 self-center text-sm md:text-base">
-    <a href="/docs/reference/extras/getting-started" target="_blank">Components, helpers, hooks</a>
+    <a
+      href="/docs/reference/extras/getting-started"
+      target="_blank">Components, helpers, hooks</a
+    >
     and more that extend the core functionality.
   </p>
 
@@ -90,7 +97,10 @@
   >
 
   <p class="my-0 self-center text-sm md:text-base">
-    A <a href="/docs/reference/gltf/getting-started" target="_blank">command-line tool</a>
+    A <a
+      href="/docs/reference/gltf/getting-started"
+      target="_blank">command-line tool</a
+    >
     that turns GLTF assets into declarative and re-usable Threlte components. The generated Threlte components
     make use of the package <code>@threlte/extras</code>.
   </p>
@@ -105,8 +115,10 @@
   >
 
   <p class="my-0 self-center text-sm md:text-base">
-    Components and hooks to use the <a href="https://rapier.rs/" target="_blank" rel="noreferrer"
-      >Rapier physics engine</a
+    Components and hooks to use the <a
+      href="https://rapier.rs/"
+      target="_blank"
+      rel="noreferrer">Rapier physics engine</a
     > in Threlte.
   </p>
 

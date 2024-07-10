@@ -92,6 +92,11 @@
   $: opacity = _out ? clamp(mapLinear(progress, _out.start, _out.end, 1, 0), 0, 1) : 1
 </script>
 
-<div {id} {...$$restProps} use:transform style="opacity: {opacity}">
+<div
+  {id}
+  {...$$restProps}
+  use:transform
+  style="opacity: {opacity}"
+>
   <slot />
 </div>

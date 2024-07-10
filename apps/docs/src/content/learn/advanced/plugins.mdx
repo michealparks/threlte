@@ -261,7 +261,10 @@ By default, Three.js is automatically updating the `matrix` and `matrixWorld` pr
 Now when applying props like `position.x` or `scale` to any `<T>` component, the matrix of the object will update but doesn't just update every frame as Three.js does by default. If an object is transformed without props (like a camera being transformed by `THREE.OrbitControls`) you can apply the flag `matrixAutoUpdate`:
 
 ```svelte
-<T.PerspectiveCamera matrixAutoUpdate makeDefault>
+<T.PerspectiveCamera
+  matrixAutoUpdate
+  makeDefault
+>
   <OrbitControls />
 </T.PerspectiveCamera>
 ```

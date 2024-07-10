@@ -13,18 +13,30 @@
 
 <MobileNav search>
   <svelte:fragment slot="topbar-left">
-    <a class="flex flex-row gap-3" href="/">
+    <a
+      class="flex flex-row gap-3"
+      href="/"
+    >
       <slot name="logo" />
     </a>
   </svelte:fragment>
 
-  <div slot="content" class="flex flex-col gap-4 text-lg">
+  <div
+    slot="content"
+    class="flex flex-col gap-4 text-lg"
+  >
     <ul class="flex flex-col gap-2 overflow-y-auto">
       {#each keys as key}
         <li>
           <!-- The container for "learn" and "reference" categories -->
-          <Details id={key} open={activeSidebarTab === key}>
-            <div class="font-normal" slot="summary">
+          <Details
+            id={key}
+            open={activeSidebarTab === key}
+          >
+            <div
+              class="font-normal"
+              slot="summary"
+            >
               {#if key === 'learn'}
                 Learn
               {:else if key === 'reference'}
@@ -35,7 +47,10 @@
             </div>
             {#each sidebarMenu[key].categories as category}
               <li class="mb-0 ml-4 mt-2 text-sm">
-                <LeftSidebarCategory {category} {activeUrlPathName} />
+                <LeftSidebarCategory
+                  {category}
+                  {activeUrlPathName}
+                />
               </li>
             {/each}
           </Details>

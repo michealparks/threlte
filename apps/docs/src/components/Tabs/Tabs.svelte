@@ -1,4 +1,7 @@
-<script lang="ts" context="module">
+<script
+  lang="ts"
+  context="module"
+>
   export type Tab = {
     title: string
     id: string

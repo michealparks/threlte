@@ -14,7 +14,10 @@
   >
     {#each menu[activeSidebarTab].categories as category}
       <li class="mb-6 text-sm">
-        <LeftSidebarCategory {category} {activeUrlPathName} />
+        <LeftSidebarCategory
+          {category}
+          {activeUrlPathName}
+        />
       </li>
     {/each}
   </ul>

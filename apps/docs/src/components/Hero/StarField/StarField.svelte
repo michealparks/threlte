@@ -114,5 +114,10 @@
 
 <T.Points>
   <T is={geometry} />
-  <T is={material} {size} {color} {opacity} />
+  <T
+    is={material}
+    {size}
+    {color}
+    {opacity}
+  />
 </T.Points>

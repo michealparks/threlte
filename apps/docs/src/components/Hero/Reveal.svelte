@@ -9,7 +9,10 @@
   $: p = clamp(mapLinear(progress, from, to, 0, 1), 0, 1)
 </script>
 
-<div class="reveal" style="--progress: {p};">
+<div
+  class="reveal"
+  style="--progress: {p};"
+>
   <slot />
 </div>
 

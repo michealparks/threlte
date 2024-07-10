@@ -1,7 +1,10 @@
 This example demonstrates [`<InstancedSprites>`](/docs/reference/extras/instanced-sprite), showing
 a few different approaches for instancing and updating large numbers of sprites in your scene.
 
-<Example path="instancing/instanced-sprite-mania" iframe />
+<Example
+  path="instancing/instanced-sprite-mania"
+  iframe
+/>
 
 ## How it works?
 
@@ -47,7 +50,10 @@ For detailed information on defining animations and using frame ranges, refer to
 
 ```svelte title=Flyer.svelte
 {#await flyerSheetbuilder.spritesheet then spritesheet}
-  <InstancedSprite count={20000} {spritesheet}>
+  <InstancedSprite
+    count={20000}
+    {spritesheet}
+  >
     <!-- User component for updating instances -->
     <UpdaterFlying /> /
     <!-- -->
