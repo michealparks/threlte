@@ -8,10 +8,7 @@
       <slot name="logo" />
     </a>
   </svelte:fragment>
-  <div
-    slot="content"
-    class="flex flex-col gap-2 text-lg"
-  >
+  <div slot="content" class="flex flex-col gap-2 text-lg">
     <a href="/docs/learn/getting-started/introduction"> Documentation </a>
 
     <!-- Implement as soon as there are showcase entries -->

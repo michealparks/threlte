@@ -66,16 +66,8 @@ To give each line a different color and with we export these propertys to be set
 </script>
 
 <T.Mesh {...$$restProps}>
-  <MeshLineGeometry
-    {points}
-    shape={'taper'}
-  />
-  <MeshLineMaterial
-    {width}
-    {color}
-    scaleDown={0.1}
-    attenuate={false}
-  />
+  <MeshLineGeometry {points} shape={'taper'} />
+  <MeshLineMaterial {width} {color} scaleDown={0.1} attenuate={false} />
 </T.Mesh>
 ```
 

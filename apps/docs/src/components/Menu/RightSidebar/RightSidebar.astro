@@ -46,12 +46,6 @@ const sourceUrl =
     : undefined
 ---
 
-<RightSidebarInner
-  client:idle
-  {headings}
-  {entry}
-  {editUrl}
-  {sourceUrl}
->
+<RightSidebarInner client:idle {headings} {entry} {editUrl} {sourceUrl}>
   <slot />
 </RightSidebarInner>

@@ -25,18 +25,10 @@
 </script>
 
 {#if showDirectoryName}
-  <button
-    class:expanded
-    on:click={toggle}
-    class="flex flex-row items-center gap-1 font-bold"
-  >
+  <button class:expanded on:click={toggle} class="flex flex-row items-center gap-1 font-bold">
     <div class="[&>*]:w-[1em]">
       {#if expanded}
-        <svg
-          viewBox="0 0 33 33"
-          fill="none"
-          xmlns="http://www.w3.org/2000/svg"
-        >
+        <svg viewBox="0 0 33 33" fill="none" xmlns="http://www.w3.org/2000/svg">
           <path
             d="M4.59998 26.4V8.39999C4.59998 8.13478 4.70534 7.88042 4.89288 7.69289C5.08041 7.50535 5.33477 7.39999 5.59998 7.39999H12.2625C12.4787 7.40088 12.689 7.47097 12.8625 7.59999L16.3375 10.2C16.511 10.329 16.7213 10.3991 16.9375 10.4H25.6C25.8652 10.4 26.1196 10.5054 26.3071 10.6929C26.4946 10.8804 26.6 11.1348 26.6 11.4V14.4"
             stroke="white"
@@ -53,11 +45,7 @@
           />
         </svg>
       {:else}
-        <svg
-          viewBox="0 0 32 32"
-          fill="none"
-          xmlns="http://www.w3.org/2000/svg"
-        >
+        <svg viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
           <path
             d="M27.1125 26H4.92498C4.80351 26 4.68323 25.9761 4.571 25.9296C4.45878 25.8831 4.3568 25.815 4.27091 25.7291C4.18502 25.6432 4.11688 25.5412 4.0704 25.429C4.02391 25.3168 3.99998 25.1965 3.99998 25.075V10H27C27.2652 10 27.5196 10.1054 27.7071 10.2929C27.8946 10.4804 28 10.7348 28 11V25.1125C28 25.3479 27.9065 25.5736 27.74 25.7401C27.5736 25.9065 27.3479 26 27.1125 26Z"
             stroke="white"
@@ -105,15 +93,9 @@
   {#each sortedFiles as file}
     <li class={c('my-1 list-outside pl-0')}>
       {#if file.type === 'directory'}
-        <svelte:self
-          directory={file}
-          {currentlySelectedFile}
-        />
+        <svelte:self directory={file} {currentlySelectedFile} />
       {:else}
-        <FileComponent
-          {file}
-          {currentlySelectedFile}
-        />
+        <FileComponent {file} {currentlySelectedFile} />
       {/if}
     </li>
   {/each}

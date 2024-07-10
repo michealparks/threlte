@@ -16,10 +16,7 @@
   }
 </script>
 
-<Details
-  {open}
-  id="sidebar-category-{category.title}"
->
+<Details {open} id="sidebar-category-{category.title}">
   <svelte:fragment slot="summary">
     {category.title}
   </svelte:fragment>

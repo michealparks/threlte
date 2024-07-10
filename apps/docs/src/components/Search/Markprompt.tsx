@@ -41,10 +41,7 @@ function Search({ visible }: { visible: boolean }) {
   return (
     visible && (
       <>
-        <div
-          className="h-[75vh]"
-          ref={container}
-        >
+        <div className="h-[75vh]" ref={container}>
           <Markprompt
             projectKey="q5trazVG0x8ktiY63vB3imwnZJ9bHbyN"
             close={{

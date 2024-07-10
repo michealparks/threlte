@@ -21,10 +21,7 @@
   const extras = `${paddings[size]} ${textSizes[size]} bg-${color} hover:bg-${color}-400 ${_class}`
 </script>
 
-<a
-  {href}
-  class={`flex w-fit flex-row gap-3 rounded-md text-center text-white ${extras}`}
->
+<a {href} class={`flex w-fit flex-row gap-3 rounded-md text-center text-white ${extras}`}>
   <div class="empty:hidden"><slot name="icon-before" /></div>
   <slot />
   <div class="empty:hidden"><slot name="icon-after" /></div>

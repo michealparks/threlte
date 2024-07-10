@@ -50,17 +50,10 @@
   }
 </script>
 
-<svelte:window
-  on:scroll={onScroll}
-  on:keydown={onKeyDown}
-  on:mousemove={onMouseMove}
-/>
+<svelte:window on:scroll={onScroll} on:keydown={onKeyDown} on:mousemove={onMouseMove} />
 
 <div class="pointer-events-none relative z-20 h-[500vh]">
-  <Theatre
-    config={{ state }}
-    studio={{ enabled: false }}
-  >
+  <Theatre config={{ state }} studio={{ enabled: false }}>
     <div class="fixed left-0 top-0 z-10 h-[100lvh] w-screen">
       <Canvas
         toneMapping={NoToneMapping}
@@ -86,10 +79,7 @@
       </Sheet>
     </div>
 
-    <Trigger
-      in={0.5}
-      out={2.7}
-    >
+    <Trigger in={0.5} out={2.7}>
       <svelte:fragment>
         {@const start = 0.6}
         {@const stagger = 0.4}
@@ -101,16 +91,8 @@
         >
           <div class="grid max-w-[1200px] grid-cols-3 gap-12">
             <div class="col-span-1">
-              <Reveal
-                progress={$springScrollPos}
-                from={start}
-                to={start + duration}
-              >
-                <FadeOut
-                  progress={$springScrollPos}
-                  from={outStart}
-                  to={outEnd}
-                >
+              <Reveal progress={$springScrollPos} from={start} to={start + duration}>
+                <FadeOut progress={$springScrollPos} from={outStart} to={outEnd}>
                   <h3 class="mb-2 text-2xl font-bold text-white/90">You already know Threlte</h3>
                   <p class="text-sm text-white/60">
                     Threlte puts the simplicity of Svelte 5 and all of the power of Three.js right
@@ -127,11 +109,7 @@
                 from={start + stagger}
                 to={start + stagger + duration}
               >
-                <FadeOut
-                  progress={$springScrollPos}
-                  from={outStart}
-                  to={outEnd}
-                >
+                <FadeOut progress={$springScrollPos} from={outStart} to={outEnd}>
                   <h3 class="mb-2 text-2xl font-bold text-white/90">Reimagine the Web</h3>
                   <p class="text-sm text-white/60">
                     With AR and VR picking up steam, the web is becoming more and more 3D. Threlte
@@ -147,11 +125,7 @@
                 from={start + stagger * 2}
                 to={start + stagger * 2 + duration}
               >
-                <FadeOut
-                  progress={$springScrollPos}
-                  from={outStart}
-                  to={outEnd}
-                >
+                <FadeOut progress={$springScrollPos} from={outStart} to={outEnd}>
                   <h3 class="mb-2 text-2xl font-bold text-white/90">Powerful Integrations</h3>
                   <p class="text-sm text-white/60">
                     Threlte comes with solutions for physics, XR, animation, model loading, and
@@ -165,10 +139,7 @@
       </svelte:fragment>
     </Trigger>
 
-    <Trigger
-      in={2.7}
-      out={3.9}
-    >
+    <Trigger in={2.7} out={3.9}>
       <h2
         class="fixed left-0 top-[66svh] top-[66vh] flex w-screen flex-col items-center justify-center"
       >

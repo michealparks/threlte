@@ -11,11 +11,7 @@
 
 <Sequence autoplay />
 
-<FadeOut
-  progress={$springScrollPos}
-  from={0.3}
-  to={0.6}
->
+<FadeOut progress={$springScrollPos} from={0.3} to={0.6}>
   <div
     class="fixed left-0 top-0 mt-[18vh] flex w-screen flex-col items-center justify-center gap-12 px-8 sm:mt-[25vh] md:mt-[30vh]"
     style="transform: translateY({$springScrollPos * -50}px)"
@@ -55,20 +51,13 @@
           <span class="mr-2 select-none font-bold text-orange">{'>'}</span>npm create threlte
         </code>
 
-        <Button
-          href="/docs/learn/getting-started/introduction"
-          color="orange"
-        >
+        <Button href="/docs/learn/getting-started/introduction" color="orange">
           Start Building →
         </Button>
       </div>
     </TheatreTextBox>
 
-    <FadeOut
-      progress={$springScrollPos}
-      from={0}
-      to={0.2}
-    >
+    <FadeOut progress={$springScrollPos} from={0} to={0.2}>
       <div
         class="will-change-auto"
         use:sheetObject={{

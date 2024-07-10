@@ -40,11 +40,7 @@
 <PostProcessing />
 
 <T.Group position.x={-$mouseCoordsSpring.x * 0.6}>
-  <ScrollSheet
-    name="Star Fields"
-    startAtScrollPosition={4}
-    endAtScrollPosition={5}
-  >
+  <ScrollSheet name="Star Fields" startAtScrollPosition={4} endAtScrollPosition={5}>
     <AnimatableStarField key="Star Field" />
     <AnimatableStarField key="Star Field Top" />
   </ScrollSheet>
@@ -62,20 +58,13 @@
   {/if}
 </T.PerspectiveCamera>
 
-<ScrollSheet
-  name="Scene"
-  startAtScrollPosition={0}
-  endAtScrollPosition={3}
->
+<ScrollSheet name="Scene" startAtScrollPosition={0} endAtScrollPosition={3}>
   <SheetObject key="Camera">
     {#snippet children({ Transform })}
       <KeyboardControls>
         {#snippet children({ transform })}
           <Transform {...transform}>
-            <T.PerspectiveCamera
-              {fov}
-              makeDefault={!$debug}
-            >
+            <T.PerspectiveCamera {fov} makeDefault={!$debug}>
               {#snippet children({ ref: camera })}
                 {#if $debug}
                   <Portal object={scene}>
@@ -104,15 +93,8 @@
   <SheetObject key="composite">
     {#snippet children({ Transform })}
       <Transform>
-        <T.Group
-          position.x={-$mouseCoordsSpring.x * 0.2}
-          position.y={$mouseCoordsSpring.y * 0.1}
-        >
-          <ScrollSheet
-            name="Threlte-Composite"
-            startAtScrollPosition={0}
-            endAtScrollPosition={3}
-          >
+        <T.Group position.x={-$mouseCoordsSpring.x * 0.2} position.y={$mouseCoordsSpring.y * 0.1}>
+          <ScrollSheet name="Threlte-Composite" startAtScrollPosition={0} endAtScrollPosition={3}>
             <SheetObject key="Glow">
               {#snippet children({ Transform, Sync })}
                 <KeyboardControls>
@@ -121,32 +103,17 @@
                       {#await useTexture('/glow.png') then map}
                         <T.Mesh>
                           <T.PlaneGeometry args={[10, 10]} />
-                          <T.MeshBasicMaterial
-                            transparent
-                            {map}
-                          >
-                            <Sync
-                              opacity
-                              color
-                            />
+                          <T.MeshBasicMaterial transparent {map}>
+                            <Sync opacity color />
                           </T.MeshBasicMaterial>
                         </T.Mesh>
                       {/await}
 
                       {#await useTexture('/glow2.png') then map}
-                        <T.Mesh
-                          position.z={0.1}
-                          scale={0.8}
-                        >
+                        <T.Mesh position.z={0.1} scale={0.8}>
                           <T.PlaneGeometry args={[10, 10]} />
-                          <T.MeshBasicMaterial
-                            transparent
-                            {map}
-                          >
-                            <Sync
-                              opacity="opacity2"
-                              color="color2"
-                            />
+                          <T.MeshBasicMaterial transparent {map}>
+                            <Sync opacity="opacity2" color="color2" />
                           </T.MeshBasicMaterial>
                         </T.Mesh>
                       {/await}

@@ -102,11 +102,7 @@ slot and places them in the scene and renders them with the ThreeJS
 </div>
 
 {#if element}
-  <T
-    {...$$restProps}
-    is={CSS2DObject}
-    args={[element]}
-  />
+  <T {...$$restProps} is={CSS2DObject} args={[element]} />
 {/if}
 ```
 
@@ -115,10 +111,7 @@ via the `three` slot. It passes all other properties through, letting us use it
 like so:
 
 ```svelte
-<CssObject
-  position={[-1, 2, 1]}
-  center={[-0.2, 0.5]}
->
+<CssObject position={[-1, 2, 1]} center={[-0.2, 0.5]}>
   <CounterLabel label="Hello" />
 
   <T.Mesh slot="three">

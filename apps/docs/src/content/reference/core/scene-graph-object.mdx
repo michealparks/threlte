@@ -4,7 +4,9 @@ name: '<SceneGraphObject>'
 sourcePath: 'packages/core/src/lib/internal/SceneGraphObject.svelte'
 order: 4
 type: 'component'
-componentSignature: { props: [{ name: 'object', type: 'THREE.Object3D', required: true }] }
+componentSignature: {
+  props: [{ name: 'object', type: 'THREE.Object3D', required: true }]
+}
 showInSidebar: false
 ---
 
@@ -14,23 +16,20 @@ showInSidebar: false
   it if you know what you're doing.
 </Tip>
 
-This component is extending the component [`<HierarchicalObject>`](/docs/reference/core/hierarchical-object) and conveniently provides methods to add and remove children to the scene graph.
+This component is extending the component [`<HierarchicalObject
+  >`](/docs/reference/core/hierarchical-object) and conveniently provides methods to add and remove
+  children to the scene graph. ## Basic Example In this example the component is responsible for -
+  forwarding the mesh to the parent [`<HierarchicalObject
+    >`](/docs/reference/core/hierarchical-object) - adding children to the scene graph, i.e. as
+    children to the mesh - removing children from the scene graph ```svelte
+    <script>
+      import { SceneGraphObject } from '@threlte/core'
+      import { Mesh } from 'three'
 
-## Basic Example
+      const mesh = new Mesh()
+    </script>
 
-In this example the component is responsible for
-
-- forwarding the mesh to the parent [`<HierarchicalObject>`](/docs/reference/core/hierarchical-object)
-- adding children to the scene graph, i.e. as children to the mesh
-- removing children from the scene graph
-
-```svelte
-<script>
-  import { SceneGraphObject } from '@threlte/core'
-  import { Mesh } from 'three'
-
-  const mesh = new Mesh()
-</script>
-
-<SceneGraphObject object={mesh} />
-```
+    <SceneGraphObject object={mesh} />
+    ```
+  </HierarchicalObject></HierarchicalObject
+>
