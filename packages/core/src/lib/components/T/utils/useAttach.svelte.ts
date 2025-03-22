@@ -1,5 +1,5 @@
 import { onDestroy } from 'svelte'
-import { writable } from 'svelte/store'
+import { toStore } from 'svelte/store'
 import { useThrelte } from '../../../context/compounds/useThrelte'
 import { createParentContext, useParent } from '../../../context/fragments/parent'
 import {
@@ -13,18 +13,27 @@ const isObject = (ref: unknown): ref is Record<string, any> => {
   return typeof ref === 'object' && ref !== null
 }
 
-export const useAttach = <T extends MaybeInstance<any>>() => {
+export const useAttach = <T extends MaybeInstance<any>>(
+  refSignal: () => T,
+  attachSignal: () => BaseProps<T>['attach']
+) => {
   const { invalidate } = useThrelte()
 
   let detachFn: (() => void) | void
 
-  const attach = writable<BaseProps<T>['attach']>()
-
+  const attach = toStore<BaseProps<T>['attach']>(() => attachSignal())
   const parent = useParent()
   const parentObject3D = useParentObject3D()
 
   const currentRef = createParentContext<T>()
   const object3D = createParentObject3DContext()
+
+  $effect.pre(() => {
+    currentRef.set(refSignal())
+    if (isInstanceOf(currentRef.current, 'Object3D')) {
+      object3D.set(currentRef.current)
+    }
+  })
 
   watch([attach, currentRef, parent, parentObject3D], ([attach, ref, parent, parentObject3D]) => {
     // Always detach first
@@ -72,24 +81,8 @@ export const useAttach = <T extends MaybeInstance<any>>() => {
     invalidate()
   })
 
-  const updateAttach = (a: BaseProps<T>['attach']) => {
-    attach.set(a)
-  }
-
-  const updateRef = (value: T) => {
-    currentRef.set(value)
-    if (isInstanceOf(value, 'Object3D')) {
-      object3D.set(value)
-    }
-  }
-
   onDestroy(() => {
     detachFn?.()
     invalidate()
   })
-
-  return {
-    updateRef,
-    updateAttach
-  }
 }
