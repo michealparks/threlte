@@ -2,6 +2,8 @@
   lang="ts"
   generics="Type"
 >
+  import { untrack } from 'svelte'
+  import { isInstanceOf } from '../../utilities'
   import type { TProps } from './types'
   import { useAttach } from './utils/useAttach.svelte'
   import { useCamera } from './utils/useCamera.svelte'
@@ -11,7 +13,6 @@
   import { usePlugins } from './utils/usePlugins'
   import { useProps } from './utils/useProps'
   import { determineRef } from './utils/utils'
-  import { isInstanceOf } from '../../utilities'
 
   let {
     is = useIs<Type>(),
@@ -28,15 +29,18 @@
 
   // We can't create the object in a reactive statement due to providing context
   let internalRef = $derived(determineRef<Type>(is, args))
+  ref = internalRef
 
   // When "is" or "args" change, we need to create a new ref.
   $effect.pre(() => {
-    if (ref === internalRef) return
+    if (untrack(() => ref) === internalRef) return
     ref = internalRef
   })
 
   // Create Event
-  $effect(() => oncreate?.(internalRef))
+  $effect(() => {
+    return oncreate?.(internalRef)
+  })
 
   // Plugins are initialized here so that pluginsProps
   // is available in the props update
@@ -66,6 +70,7 @@
 
   // Props
   const { updateProp } = useProps()
+
   Object.keys(rest).forEach((key) => {
     $effect.pre(() => {
       updateProp(internalRef, key, rest[key], {

@@ -14,18 +14,20 @@ const isDisposableObject = (object: unknown): object is DisposableObject => {
   return typeof (object as any)?.dispose === 'function' && !isInstanceOf(object, 'Scene')
 }
 
-export const useDispose = (refSignal: () => unknown, disposeSignal: () => boolean | undefined) => {
-  let currentRef = $state<DisposableObject>()
+export const useDispose = (
+  currentRef: () => unknown,
+  currentDispose: () => boolean | undefined
+) => {
+  let ref = $state<DisposableObject>()
 
   $effect.pre(() => {
-    const ref = refSignal()
-    if (!isDisposableObject(ref)) return
-    currentRef = ref
+    const r = currentRef()
+    if (isDisposableObject(r)) {
+      ref = r
+    }
   })
 
   let previousRef: DisposableObject | undefined
-
-  const localDispose = $derived(disposeSignal())
 
   const { disposableObjectMounted, disposableObjectUnmounted, removeObjectFromDisposal } =
     useDisposal()
@@ -34,12 +36,12 @@ export const useDispose = (refSignal: () => unknown, disposeSignal: () => boolea
 
   // We merge the local dispose with the parent dispose. If the parent dispose
   // is not set, we use true as default.
-  const mergedDispose = $derived(localDispose ?? parentDispose?.() ?? true)
+  const mergedDispose = $derived(currentDispose() ?? parentDispose?.() ?? true)
 
   setContext<ThrelteDisposeContext>(contextName, () => mergedDispose)
 
   $effect.pre(() => {
-    if (currentRef === previousRef) {
+    if (ref === previousRef) {
       // dispose changed
       if (!mergedDispose) {
         // disposal is no longer enabled, so we need to deregister the previous ref
@@ -54,17 +56,16 @@ export const useDispose = (refSignal: () => unknown, disposeSignal: () => boolea
         // we're disposing the old ref
         if (previousRef) disposableObjectUnmounted(previousRef)
         // and registering the new ref
-        if (currentRef) disposableObjectMounted(currentRef)
+        if (ref) disposableObjectMounted(ref)
       }
     }
 
-    previousRef = currentRef
+    previousRef = ref
   })
 
   onDestroy(() => {
-    if (mergedDispose) return
-    if (currentRef) {
-      disposableObjectUnmounted(currentRef)
+    if (mergedDispose && ref) {
+      disposableObjectUnmounted(ref)
     }
   })
 }
