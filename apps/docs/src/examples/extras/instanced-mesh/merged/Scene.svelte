@@ -1,8 +1,7 @@
 <script lang="ts">
   import { T } from '@threlte/core'
   import { InstancedMeshes, OrbitControls, useGltf } from '@threlte/extras'
-  import { DoubleSide, Mesh } from 'three'
-  import { DEG2RAD } from 'three/src/math/MathUtils.js'
+  import { DoubleSide, Mesh, MathUtils } from 'three'
   import Flower from './Flower.svelte'
 
   const gltf = useGltf<{
@@ -15,14 +14,13 @@
 
   // make an array of random x-z coordinates in the range of -20 to 20 with 200 elements
   const items = Array.from({ length: 1000 }, () => ({
-    x: Math.random() * 5 - 2.5,
-    z: Math.random() * 5 - 2.5,
+    position: [Math.random() * 5 - 2.5, 0, Math.random() * 5 - 2.5],
     scale: Math.random() * 0.5 + 0.5,
-    rotation: {
-      x: Math.random() * 8,
-      y: Math.random() * 360,
-      z: Math.random() * 8
-    }
+    rotation: [
+      Math.random() * 8 * MathUtils.DEG2RAD,
+      Math.random() * 360 * MathUtils.DEG2RAD,
+      Math.random() * 8 * MathUtils.DEG2RAD
+    ]
   }))
 </script>
 
@@ -34,12 +32,9 @@
     {#snippet children({ components: { Blossom, Stem } })}
       {#each items as item}
         <Flower
-          position.x={item.x}
-          position.z={item.z}
+          position={item.position}
           scale={item.scale}
-          rotation.y={(item.rotation.y * Math.PI) / 180}
-          rotation.x={(item.rotation.x * Math.PI) / 180}
-          rotation.z={(item.rotation.z * Math.PI) / 180}
+          rotation={item.rotation}
         >
           <Blossom />
           <Stem />
@@ -63,7 +58,7 @@
 
 <T.Mesh
   receiveShadow
-  rotation.x={-90 * DEG2RAD}
+  rotation.x={-90 * MathUtils.DEG2RAD}
 >
   <T.PlaneGeometry args={[5, 5]} />
   <T.MeshStandardMaterial

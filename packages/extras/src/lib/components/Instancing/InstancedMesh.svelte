@@ -16,10 +16,6 @@
   }: InstancedMeshProps = $props()
 
   const mesh = new InstancedMesh(undefined, undefined, 0)
-
-  const useInstancedMesh = (callback: (instancedMesh: InstancedMesh) => void) => {
-    callback(mesh)
-  }
 </script>
 
 <T
@@ -35,7 +31,6 @@
     {limit}
     {range}
     {update}
-    {useInstancedMesh}
   >
     {@render children?.({ ref: mesh })}
   </Api>
