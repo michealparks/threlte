@@ -12,7 +12,7 @@
 
   const viewport = useViewport()
 
-  let meshes: [Mesh, Mesh, Mesh] = [null!, null!, null!]
+  let meshes = $state<[Mesh, Mesh, Mesh]>([null!, null!, null!])
 
   const boxCursor = useCursor('pointer')
   const torusCursor = useCursor('pointer')

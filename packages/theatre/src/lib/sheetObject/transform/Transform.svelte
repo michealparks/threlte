@@ -28,7 +28,7 @@
 
   const { sheetObject, addProps, removeProps } = useSheet<any>()
 
-  let controls = $state<TC | undefined>(undefined)
+  let controls = $state.raw<TC>()
 
   $effect.pre(() => {
     if (controls) {

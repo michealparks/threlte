@@ -10,7 +10,7 @@ export const injectTeleportControlsPlugin = (): void => {
     if (!isInstanceOf(args.ref, 'Mesh')) return
     if (!('teleportSurface' in args.props)) return
 
-    let ref = $state<Mesh | undefined>(args.ref)
+    let ref = $state.raw<Mesh | undefined>(args.ref)
     let isSurface = $state<boolean>(args.props.teleportSurface)
 
     const { addSurface, removeSurface } = useTeleportControls()
@@ -47,7 +47,7 @@ export const injectTeleportControlsPlugin = (): void => {
     if (!isInstanceOf(args.ref, 'Mesh')) return
     if (!('teleportBlocker' in args.props)) return
 
-    let ref = $state<Mesh | undefined>(args.ref)
+    let ref = $state.raw<Mesh | undefined>(args.ref)
     let isBlocker = $state<boolean>(args.props.teleportBlocker)
 
     const { addBlocker, removeBlocker } = useTeleportControls()

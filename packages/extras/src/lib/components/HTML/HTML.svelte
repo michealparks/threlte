@@ -90,8 +90,8 @@
   let element = document.createElement(as)
   let oldZoom = 0
   let oldPosition = [0, 0]
-  let transformOuterRef: HTMLDivElement | undefined = $state()
-  let transformInnerRef: HTMLDivElement | undefined = $state()
+  let transformOuterRef = $state.raw<HTMLDivElement>()
+  let transformInnerRef = $state.raw<HTMLDivElement>()
   let isMeshSizeSet = false
 
   const occlusionMesh = new Mesh()

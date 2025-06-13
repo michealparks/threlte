@@ -8,8 +8,8 @@
   let iteration = $state(1)
   let framerate: number | 'varying' = $state(10)
 
-  let threlteCanvas = $state<HTMLCanvasElement>()
-  let otherCanvas = $state<HTMLCanvasElement>()
+  let threlteCanvas = $state.raw<HTMLCanvasElement>()
+  let otherCanvas = $state.raw<HTMLCanvasElement>()
   const otherCanvasCtx = $derived(otherCanvas?.getContext('2d') ?? undefined)
 
   const getThrelteCanvas = (node: HTMLDivElement) => {

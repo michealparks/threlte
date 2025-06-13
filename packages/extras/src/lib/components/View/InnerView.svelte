@@ -10,7 +10,7 @@
     useTask,
     useThrelte
   } from '@threlte/core'
-  import type { Snippet } from 'svelte'
+  import { setContext, type Snippet } from 'svelte'
   import { Vector4 } from 'three'
   import { OffscreenObserver } from './OffscreenObserver.svelte'
 
@@ -20,13 +20,28 @@
 
   const parentContext = useThrelte()
 
-  createDOMContext({ dom, canvas: parentContext.canvas })
-  createCacheContext()
-  const { scene } = createSceneContext()
+  const domCtx = createDOMContext({ dom, canvas: parentContext.canvas })
+  const cacheCtx = createCacheContext()
+  const sceneCtx = createSceneContext()
+  const { scene } = sceneCtx
   createParentContext(scene)
   createParentObject3DContext(scene)
-  const { camera } = createCameraContext()
+  const cameraCtx = createCameraContext()
+  const { camera } = cameraCtx
   createUserContext()
+
+  setContext('threlte-context', {
+    ...parentContext,
+    ...domCtx,
+    ...cacheCtx,
+    ...cameraCtx,
+    get scene() {
+      return sceneCtx.scene
+    },
+    set scene(scene) {
+      sceneCtx.scene = scene
+    }
+  })
 
   const { renderer, renderStage, canvas } = useThrelte()
 

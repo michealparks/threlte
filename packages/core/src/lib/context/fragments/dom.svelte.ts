@@ -1,4 +1,4 @@
-import { getContext, onMount, setContext } from 'svelte'
+import { getContext, setContext } from 'svelte'
 import { currentWritable, toCurrentReadable, type CurrentReadable } from '../../utilities'
 
 type DOMContext = {
@@ -18,7 +18,7 @@ export const createDOMContext = (options: CreateDOMContextOptions) => {
 
   const size = currentWritable({ width: dom.offsetWidth, height: dom.offsetHeight })
 
-  onMount(() => {
+  $effect(() => {
     const resizeObserver = new ResizeObserver(() => {
       const { offsetWidth, offsetHeight } = dom
       if (size.current.width !== offsetWidth || size.current.height !== offsetHeight) {

@@ -73,7 +73,7 @@
   let flipOffset = flipX ? -1 : 1
   let frameWidth = 0
   let frameHeight = 0
-  let texture: Texture | undefined = $state()
+  let texture = $state.raw<Texture>()
   let json: SpriteJsonHashData | undefined
   let frameNames: string[] = []
   let direction: (typeof supportedDirections)[number] = 'forward'

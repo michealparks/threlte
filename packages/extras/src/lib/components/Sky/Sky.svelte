@@ -36,7 +36,7 @@
 
   const { renderer, scene, invalidate } = useThrelte()
 
-  let renderTarget: WebGLCubeRenderTarget | undefined = $state()
+  let renderTarget = $state.raw<WebGLCubeRenderTarget>()
   let cubeCamera: CubeCamera | undefined
 
   const init = () => {

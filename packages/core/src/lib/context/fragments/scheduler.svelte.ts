@@ -1,4 +1,4 @@
-import { getContext, onDestroy, setContext } from 'svelte'
+import { getContext, setContext } from 'svelte'
 import { type CurrentWritable, currentWritable } from '../../utilities'
 import { Scheduler, type Stage } from '../../frame-scheduling'
 
@@ -84,15 +84,16 @@ export const createSchedulerContext = (
     }
   }
 
-  $effect(() => {
+  $effect.pre(() => {
     context.autoRender.set(options.autoRender ?? true)
   })
-  $effect(() => {
+
+  $effect.pre(() => {
     context.renderMode.set(options.renderMode ?? 'on-demand')
   })
 
-  onDestroy(() => {
-    context.scheduler.dispose()
+  $effect.pre(() => {
+    return () => context.scheduler.dispose()
   })
 
   setContext<SchedulerContext>('threlte-scheduler-context', context)

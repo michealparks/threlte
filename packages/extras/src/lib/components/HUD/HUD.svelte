@@ -1,6 +1,7 @@
 <script lang="ts">
   import { T, createCameraContext, createSceneContext, useThrelte } from '@threlte/core'
   import type { HUDProps } from './types'
+  import { setContext } from 'svelte'
 
   const { renderStage, renderer, toneMapping } = useThrelte()
 
@@ -13,8 +14,17 @@
     ...rest
   }: HUDProps = $props()
 
-  const { scene } = createSceneContext()
-  const { camera } = createCameraContext()
+  const ctx = useThrelte()
+  const sceneCtx = createSceneContext()
+  const cameraCtx = createCameraContext()
+  const { scene } = sceneCtx
+  const { camera } = cameraCtx
+
+  setContext('threlte-context', {
+    ...ctx,
+    ...sceneCtx,
+    ...cameraCtx
+  })
 
   const key = Symbol('threlte-hud-render-stage')
 

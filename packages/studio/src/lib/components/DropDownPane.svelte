@@ -5,9 +5,9 @@
   import type { Icons } from './Icon.svelte'
   import type { Snippet } from 'svelte'
 
-  let ref = $state<HTMLElement>()
-  let tooltipEl = $state<HTMLElement>()
-  let arrowEl = $state<HTMLElement>()
+  let ref = $state.raw<HTMLElement>()
+  let tooltipEl = $state.raw<HTMLElement>()
+  let arrowEl = $state.raw<HTMLElement>()
 
   export const show = () => {
     if (!tooltipEl) return

@@ -1,4 +1,4 @@
-import { getContext, onDestroy, setContext } from 'svelte'
+import { getContext, setContext } from 'svelte'
 import {
   AgXToneMapping,
   ColorManagement,
@@ -13,7 +13,7 @@ import { useTask } from '../../hooks/useTask'
 import { currentWritable, watch, type CurrentWritable } from '../../utilities'
 import { useCamera } from './camera'
 import { useDisposal } from './disposal'
-import { useDOM } from './dom'
+import { useDOM } from './dom.svelte'
 import { useScene } from './scene'
 import { useScheduler } from './scheduler.svelte'
 import type { WebGPURenderer } from 'three/webgpu'
@@ -73,51 +73,29 @@ export const createRendererContext = <T extends Renderer>(
   const { invalidate, renderStage, autoRender, scheduler, resetFrameInvalidation } = useScheduler()
   const { size, canvas } = useDOM()
 
-  const renderer = options.createRenderer
-    ? options.createRenderer(canvas)
-    : new WebGLRenderer({
-        canvas,
-        powerPreference: 'high-performance',
-        antialias: true,
-        alpha: true
-      })
+  const renderer =
+    options.createRenderer?.(canvas) ??
+    (new WebGLRenderer({
+      canvas,
+      powerPreference: 'high-performance',
+      antialias: true,
+      alpha: true
+    }) as T)
 
   const autoRenderTask = renderStage.createTask(Symbol('threlte-auto-render-task'), () => {
     renderer.render(scene, camera.current)
   })
 
-  const context: RendererContext<T> = {
-    renderer: renderer as T,
-    colorManagementEnabled: currentWritable(options.colorManagementEnabled ?? true),
-    colorSpace: currentWritable(options.colorSpace ?? 'srgb'),
-    dpr: currentWritable(options.dpr ?? window.devicePixelRatio),
-    shadows: currentWritable(options.shadows ?? PCFSoftShadowMap),
-    toneMapping: currentWritable(options.toneMapping ?? AgXToneMapping),
-    autoRenderTask
-  }
-
-  setContext<RendererContext<T>>('threlte-renderer-context', context)
-
-  watch([context.colorManagementEnabled], ([colorManagementEnabled]) => {
-    ColorManagement.enabled = colorManagementEnabled
-  })
-
-  watch([context.colorSpace], ([colorSpace]) => {
-    if ('outputColorSpace' in renderer) {
-      renderer.outputColorSpace = colorSpace
-    }
-  })
-
-  watch([context.dpr], ([dpr]) => {
-    if ('setPixelRatio' in renderer) {
-      renderer.setPixelRatio(dpr)
-    }
-  })
+  const colorManagementEnabled = currentWritable(options.colorManagementEnabled ?? true)
+  const colorSpace = currentWritable(options.colorSpace ?? 'srgb')
+  const dpr = currentWritable(options.dpr ?? window.devicePixelRatio)
+  const shadows = currentWritable(options.shadows ?? PCFSoftShadowMap)
+  const toneMapping = currentWritable(options.toneMapping ?? AgXToneMapping)
 
   // Resize the renderer when the size changes
   const { start, stop } = useTask(
     () => {
-      if (!('xr' in renderer) || renderer.xr?.isPresenting) return
+      if (renderer.xr.isPresenting) return
       renderer.setSize(size.current.width, size.current.height)
       invalidate()
       stop()
@@ -128,39 +106,23 @@ export const createRendererContext = <T extends Renderer>(
       autoInvalidate: false
     }
   )
+
   watch([size], () => {
     start()
   })
 
-  watch([context.shadows], ([shadows]) => {
-    if (!('shadowMap' in renderer)) return
-
-    renderer.shadowMap.enabled = !!shadows
-    if (shadows && shadows !== true) {
-      renderer.shadowMap.type = shadows
-    } else if (shadows === true) {
-      renderer.shadowMap.type = PCFSoftShadowMap
-    }
-  })
-
-  watch([context.toneMapping], ([toneMapping]) => {
-    if (!('toneMapping' in renderer)) return
-    renderer.toneMapping = toneMapping
-  })
-
   watch([autoRender], ([autoRender]) => {
     if (autoRender) {
-      context.autoRenderTask.start()
+      autoRenderTask.start()
     } else {
-      context.autoRenderTask.stop()
+      autoRenderTask.stop()
     }
     return () => {
-      context.autoRenderTask.stop()
+      autoRenderTask.stop()
     }
   })
 
-  if ('setAnimationLoop' in context.renderer) {
-    const renderer = context.renderer
+  if ('setAnimationLoop' in renderer) {
     renderer.setAnimationLoop((time) => {
       dispose()
       scheduler.run(time)
@@ -168,28 +130,61 @@ export const createRendererContext = <T extends Renderer>(
     })
   }
 
-  onDestroy(() => {
-    if ('dispose' in context.renderer) {
-      const dispose = context.renderer.dispose as () => void
-      dispose()
+  $effect.pre(() => {
+    return () => {
+      if ('dispose' in renderer) {
+        renderer.dispose()
+      }
     }
   })
 
-  $effect(() => {
-    context.colorManagementEnabled.set(options.colorManagementEnabled ?? true)
+  $effect.pre(() => {
+    const value = options.colorManagementEnabled ?? true
+    colorManagementEnabled.set(value)
+    ColorManagement.enabled = value
   })
-  $effect(() => {
-    context.colorSpace.set(options.colorSpace ?? 'srgb')
+
+  $effect.pre(() => {
+    const value = options.colorSpace ?? 'srgb'
+    colorSpace.set(value)
+    renderer.outputColorSpace = value
   })
-  $effect(() => {
-    context.toneMapping.set(options.toneMapping ?? AgXToneMapping)
+
+  $effect.pre(() => {
+    const value = options.toneMapping ?? AgXToneMapping
+    toneMapping.set(value)
+    renderer.toneMapping = value
   })
-  $effect(() => {
-    context.shadows.set(options.shadows ?? PCFSoftShadowMap)
+
+  $effect.pre(() => {
+    const value = options.shadows ?? PCFSoftShadowMap
+    shadows.set(value)
+
+    renderer.shadowMap.enabled = !!shadows
+    if (value && value !== true) {
+      renderer.shadowMap.type = value
+    } else if (value === true) {
+      renderer.shadowMap.type = PCFSoftShadowMap
+    }
   })
-  $effect(() => {
-    context.dpr.set(options.dpr ?? window.devicePixelRatio)
+
+  $effect.pre(() => {
+    const value = options.dpr ?? window.devicePixelRatio
+    dpr.set(value)
+    renderer.setPixelRatio(value)
   })
+
+  const context: RendererContext<T> = {
+    renderer,
+    colorManagementEnabled,
+    colorSpace,
+    dpr,
+    shadows,
+    toneMapping,
+    autoRenderTask
+  }
+
+  setContext<RendererContext<T>>('threlte-renderer-context', context)
 
   return context
 }
