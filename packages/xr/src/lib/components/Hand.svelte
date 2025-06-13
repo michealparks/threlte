@@ -5,10 +5,9 @@
   import { Group } from 'three'
   import { T, useThrelte, useTask } from '@threlte/core'
   import type { XRHandEvents } from '../types'
-  import { isHandTracking, handEvents } from '../internal/stores'
+  import { xrState, handEvents } from '../internal/state.svelte'
   import { left as leftStore, right as rightStore } from '../hooks/useHand'
   import ScenePortal from './internal/ScenePortal.svelte'
-  import { writable } from 'svelte/store'
   import type { Snippet } from 'svelte'
 
   const stores = {
@@ -61,17 +60,16 @@
   const { xr } = renderer
   const space = xr.getReferenceSpace()
 
-  const handedness = writable<'left' | 'right'>(left ? 'left' : right ? 'right' : hand)
-  $effect.pre(() => handedness.set(left ? 'left' : right ? 'right' : (hand as 'left' | 'right')))
+  const handedness = $derived<'left' | 'right'>(left ? 'left' : right ? 'right' : hand ?? 'left')
 
-  $effect.pre(() =>
-    handEvents[$handedness].set({
+  $effect.pre(() => {
+    handEvents[handedness] = {
       onconnected,
       ondisconnected,
       onpinchend,
       onpinchstart
-    })
-  )
+    }
+  })
 
   let group = new Group()
 
@@ -106,19 +104,19 @@
   )
 
   $effect.pre(() => {
-    if ($isHandTracking && (wrist !== undefined || children !== undefined) && inputSource) {
+    if (xrState.isHandTracking && (wrist !== undefined || children !== undefined) && inputSource) {
       start()
     } else {
       stop()
     }
   })
 
-  let store = $derived(stores[$handedness])
+  let store = $derived(stores[handedness])
   let inputSource = $derived($store?.inputSource)
   let model = $derived($store?.model)
 </script>
 
-{#if $store?.hand && $isHandTracking}
+{#if $store?.hand && xrState.isHandTracking}
   <T is={$store.hand}>
     {#if children === undefined}
       <T is={model} />
@@ -132,7 +130,7 @@
   {/if}
 {/if}
 
-{#if $isHandTracking}
+{#if xrState.isHandTracking}
   <ScenePortal>
     <T is={group}>
       {@render wrist?.()}

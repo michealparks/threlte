@@ -1,12 +1,12 @@
 import { Vector3, type Event, type Object3D } from 'three'
-import { watch } from '@threlte/core'
+import { observe, watch } from '@threlte/core'
 import type { ControlsContext, HandContext, Intersection, IntersectionEvent, events } from './types'
 import { getInternalContext } from './context'
 import { useController } from '../../hooks/useController'
 import { useHand } from '../../hooks/useHand'
-import { useXR } from '../../hooks/useXR'
+import { useXR } from '../../hooks/useXR.svelte'
 import { useFixed } from '../../internal/useFixed'
-import { pointerIntersection } from '../../internal/stores'
+import { pointerIntersection } from '../../internal/state.svelte'
 
 type PointerEventName = (typeof events)[number]
 
@@ -98,7 +98,7 @@ export const setupPointerControls = (
     const filtered =
       context.filter === undefined ? hits : context.filter(hits, context, handContext)
 
-    pointerIntersection[handedness].set(filtered[0])
+    pointerIntersection[handedness] = filtered[0]
 
     // Bubble up the events, find the event source (eventObject)
     for (const hit of filtered) {
@@ -276,11 +276,16 @@ export const setupPointerControls = (
     }
   })
 
-  watch([useXR().isPresenting, handContext.enabled], ([isPresenting, enabled]) => {
-    if (isPresenting && enabled) {
-      start()
-    } else {
-      stop()
+  const { isPresenting } = useXR()
+
+  observe(
+    () => [isPresenting.current, handContext.enabled],
+    ([isPresenting, enabled]) => {
+      if (isPresenting && enabled) {
+        start()
+      } else {
+        stop()
+      }
     }
-  })
+  )
 }

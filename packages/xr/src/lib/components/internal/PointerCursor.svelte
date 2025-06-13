@@ -1,7 +1,7 @@
 <script lang="ts">
   import { Group, Vector3, Matrix3 } from 'three'
-  import { T, useTask } from '@threlte/core'
-  import { pointerIntersection, pointerState } from '../../internal/stores'
+  import { T, useTask, useThrelte } from '@threlte/core'
+  import { pointerIntersection, pointerState } from '../../internal/state.svelte'
   import Cursor from './Cursor.svelte'
   import type { Snippet } from 'svelte'
 
@@ -12,18 +12,20 @@
 
   let { handedness, children }: Props = $props()
 
+  const { scene } = useThrelte()
+
   const ref = new Group()
   const vec3 = new Vector3()
   const normalMatrix = new Matrix3()
   const worldNormal = new Vector3()
 
-  let hovering = $derived($pointerState[handedness].hovering)
+  let hovering = $derived(pointerState[handedness].hovering)
   let intersection = $derived(pointerIntersection[handedness])
 
   const { start, stop } = useTask(
     () => {
-      if (intersection.current === undefined) return
-      const { point, face, object } = intersection.current
+      if (intersection === undefined) return
+      const { point, face, object } = intersection
       ref.position.lerp(point, 0.4)
 
       if (face) {
@@ -38,8 +40,8 @@
   )
 
   $effect.pre(() => {
-    if (hovering) {
-      ref.position.copy(intersection.current!.point)
+    if (hovering && intersection) {
+      ref.position.copy(intersection.point)
       start()
     } else {
       stop()
@@ -50,6 +52,7 @@
 <T
   is={ref}
   visible={hovering}
+  attach={scene}
 >
   {#if children}
     {@render children()}

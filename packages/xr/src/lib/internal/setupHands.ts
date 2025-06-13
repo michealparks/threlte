@@ -5,7 +5,7 @@ import { onMount } from 'svelte'
 import { left, right } from '../hooks/useHand'
 import { useHandTrackingState } from './useHandTrackingState'
 import type { XRHandEvent, XRHandEvents } from '../types'
-import { handEvents } from './stores'
+import { handEvents } from './state.svelte'
 
 export const setupHands = () => {
   const factory = new XRHandModelFactory()
@@ -31,7 +31,7 @@ export const setupHands = () => {
         | { data: { handedness: 'left' | 'right' } }
       const handedness =
         'handedness' in handEvent ? handEvent.handedness : handEvent.data.handedness
-      handEvents[handedness]?.current?.[`on${event.type}` as keyof XRHandEvents]?.(event as any)
+      handEvents[handedness]?.[`on${event.type}` as keyof XRHandEvents]?.(event as any)
     }
 
     function handleConnected(this: XRHandSpace, event: XRHandEvent) {

@@ -1,8 +1,8 @@
 <script lang="ts">
-  import { spring } from 'svelte/motion'
+  import { Spring } from 'svelte/motion'
   import { Group, Matrix3, Vector3 } from 'three'
   import { T, useTask } from '@threlte/core'
-  import { teleportIntersection } from '../../internal/stores'
+  import { teleportIntersection } from '../../internal/state.svelte'
   import Cursor from './Cursor.svelte'
   import type { Snippet } from 'svelte'
 
@@ -22,9 +22,9 @@
 
   const { start, stop } = useTask(
     () => {
-      if (intersection.current === undefined) return
+      if (intersection === undefined) return
 
-      const { point, face, object } = intersection.current
+      const { point, face, object } = intersection
       ref.position.lerp(point, 0.4)
 
       if (face) {
@@ -38,15 +38,15 @@
     }
   )
 
-  const size = spring(0.1, { stiffness: 0.2 })
+  const size = new Spring(0.1, { stiffness: 0.2 })
 
   $effect.pre(() => {
-    if ($intersection === undefined) {
+    if (intersection === undefined) {
       size.set(0.1)
       stop()
     } else {
       size.set(1)
-      ref.position.copy($intersection.point)
+      ref.position.copy(intersection.point)
       start()
     }
   })
@@ -54,13 +54,13 @@
 
 <T
   is={ref}
-  visible={$intersection !== undefined}
+  visible={intersection !== undefined}
 >
   {#if children}
     {@render children()}
   {:else}
     <Cursor
-      size={$size}
+      size={size.current}
       thickness={0.015}
     />
   {/if}

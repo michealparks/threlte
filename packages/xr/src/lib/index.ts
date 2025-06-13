@@ -23,7 +23,7 @@ export { useHandJoint } from './hooks/useHandJoint'
 export { useHeadset } from './hooks/useHeadset'
 export { useHitTest } from './hooks/useHitTest'
 export { useTeleport } from './hooks/useTeleport'
-export { useXR } from './hooks/useXR'
+export { useXR } from './hooks/useXR.svelte'
 
 // Types
 export type {

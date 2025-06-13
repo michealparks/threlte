@@ -5,10 +5,9 @@
   lang="ts"
   module
 >
-  import { writable } from 'svelte/store'
   import { T } from '@threlte/core'
   import { left as leftStore, right as rightStore } from '../hooks/useController'
-  import { isHandTracking, pointerState, teleportState, controllerEvents } from '../internal/stores'
+  import { xrState, pointerState, teleportState, controllerEvents } from '../internal/state.svelte'
   import type { XRControllerEvents } from '../types'
   import PointerCursor from './internal/PointerCursor.svelte'
   import ShortRay from './internal/ShortRay.svelte'
@@ -24,6 +23,8 @@
 </script>
 
 <script lang="ts">
+  import { useThrelte } from '../../../../core/src/lib'
+
   type Props = {
     children?: Snippet
     grip?: Snippet
@@ -77,11 +78,12 @@
     teleportCursor: teleportCursorSnippet
   }: Props = $props()
 
-  const handedness = writable<'left' | 'right'>(left ? 'left' : right ? 'right' : hand)
-  $effect.pre(() => handedness.set(left ? 'left' : right ? 'right' : (hand as 'left' | 'right')))
+  const { scene } = useThrelte()
 
-  $effect.pre(() =>
-    controllerEvents[$handedness].set({
+  const handedness = $derived<'left' | 'right'>(left ? 'left' : right ? 'right' : hand ?? 'left')
+
+  $effect.pre(() => {
+    controllerEvents[handedness] = {
       onconnected,
       ondisconnected,
       onselect,
@@ -90,20 +92,23 @@
       onsqueeze,
       onsqueezeend,
       onsqueezestart
-    })
-  )
+    }
+  })
 
-  let store = $derived(stores[$handedness])
+  let store = $derived(stores[handedness])
   let grip = $derived($store?.grip)
   let targetRay = $derived($store?.targetRay)
   let model = $derived($store?.model)
-  let hasPointerControls = $derived($pointerState[$handedness].enabled)
-  let hasTeleportControls = $derived($teleportState[$handedness].enabled)
+  let hasPointerControls = $derived(pointerState[handedness].enabled)
+  let hasTeleportControls = $derived(teleportState[handedness].enabled)
 </script>
 
-{#if !$isHandTracking}
+{#if !xrState.isHandTracking}
   {#if grip}
-    <T is={grip}>
+    <T
+      is={grip}
+      attach={scene}
+    >
       {#if children}
         {@render children?.()}
       {:else}
@@ -120,7 +125,7 @@
 
       {#if hasPointerControls || hasTeleportControls}
         <ShortRay
-          handedness={$handedness}
+          {handedness}
           children={pointerRaySnippet}
         />
       {/if}
@@ -128,24 +133,22 @@
   {/if}
 {/if}
 
-<ScenePortal>
-  {#if hasPointerControls}
-    <PointerCursor
-      handedness={$handedness}
-      children={pointerCursorSnippet}
-    />
-  {/if}
+{#if hasPointerControls}
+  <PointerCursor
+    {handedness}
+    children={pointerCursorSnippet}
+  />
+{/if}
 
-  {#if hasTeleportControls && targetRay !== undefined}
-    <TeleportRay
-      {targetRay}
-      handedness={$handedness}
-      children={teleportRaySnippet}
-    />
+{#if hasTeleportControls && targetRay !== undefined}
+  <TeleportRay
+    {targetRay}
+    {handedness}
+    children={teleportRaySnippet}
+  />
 
-    <TeleportCursor
-      handedness={$handedness}
-      children={teleportCursorSnippet}
-    />
-  {/if}
-</ScenePortal>
+  <TeleportCursor
+    {handedness}
+    children={teleportCursorSnippet}
+  />
+{/if}

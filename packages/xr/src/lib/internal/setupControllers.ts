@@ -5,7 +5,7 @@ import { onMount } from 'svelte'
 import { useHandTrackingState } from './useHandTrackingState'
 import type { XRControllerEvent, XRControllerEvents } from '../types'
 import { gaze, left, right } from '../hooks/useController'
-import { controllerEvents } from './stores'
+import { controllerEvents } from './state.svelte'
 
 export const setupControllers = () => {
   const factory = new XRControllerModelFactory()
@@ -27,7 +27,7 @@ export const setupControllers = () => {
     const dispatch = (event: Event) => {
       if (hasHands()) return
       const { data } = event as unknown as { data: { handedness: 'left' | 'right' } }
-      controllerEvents[data.handedness]?.current?.[`on${event.type}` as keyof XRControllerEvents]?.(
+      controllerEvents[data.handedness]?.[`on${event.type}` as keyof XRControllerEvents]?.(
         event as any
       )
     }

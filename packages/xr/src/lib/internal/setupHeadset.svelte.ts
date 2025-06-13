@@ -1,6 +1,6 @@
 import { Group } from 'three'
-import { useThrelte, useTask, watch } from '@threlte/core'
-import { useXR } from '../hooks/useXR'
+import { useThrelte, useTask } from '@threlte/core'
+import { useXR } from '../hooks/useXR.svelte'
 
 export const headset = new Group()
 
@@ -45,8 +45,10 @@ export const setupHeadset = () => {
     }
   )
 
-  watch(useXR().isPresenting, ($isPresenting) => {
-    if ($isPresenting) {
+  const { isPresenting } = useXR()
+
+  $effect.pre(() => {
+    if (isPresenting.current) {
       immersiveFrame.start()
       nonImmersiveFrame.stop()
     } else {
