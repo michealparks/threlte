@@ -6,7 +6,7 @@ import { currentWritable, type CurrentWritable } from '@threlte/core'
 const getContextId = (instancedMeshId: string) => `threlte-instanced-mesh-${instancedMeshId}`
 
 type InstancedMeshContext = {
-  instancedMesh: CurrentWritable<InstancedMesh>
+  instancedMesh: InstancedMesh
   instances: CurrentWritable<PositionMesh[]>
   addInstance: (instance: PositionMesh) => void
   removeInstance: (instance: PositionMesh) => void
@@ -14,7 +14,7 @@ type InstancedMeshContext = {
 
 export const createApi = (instancedMesh: InstancedMesh, instancedMeshId: string) => {
   const api: InstancedMeshContext = {
-    instancedMesh: currentWritable(instancedMesh),
+    instancedMesh,
     addInstance(instance) {
       api.instances.update((arr) => {
         arr.push(instance)

@@ -19,13 +19,10 @@ const _mesh = new Mesh<BufferGeometry, MeshBasicMaterial>()
 
 export class PositionMesh extends Group {
   color: Color
-  instancedMesh: CurrentWritable<InstancedMesh | undefined>
+  instancedMesh: InstancedMesh
   instances: CurrentWritable<PositionMesh[]>
 
-  constructor(
-    instancedMesh: CurrentWritable<InstancedMesh>,
-    instances: CurrentWritable<PositionMesh[]>
-  ) {
+  constructor(instancedMesh: InstancedMesh, instances: CurrentWritable<PositionMesh[]>) {
     super()
     this.color = new Color('white')
     this.instancedMesh = instancedMesh
@@ -33,15 +30,13 @@ export class PositionMesh extends Group {
   }
 
   // This will allow the virtual instance have bounds
-  get geometry(): BufferGeometry | undefined {
-    return this.instancedMesh.current?.geometry
+  get geometry(): BufferGeometry {
+    return this.instancedMesh.geometry
   }
 
   // And this will allow the virtual instance to receive events
   override raycast(raycaster: Raycaster, intersects: Intersection[]): void {
-    const parent = this.instancedMesh.current
-
-    if (parent === undefined) return
+    const parent = this.instancedMesh
 
     if (parent.geometry === undefined || parent.material === undefined) return
 
