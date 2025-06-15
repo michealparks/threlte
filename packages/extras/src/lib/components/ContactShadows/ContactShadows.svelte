@@ -1,6 +1,5 @@
 <script lang="ts">
   import { T, useTask, useThrelte } from '@threlte/core'
-  import { onDestroy } from 'svelte'
   import {
     Color,
     Group,
@@ -33,56 +32,67 @@
     ...props
   }: ContactShadowsProps = $props()
 
-  const { scene, renderer } = useThrelte()
+  const { scene, renderer, colorSpace } = useThrelte()
 
   const group = new Group()
-  const scaledWidth = $derived(width * (Array.isArray(scale) ? scale[0] : scale || 1))
-  const scaledHeight = $derived(height * (Array.isArray(scale) ? scale[1] : scale || 1))
+  const scaledWidth = $derived(width * (Array.isArray(scale) ? scale[0] : scale ?? 1))
+  const scaledHeight = $derived(height * (Array.isArray(scale) ? scale[1] : scale ?? 1))
 
-  const renderTarget = $derived.by(() => {
-    const rt = new WebGLRenderTarget(resolution, resolution)
-    rt.texture.generateMipmaps = false
-    rt.texture.colorSpace = renderer.outputColorSpace
-    return rt
+  const renderTarget = new WebGLRenderTarget()
+  renderTarget.texture.generateMipmaps = false
+  $effect.pre(() => {
+    renderTarget.setSize(resolution, resolution)
+  })
+  $effect.pre(() => {
+    renderTarget.texture.colorSpace = $colorSpace
   })
 
-  const renderTargetBlur = $derived.by(() => {
-    const rt = new WebGLRenderTarget(resolution, resolution)
-    rt.texture.generateMipmaps = false
-    return rt
+  const renderTargetBlur = new WebGLRenderTarget()
+  renderTargetBlur.texture.generateMipmaps = false
+  $effect.pre(() => {
+    renderTargetBlur.setSize(resolution, resolution)
   })
 
   const planeGeometry = $derived(new PlaneGeometry(scaledWidth, scaledHeight).rotateX(Math.PI / 2))
-  const blurPlane = $derived(new Mesh(planeGeometry))
 
-  const depthMaterial = $derived.by(() => {
-    const dm = new MeshDepthMaterial({
-      depthTest: false,
-      depthWrite: false
-    })
-    dm.onBeforeCompile = (shader) => {
-      shader.uniforms = {
-        ...shader.uniforms,
-        uColor: {
-          value: new Color(color).convertSRGBToLinear()
-        }
-      }
-
-      shader.fragmentShader = `uniform vec3 uColor;\n${shader.fragmentShader}`
-
-      shader.fragmentShader = shader.fragmentShader.replace(
-        'vec4( vec3( 1.0 - fragCoordZ ), opacity );',
-        'vec4( uColor, ( 1.0 - fragCoordZ ) * 1.0 );'
-      )
-
-      // minified replace, https://github.com/yushijinhun/three-minifier also minifies GLSL files
-      shader.fragmentShader = shader.fragmentShader.replace(
-        'vec4(vec3(1.0-fragCoordZ),opacity);',
-        'vec4(uColor,(1.0-fragCoordZ)*1.0);'
-      )
-    }
-    return dm
+  const blurPlane = new Mesh()
+  $effect.pre(() => {
+    blurPlane.geometry = planeGeometry
   })
+
+  const depthMaterial = new MeshDepthMaterial({
+    depthTest: false,
+    depthWrite: false
+  })
+
+  let uniforms = {
+    uColor: {
+      value: new Color()
+    }
+  }
+  $effect.pre(() => {
+    uniforms.uColor.value.set(color).convertSRGBToLinear()
+  })
+
+  depthMaterial.onBeforeCompile = (shader) => {
+    shader.uniforms = {
+      ...shader.uniforms,
+      ...uniforms
+    }
+
+    shader.fragmentShader = `uniform vec3 uColor;\n${shader.fragmentShader}`
+
+    shader.fragmentShader = shader.fragmentShader.replace(
+      'vec4( vec3( 1.0 - fragCoordZ ), opacity );',
+      'vec4( uColor, ( 1.0 - fragCoordZ ) * 1.0 );'
+    )
+
+    // minified replace, https://github.com/yushijinhun/three-minifier also minifies GLSL files
+    shader.fragmentShader = shader.fragmentShader.replace(
+      'vec4(vec3(1.0-fragCoordZ),opacity);',
+      'vec4(uColor,(1.0-fragCoordZ)*1.0);'
+    )
+  }
 
   const horizontalBlurMaterial = new ShaderMaterial({
     ...HorizontalBlurShader,
@@ -94,26 +104,27 @@
     depthTest: false
   })
 
-  const shadowCamera = $derived(
-    new OrthographicCamera(
-      -scaledWidth / 2,
-      scaledWidth / 2,
-      scaledHeight / 2,
-      -scaledHeight / 2,
-      0,
-      far
-    )
-  )
-  $effect.pre(() => shadowCamera.updateProjectionMatrix())
+  const shadowCamera = new OrthographicCamera()
+  $effect.pre(() => {
+    shadowCamera.left = -scaledWidth / 2
+    shadowCamera.right = scaledWidth / 2
+    shadowCamera.top = scaledHeight / 2
+    shadowCamera.bottom = -scaledHeight / 2
+    shadowCamera.near = 0
+    shadowCamera.far = far
+    shadowCamera.updateProjectionMatrix()
+  })
 
-  const shadowMaterial = $derived(
-    new MeshBasicMaterial({
-      map: renderTarget.texture,
-      transparent: true,
-      opacity,
-      depthWrite
-    })
-  )
+  const shadowMaterial = new MeshBasicMaterial({
+    map: renderTarget.texture,
+    transparent: true
+  })
+  $effect.pre(() => {
+    shadowMaterial.opacity = opacity
+  })
+  $effect.pre(() => {
+    shadowMaterial.depthWrite = depthWrite
+  })
 
   const blurShadows = (blur: number) => {
     // separate from store to not call store setter
@@ -198,14 +209,16 @@
     }
   })
 
-  onDestroy(() => {
-    renderTarget.dispose()
-    renderTargetBlur.dispose()
-    planeGeometry.dispose()
-    depthMaterial.dispose()
-    horizontalBlurMaterial.dispose()
-    verticalBlurMaterial.dispose()
-    shadowMaterial.dispose()
+  $effect(() => {
+    return () => {
+      renderTarget.dispose()
+      renderTargetBlur.dispose()
+      planeGeometry.dispose()
+      depthMaterial.dispose()
+      horizontalBlurMaterial.dispose()
+      verticalBlurMaterial.dispose()
+      shadowMaterial.dispose()
+    }
   })
 </script>
 

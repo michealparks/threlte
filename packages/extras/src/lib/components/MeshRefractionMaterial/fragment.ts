@@ -1,4 +1,3 @@
-import { ShaderChunk } from 'three'
 import { shaderStructs, shaderIntersectFunction } from 'three-mesh-bvh'
 
 export const fragmentShader = `#define ENVMAP_TYPE_CUBE_UV
@@ -113,6 +112,7 @@ void main() {
 	vec3 viewDirection = normalize(vWorldPosition - cameraPosition);
 	float nFresnel = fresnelFunc(viewDirection, normal) * fresnel;
 	gl_FragColor = vec4(mix(finalColor, vec3(1.0), nFresnel), 1.0);
-	${ShaderChunk.tonemapping_fragment}
-	${ShaderChunk.colorspace_fragment}
+	
+	#include <tonemapping_fragment>
+  #include <colorspace_fragment>
 }`

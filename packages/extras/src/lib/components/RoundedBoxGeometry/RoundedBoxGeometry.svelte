@@ -27,12 +27,9 @@
     return shape
   }
 
-  let width = $derived(args[0] ?? 1)
-  let height = $derived(args[1] ?? 1)
-  let depth = $derived(args[2] ?? 1)
-  let shape = $derived(createShape(width, height, radius))
+  let shape = $derived(createShape(args[0] ?? 1, args[1] ?? 1, radius))
   let params = $derived({
-    depth: depth - radius * 2,
+    depth: args[2] ?? 1 - radius * 2,
     bevelEnabled: true,
     bevelSegments: smoothness * 2,
     steps,

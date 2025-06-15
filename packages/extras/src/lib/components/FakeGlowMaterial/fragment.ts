@@ -1,5 +1,3 @@
-import { ShaderChunk } from 'three'
-
 export const fragmentShader = `
 uniform vec3 glowColor;
 uniform float falloffAmount;
@@ -24,6 +22,6 @@ void main()
 	fakeGlow *= falloff;
 	gl_FragColor = vec4(clamp(glowColor * fresnel, 0., 1.0), clamp(fakeGlow, 0., 1.0));
 
-	${ShaderChunk.tonemapping_fragment}
-	${ShaderChunk.colorspace_fragment}
+	#include <tonemapping_fragment>
+  #include <colorspace_fragment>
 }`

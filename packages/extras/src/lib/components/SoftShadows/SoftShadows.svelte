@@ -17,8 +17,7 @@
 -->
 <script lang="ts">
   import { useThrelte } from '@threlte/core'
-  import { onDestroy } from 'svelte'
-  import { ShaderChunk } from 'three'
+  import { Material, ShaderChunk } from 'three'
 
   const { renderer, camera, scene } = useThrelte()
 
@@ -139,15 +138,14 @@
 	}`)
 
   const recompile = () => {
-    scene.traverse((o) => {
-      const object = o as any
-      if ((object as any).material) {
-        renderer?.properties.remove(object.material)
-        object.material.dispose?.()
+    scene.traverse((object) => {
+      if ('material' in object) {
+        renderer.properties.remove(object.material)
+        ;(object.material as Material).dispose?.()
       }
     })
-    if (renderer?.info.programs) renderer!.info.programs.length = 0
-    renderer?.compile(scene, camera.current)
+    if (renderer.info.programs) renderer.info.programs.length = 0
+    renderer.compile(scene, camera.current)
   }
 
   $effect.pre(() => {
@@ -160,9 +158,11 @@
     recompile()
   })
 
-  onDestroy(() => {
-    ShaderChunk.shadowmap_pars_fragment = original
-    recompile()
+  $effect.pre(() => {
+    return () => {
+      ShaderChunk.shadowmap_pars_fragment = original
+      recompile()
+    }
   })
 </script>
 

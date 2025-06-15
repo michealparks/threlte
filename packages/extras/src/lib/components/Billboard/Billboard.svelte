@@ -1,6 +1,15 @@
+<script
+  module
+  lang="ts"
+>
+  import { Group, Quaternion } from 'three'
+
+  const quaternion = new Quaternion()
+</script>
+
 <script lang="ts">
   import { T, useStage, useTask, useThrelte } from '@threlte/core'
-  import { Group, Quaternion } from 'three'
+
   import type { BillboardProps } from './types'
 
   let { follow = true, ref = $bindable(), children, ...props }: BillboardProps = $props()
@@ -9,8 +18,6 @@
   const localRef = new Group()
 
   const { camera, renderStage } = useThrelte()
-
-  const q = new Quaternion()
 
   let followObject = $derived(follow === true ? $camera : follow === false ? undefined : follow)
 
@@ -21,8 +28,8 @@
       // always face the follow object
       localRef.updateMatrix()
       localRef.updateWorldMatrix(false, false)
-      localRef.getWorldQuaternion(q)
-      followObject?.getWorldQuaternion(inner.quaternion).premultiply(q.invert())
+      localRef.getWorldQuaternion(quaternion)
+      followObject?.getWorldQuaternion(inner.quaternion).premultiply(quaternion.invert())
     },
     { autoStart: false, stage }
   )

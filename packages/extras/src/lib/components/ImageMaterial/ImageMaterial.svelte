@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { T, asyncWritable, isInstanceOf, useParent, useTask, useThrelte } from '@threlte/core'
+  import { T, asyncWritable, useParent, useTask, useThrelte } from '@threlte/core'
   import { Color, ShaderMaterial, Vector2, Vector3, type Mesh, type Texture } from 'three'
   import { useTexture } from '../../hooks/useTexture'
   import { useSuspense } from '../../suspense/useSuspense'
@@ -35,7 +35,7 @@
   const material = new ShaderMaterial()
 
   $effect.pre(() => {
-    if (side) material.side = side
+    if (side !== undefined) material.side = side
   })
 
   const suspend = useSuspense()
@@ -152,21 +152,20 @@
     uniforms.colorProcessingEnabled.value = colorProcessingEnabled
   })
 
-  useTask(() => {
-    const mesh = parent.current
+  useTask(
+    () => {
+      const { scale, geometry } = parent.current as Mesh
 
-    if (!isInstanceOf(mesh, 'Mesh')) return
+      uniforms.scale.value.set(scale.x, scale.y)
 
-    uniforms.scale.value.set(mesh.scale.x, mesh.scale.y)
-
-    const geometry = (mesh as Mesh).geometry
-
-    // Support arbitrary plane geometries (for instance with rounded corners)
-    if (geometry !== undefined && 'parameters' in geometry) {
-      const { width, height } = geometry.parameters as { width: number; height: number }
-      uniforms.scale.value.set(uniforms.scale.value.x * width, uniforms.scale.value.y * height)
-    }
-  })
+      // Support arbitrary plane geometries (for instance with rounded corners)
+      if (geometry !== undefined && 'parameters' in geometry) {
+        const { width, height } = geometry.parameters as { width: number; height: number }
+        uniforms.scale.value.set(uniforms.scale.value.x * width, uniforms.scale.value.y * height)
+      }
+    },
+    { autoStart: false }
+  )
 </script>
 
 <T

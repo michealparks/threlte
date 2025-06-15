@@ -30,20 +30,22 @@
   const group = new Group()
   const innerGroup = new Group()
   const outerGroup = new Group()
+  const box3 = new Box3()
+  const vec3 = new Vector3()
+  const sphere = new Sphere()
 
   const calculate = () => {
     // return early if all axes are false
     if (x === false && y === false && z === false) return
 
     outerGroup.matrixWorld.identity()
-    const box3 = new Box3().setFromObject(innerGroup, precise)
-    const align = new Vector3()
-    const sphere = new Sphere()
+    box3.setFromObject(innerGroup, precise)
+
     const width = box3.max.x - box3.min.x
     const height = box3.max.y - box3.min.y
     const depth = box3.max.z - box3.min.z
 
-    box3.getCenter(align)
+    box3.getCenter(vec3)
     box3.getBoundingSphere(sphere)
 
     const vAlign = ((y || 0) * height) / 2
@@ -51,9 +53,9 @@
     const dAlign = ((z || 0) * depth) / 2
 
     outerGroup.position.set(
-      x === false ? 0 : -align.x + hAlign,
-      y === false ? 0 : -align.y + vAlign,
-      z === false ? 0 : -align.z + dAlign
+      x === false ? 0 : -vec3.x + hAlign,
+      y === false ? 0 : -vec3.y + vAlign,
+      z === false ? 0 : -vec3.z + dAlign
     )
 
     onalign?.({

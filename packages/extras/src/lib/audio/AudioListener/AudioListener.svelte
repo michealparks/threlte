@@ -1,6 +1,5 @@
 <script lang="ts">
   import { T } from '@threlte/core'
-  import { onDestroy } from 'svelte'
   import { AudioListener as ThreeAudioListener } from 'three'
   import { useThrelteAudio } from '../useThrelteAudio'
   import type { AudioListenerProps } from './types'
@@ -22,8 +21,8 @@
 
   addAudioListener(listener, id)
 
-  onDestroy(() => {
-    removeAudioListener(id)
+  $effect.pre(() => {
+    return () => removeAudioListener(id)
   })
 </script>
 

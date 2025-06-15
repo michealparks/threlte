@@ -11,10 +11,10 @@
   }
 
   let { meshes, index = meshes.length - 1, children, ...props }: Props = $props()
-  const mesh = meshes[index]
 </script>
 
 {#if index > -1}
+  {@const mesh = meshes[index]}
   <InstancedMesh
     geometry={mesh.geometry}
     material={mesh.material}

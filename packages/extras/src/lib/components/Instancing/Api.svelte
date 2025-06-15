@@ -1,8 +1,21 @@
+<script
+  module
+  lang="ts"
+>
+  import { DynamicDrawUsage, Matrix4, Quaternion, Vector3 } from 'three'
+
+  const tempMatrix = new Matrix4()
+  const parentMatrix = new Matrix4()
+  const instanceMatrix = new Matrix4()
+  const translation = new Vector3()
+  const rotation = new Quaternion()
+  const scale = new Vector3()
+</script>
+
 <script lang="ts">
   import { T, useTask } from '@threlte/core'
   import type { Snippet } from 'svelte'
   import type { InstancedMesh } from 'three'
-  import { DynamicDrawUsage, Matrix4, Quaternion, Vector3 } from 'three'
   import { createApi } from './api'
 
   interface Props {
@@ -18,18 +31,10 @@
 
   const { instances } = createApi(instancedMesh, id)
 
-  const tempMatrix = new Matrix4()
-
   const matrices = new Float32Array(limit * 16)
   for (let i = 0; i < limit; i++) tempMatrix.identity().toArray(matrices, i * 16)
 
   const colors = new Float32Array(limit * 3).fill(1)
-
-  const parentMatrix = new Matrix4()
-  const instanceMatrix = new Matrix4()
-  const translation = new Vector3()
-  const rotation = new Quaternion()
-  const scale = new Vector3()
 
   let initialUpdateDone = false
 

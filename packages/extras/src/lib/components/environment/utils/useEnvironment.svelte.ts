@@ -11,7 +11,7 @@ export const useEnvironment = (options: EnvironmentOptions) => {
   const { invalidate } = useThrelte()
 
   // save lastScene and restore when scene changes and on unmount
-  observe(
+  observe.pre(
     () => [options.scene],
     ([scene]) => {
       const { background, environment } = scene
@@ -23,10 +23,10 @@ export const useEnvironment = (options: EnvironmentOptions) => {
     }
   )
 
-  let background: Scene['background'] | undefined = $state()
-  let environment: Scene['environment'] | undefined = $state()
+  let background = $state.raw<Scene['background']>()
+  let environment = $state.raw<Scene['environment']>()
 
-  observe(
+  observe.pre(
     () => [options.scene],
     ([scene]) => {
       background = scene.background
@@ -34,7 +34,7 @@ export const useEnvironment = (options: EnvironmentOptions) => {
     }
   )
 
-  $effect(() => {
+  $effect.pre(() => {
     if (options.texture === undefined || !options.isBackground) {
       return
     }
@@ -50,7 +50,7 @@ export const useEnvironment = (options: EnvironmentOptions) => {
     }
   })
 
-  $effect(() => {
+  $effect.pre(() => {
     if (options.texture === undefined) {
       return
     }

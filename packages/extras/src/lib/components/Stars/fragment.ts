@@ -1,5 +1,3 @@
-import { ShaderChunk } from 'three'
-
 export const fragmentShader = `
 uniform sampler2D pointTexture;
 uniform float fade;
@@ -14,6 +12,6 @@ void main() {
 	}
 	gl_FragColor = vec4(vColor, pointOpacity * opacity);
 
-	${ShaderChunk.tonemapping_fragment}
-	${ShaderChunk.colorspace_fragment}
+	#include <tonemapping_fragment>
+  #include <colorspace_fragment>
 }`

@@ -46,11 +46,11 @@
     t += delta
 
     group.position.x =
-      map(Math.sin((t / 4) * fSpeed[0]) / 10, -0.1, 0.1, ...fRange[0]) * fIntensity[0]
+      map(Math.sin((t / 4) * fSpeed[0]) / 10, -0.1, 0.1, fRange[0][0], fRange[0][1]) * fIntensity[0]
     group.position.y =
-      map(Math.sin((t / 4) * fSpeed[1]) / 10, -0.1, 0.1, ...fRange[1]) * fIntensity[1]
+      map(Math.sin((t / 4) * fSpeed[1]) / 10, -0.1, 0.1, fRange[1][0], fRange[1][1]) * fIntensity[1]
     group.position.z =
-      map(Math.sin((t / 4) * fSpeed[2]) / 10, -0.1, 0.1, ...fRange[2]) * fIntensity[2]
+      map(Math.sin((t / 4) * fSpeed[2]) / 10, -0.1, 0.1, fRange[2][0], fRange[2][1]) * fIntensity[2]
 
     group.rotation.x = (Math.cos((t / 4) * rSpeed[0]) / 8) * rIntensity[0]
     group.rotation.y = (Math.sin((t / 4) * rSpeed[1]) / 8) * rIntensity[1]

@@ -2,6 +2,21 @@
   lang="ts"
   module
 >
+  import {
+    DoubleSide,
+    Group,
+    Matrix4,
+    Mesh,
+    Object3D,
+    OrthographicCamera,
+    PerspectiveCamera,
+    Raycaster,
+    Vector3
+  } from 'three'
+
+  const raycaster = new Raycaster()
+  const matrix = new Matrix4()
+
   let canvasModified = false
   let activeOccludeInstances = 0
 
@@ -30,17 +45,7 @@
 
 <script lang="ts">
   import { T, useTask, useThrelte } from '@threlte/core'
-  import {
-    DoubleSide,
-    Group,
-    Matrix4,
-    Mesh,
-    Object3D,
-    OrthographicCamera,
-    PerspectiveCamera,
-    Raycaster,
-    Vector3
-  } from 'three'
+
   import { useSuspense } from '../../suspense/useSuspense'
   import { logFragment, logVertex, spriteVertex } from './shaders'
   import type { HTMLProps } from './types'
@@ -90,24 +95,23 @@
   let element = document.createElement(as)
   let oldZoom = 0
   let oldPosition = [0, 0]
-  let transformOuterRef: HTMLDivElement | undefined = $state()
-  let transformInnerRef: HTMLDivElement | undefined = $state()
+  let transformOuterRef = $state.raw<HTMLDivElement>()
+  let transformInnerRef = $state.raw<HTMLDivElement>()
   let isMeshSizeSet = false
 
   const occlusionMesh = new Mesh()
-  const raycaster = new Raycaster()
 
   let isRayCastOcclusion = $derived(
     (occlude && occlude !== 'blending') || (Array.isArray(occlude) && occlude.length > 0)
   )
 
-  let matrix = new Matrix4()
-  let width = $derived($size.width)
-  let height = $derived($size.height)
-  let halfWidth = $derived(width / 2)
-  let halfHeight = $derived(height / 2)
-  let fov = $derived($camera.projectionMatrix.elements[5] * halfHeight)
-  let viewportFactor = $derived(getViewportFactor($camera, new Vector3(), $size))
+  const vec3 = new Vector3()
+  const width = $derived($size.width)
+  const height = $derived($size.height)
+  const halfWidth = $derived(width / 2)
+  const halfHeight = $derived(height / 2)
+  const fov = $derived($camera.projectionMatrix.elements[5] * halfHeight)
+  const viewportFactor = $derived(getViewportFactor($camera, vec3, $size))
 
   $effect.pre(() => {
     if (wrapperClass) element.className = wrapperClass
@@ -273,7 +277,7 @@
     }
   })
 
-  let pos = $derived.by(() => {
+  const pos = $derived.by(() => {
     scene.updateMatrixWorld()
     return calculatePosition(group, $camera, $size)
   })
