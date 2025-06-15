@@ -1,6 +1,5 @@
 <script lang="ts">
   import { T, useTask } from '@threlte/core'
-  import { onDestroy } from 'svelte'
   import { BufferAttribute, BufferGeometry, LineSegments } from 'three'
   import { useRapier } from '../../hooks/useRapier'
   import type { DebugProps } from './types'
@@ -10,8 +9,6 @@
   const { world, debug } = useRapier()
 
   const geometry = new BufferGeometry()
-
-  debug.set(true)
 
   useTask(() => {
     const buffers = world.debugRender()
@@ -23,8 +20,10 @@
     geometry.setAttribute('color', colors)
   })
 
-  onDestroy(() => {
-    debug.set(false)
+  debug.set(true)
+
+  $effect.pre(() => {
+    return () => debug.set(false)
   })
 </script>
 

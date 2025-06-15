@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { onDestroy, setContext, tick } from 'svelte'
+  import { setContext, tick } from 'svelte'
   import { createRapierContext } from '../../lib/createRapierContext'
   import type { RapierContext } from '../../types/types'
   import type { WorldProps } from './types'
@@ -63,9 +63,8 @@
     if (framerate !== undefined) rapierContext.framerate.set(framerate)
   })
 
-  onDestroy(async () => {
-    await tick()
-    rapierContext.world.free()
+  $effect.pre(() => {
+    return () => tick().then(() => rapierContext.world.free())
   })
 </script>
 
