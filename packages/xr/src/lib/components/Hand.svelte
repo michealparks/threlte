@@ -1,21 +1,12 @@
-<script
-  lang="ts"
-  module
->
+<script lang="ts">
+  import type { Snippet } from 'svelte'
   import { Group } from 'three'
   import { T, useThrelte, useTask } from '@threlte/core'
   import type { XRHandEvents } from '../types'
-  import { isHandTracking, handEvents } from '../internal/stores'
-  import { left as leftStore, right as rightStore } from '../hooks/useHand'
-  import type { Snippet } from 'svelte'
+  import { xrState } from '../hooks/useXR.svelte'
+  import { handEvents } from '../internal/setupHands.svelte'
+  import { hands } from '../hooks/useHand.svelte'
 
-  const stores = {
-    left: leftStore,
-    right: rightStore
-  } as const
-</script>
-
-<script lang="ts">
   type Props = {
     children?: Snippet
     targetRay?: Snippet
@@ -61,14 +52,14 @@
 
   const handedness = $derived<'left' | 'right'>(left ? 'left' : right ? 'right' : hand ?? 'left')
 
-  $effect.pre(() =>
-    handEvents[handedness].set({
+  $effect.pre(() => {
+    handEvents[handedness] = {
       onconnected,
       ondisconnected,
       onpinchend,
       onpinchstart
-    })
-  )
+    }
+  })
 
   const group = new Group()
 
@@ -103,33 +94,33 @@
   )
 
   $effect.pre(() => {
-    if ($isHandTracking && (wrist !== undefined || children !== undefined) && inputSource) {
+    if (xrState.isHandTracking && (wrist !== undefined || children !== undefined) && inputSource) {
       start()
     } else {
       stop()
     }
   })
 
-  const store = $derived(stores[handedness])
-  const inputSource = $derived($store?.inputSource)
-  const model = $derived($store?.model)
+  const xrHand = $derived(hands[handedness])
+  const inputSource = $derived(xrHand?.inputSource)
+  const model = $derived(xrHand?.model)
 </script>
 
-{#if $store?.hand && $isHandTracking}
-  <T is={$store.hand}>
+{#if xrHand?.hand && xrState.isHandTracking}
+  <T is={xrHand.hand}>
     {#if children === undefined}
       <T is={model} />
     {/if}
   </T>
 
   {#if targetRay !== undefined}
-    <T is={$store.targetRay}>
+    <T is={xrHand.targetRay}>
       {@render targetRay()}
     </T>
   {/if}
 {/if}
 
-{#if $isHandTracking}
+{#if xrState.isHandTracking}
   <T
     is={group}
     attach={scene}

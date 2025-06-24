@@ -19,19 +19,13 @@ This should be placed within a Threlte `<Canvas />`.
 -->
 <script lang="ts">
   import { onMount, type Snippet } from 'svelte'
-  import { useThrelte, watch } from '@threlte/core'
+  import { useThrelte } from '@threlte/core'
   import type { XRSessionEvent } from '../types'
-  import {
-    isHandTracking,
-    isPresenting,
-    referenceSpaceType,
-    session,
-    xr as xrStore
-  } from '../internal/stores'
-  import { setupRaf } from '../internal/setupRaf'
+  import { xrState } from '../hooks/useXR.svelte'
+  import { setupRaf } from '../internal/setupRaf.svelte'
   import { setupHeadset } from '../internal/setupHeadset'
-  import { setupControllers } from '../internal/setupControllers'
-  import { setupHands } from '../internal/setupHands'
+  import { setupControllers } from '../internal/setupControllers.svelte'
+  import { setupHands } from '../internal/setupHands.svelte'
 
   interface Props {
     /**
@@ -95,55 +89,53 @@ This should be placed within a Threlte `<Canvas />`.
   setupHands()
 
   const handleSessionStart = () => {
-    isPresenting.set(true)
-    onsessionstart?.({ type: 'sessionstart', target: $session } as any)
+    xrState.isPresenting = true
+    onsessionstart?.({ type: 'sessionstart', target: xrState.session } as any)
   }
 
   const handleSessionEnd = () => {
-    onsessionend?.({ type: 'sessionend', target: $session } as any)
-    isPresenting.set(false)
-    session.set(undefined)
+    onsessionend?.({ type: 'sessionend', target: xrState.session } as any)
+    xrState.isPresenting = false
+    xrState.session = undefined
   }
 
   const handleVisibilityChange = (event: globalThis.XRSessionEvent) => {
-    onvisibilitychange?.({ ...event, target: $session! })
+    onvisibilitychange?.({ ...event, target: xrState.session! })
   }
 
   const handleInputSourcesChange = (event: XRInputSourcesChangeEvent) => {
-    $isHandTracking = Object.values(event.session.inputSources).some((source) => source.hand)
-    oninputsourceschange?.({ ...event, target: $session! })
+    xrState.isHandTracking = Object.values(event.session.inputSources).some((source) => source.hand)
+    oninputsourceschange?.({ ...event, target: xrState.session! })
   }
 
   const handleFramerateChange = (event: globalThis.XRSessionEvent) => {
-    onvisibilitychange?.({ ...event, target: $session! })
+    onvisibilitychange?.({ ...event, target: xrState.session! })
   }
 
   const updateTargetFrameRate = (frameRate?: number) => {
     if (frameRate === undefined) return
 
     try {
-      $session?.updateTargetFrameRate(frameRate)
+      xrState.session?.updateTargetFrameRate(frameRate)
     } catch {
       // Do nothing
     }
   }
 
-  watch(session, (currentSession) => {
-    if (currentSession === undefined) return
-
-    currentSession.addEventListener('visibilitychange', handleVisibilityChange)
-    currentSession.addEventListener('inputsourceschange', handleInputSourcesChange)
-    currentSession.addEventListener('frameratechange', handleFramerateChange)
+  $effect.pre(() => {
+    xrState.session?.addEventListener('visibilitychange', handleVisibilityChange)
+    xrState.session?.addEventListener('inputsourceschange', handleInputSourcesChange)
+    xrState.session?.addEventListener('frameratechange', handleFramerateChange)
 
     return () => {
-      currentSession.removeEventListener('visibilitychange', handleVisibilityChange)
-      currentSession.removeEventListener('inputsourceschange', handleInputSourcesChange)
-      currentSession.removeEventListener('frameratechange', handleFramerateChange)
+      xrState.session?.removeEventListener('visibilitychange', handleVisibilityChange)
+      xrState.session?.removeEventListener('inputsourceschange', handleInputSourcesChange)
+      xrState.session?.removeEventListener('frameratechange', handleFramerateChange)
     }
   })
 
-  watch(isPresenting, (presenting) => {
-    if (presenting) {
+  $effect.pre(() => {
+    if (xrState.isPresenting) {
       originalRenderMode = renderMode.current
       renderMode.set('always')
     } else {
@@ -152,19 +144,19 @@ This should be placed within a Threlte `<Canvas />`.
   })
 
   onMount(() => {
-    $xrStore = xr
+    xrState.xr = xr
     xr.enabled = true
     xr.addEventListener('sessionstart', handleSessionStart)
     xr.addEventListener('sessionend', handleSessionEnd)
 
     return () => {
-      $xrStore = undefined
+      xrState.xr = undefined
       xr.enabled = false
       xr.removeEventListener('sessionstart', handleSessionStart)
       xr.removeEventListener('sessionend', handleSessionEnd)
 
       // if unmounted while presenting (e.g. due to sveltekit navigation), end the session
-      session.current?.end()
+      xrState.session?.end()
     }
   })
 
@@ -178,11 +170,11 @@ This should be placed within a Threlte `<Canvas />`.
 
   $effect.pre(() => {
     xr.setReferenceSpaceType(referenceSpace)
-    $referenceSpaceType = referenceSpace
+    xrState.referenceSpaceType = referenceSpace
   })
 </script>
 
-{#if $isPresenting}
+{#if xrState.isPresenting}
   {@render children?.()}
 {:else}
   {@render fallback?.()}

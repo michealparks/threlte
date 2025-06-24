@@ -40,9 +40,9 @@
 
 <Controller left>
   <T.Mesh
+    bind:ref={sabers.left}
     rotation.x={Math.PI / 2}
     position.z={-saberLength / 2}
-    oncreate={(ref) => (sabers.left = ref)}
   >
     <T.CylinderGeometry args={[saberRadius, saberRadius, saberLength]} />
     <T.MeshPhongMaterial color="red" />
@@ -51,9 +51,9 @@
 
 <Controller right>
   <T.Mesh
+    bind:ref={sabers.right}
     rotation.x={Math.PI / 2}
     position.z={-saberLength / 2}
-    oncreate={(ref) => (sabers.right = ref)}
   >
     <T.CylinderGeometry args={[saberRadius, saberRadius, saberLength]} />
     <T.MeshStandardMaterial
@@ -66,9 +66,9 @@
 <Hand left>
   {#snippet wrist()}
     <T.Mesh
+      bind:ref={handSabers.left}
       rotation.x={Math.PI / 2}
       position.z={-saberLength / 2}
-      oncreate={(ref) => (handSabers.left = ref)}
     >
       <T.CylinderGeometry args={[saberRadius, saberRadius, saberLength]} />
       <T.MeshStandardMaterial
@@ -82,9 +82,9 @@
 <Hand right>
   {#snippet wrist()}
     <T.Mesh
+      bind:ref={handSabers.right}
       rotation.x={Math.PI / 2}
       position.z={-saberLength / 2}
-      oncreate={(ref) => (handSabers.right = ref)}
     >
       <T.CylinderGeometry args={[saberRadius, saberRadius, saberLength]} />
       <T.MeshPhongMaterial color="red" />

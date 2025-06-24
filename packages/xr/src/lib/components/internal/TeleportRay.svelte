@@ -18,7 +18,7 @@
   import { LineGeometry } from 'three/examples/jsm/lines/LineGeometry.js'
   import { LineMaterial } from 'three/examples/jsm/lines/LineMaterial.js'
   import { T, useTask, useThrelte } from '@threlte/core'
-  import { teleportIntersection } from '../../internal/stores'
+  import { teleportIntersection } from '../../internal/state.svelte'
 
   interface Props {
     handedness: 'left' | 'right'

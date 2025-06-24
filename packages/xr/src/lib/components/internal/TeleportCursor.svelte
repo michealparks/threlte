@@ -12,7 +12,7 @@
 <script lang="ts">
   import { Spring } from 'svelte/motion'
   import { T, useTask, useThrelte } from '@threlte/core'
-  import { teleportIntersection } from '../../internal/stores'
+  import { teleportIntersection } from '../../internal/state.svelte'
   import Cursor from './Cursor.svelte'
   import type { Snippet } from 'svelte'
 

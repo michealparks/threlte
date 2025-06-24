@@ -14,16 +14,16 @@ export { handJoints } from './lib/handJoints'
 
 // Plugins
 export { pointerControls } from './plugins/pointerControls'
-export { teleportControls } from './plugins/teleportControls'
+export { teleportControls } from './plugins/teleportControls/index.svelte'
 
 // Hooks
-export { useController } from './hooks/useController'
-export { useHand } from './hooks/useHand'
-export { useHandJoint } from './hooks/useHandJoint'
+export { useController } from './hooks/useController.svelte'
+export { useHand } from './hooks/useHand.svelte'
+export { useHandJoint } from './hooks/useHandJoint.svelte'
 export { useHeadset } from './hooks/useHeadset'
-export { useHitTest } from './hooks/useHitTest'
+export { useHitTest } from './hooks/useHitTest.svelte'
 export { useTeleport } from './hooks/useTeleport'
-export { useXR } from './hooks/useXR'
+export { useXR } from './hooks/useXR.svelte'
 
 // Types
 export type {

@@ -8,12 +8,18 @@ export const useHandTrackingState = () => {
   const { xr } = useThrelte().renderer
 
   return () => {
-    let handTracking = false
-    xr.getSession()?.inputSources?.forEach((value) => {
+    const sources = xr.getSession()?.inputSources
+
+    if (sources === undefined) {
+      return false
+    }
+
+    for (const value of sources) {
       if (value.hand) {
-        handTracking = true
+        return true
       }
-    })
-    return handTracking
+    }
+
+    return false
   }
 }
