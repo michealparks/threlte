@@ -4,8 +4,8 @@ import {
   type RigidBody,
   type TempContactManifold,
   type Vector
-} from '@dimforge/rapier3d-compat'
-import RAPIER from '@dimforge/rapier3d-compat'
+} from '@dimforge/rapier3d-simd-compat'
+import RAPIER from '@dimforge/rapier3d-simd-compat'
 import type { CurrentWritable, Stage, Task } from '@threlte/core'
 import type { Readable, Writable } from 'svelte/store'
 import type { Object3D } from 'three'

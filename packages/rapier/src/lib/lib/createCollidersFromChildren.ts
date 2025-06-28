@@ -1,4 +1,10 @@
-import { ActiveEvents, Collider, ColliderDesc, RigidBody, World } from '@dimforge/rapier3d-compat'
+import {
+  ActiveEvents,
+  Collider,
+  ColliderDesc,
+  RigidBody,
+  World
+} from '@dimforge/rapier3d-simd-compat'
 import { isInstanceOf } from '@threlte/core'
 import { Mesh, Quaternion, Vector3, type Object3D } from 'three'
 import type { AutoCollidersShapes } from '../types/types'

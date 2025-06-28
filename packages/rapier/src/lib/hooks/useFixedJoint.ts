@@ -1,4 +1,4 @@
-import type { FixedImpulseJoint } from '@dimforge/rapier3d-compat'
+import type { FixedImpulseJoint } from '@dimforge/rapier3d-simd-compat'
 import { Euler, Quaternion, Vector3 } from 'three'
 import { useJoint } from './useJoint'
 import { isEuler, isVector3 } from './utils'

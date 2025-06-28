@@ -1,4 +1,4 @@
-import { MultibodyJoint, type ImpulseJoint, type RigidBody } from '@dimforge/rapier3d-compat'
+import { MultibodyJoint, type ImpulseJoint, type RigidBody } from '@dimforge/rapier3d-simd-compat'
 import { onDestroy } from 'svelte'
 import { derived, get, writable } from 'svelte/store'
 import type { RapierContext } from '../types/types'

@@ -1,4 +1,17 @@
 <script
+  module
+  lang="ts"
+>
+  import { Object3D, Quaternion, Vector3 } from 'three'
+
+  const scale = new Vector3()
+  const worldPosition = new Vector3()
+  const worldQuaternion = new Quaternion()
+  const rigidBodyWorldPos = new Vector3()
+  const rigidBodyWorldQuatInversed = new Quaternion()
+</script>
+
+<script
   lang="ts"
   generics="TShape extends Shape, TMassDef extends MassDef"
 >
@@ -6,10 +19,9 @@
     ActiveCollisionTypes,
     CoefficientCombineRule,
     ColliderDesc
-  } from '@dimforge/rapier3d-compat'
-  import { createParentObject3DContext, useParentObject3D, useTask, watch } from '@threlte/core'
+  } from '@dimforge/rapier3d-simd-compat'
+  import { createParentObject3DContext, useParentObject3D, useTask } from '@threlte/core'
   import { onDestroy, onMount, tick } from 'svelte'
-  import { Object3D, Quaternion, Vector3 } from 'three'
   import { useCollisionGroups } from '../../../hooks/useCollisionGroups'
   import { useRapier } from '../../../hooks/useRapier'
   import { useRigidBody } from '../../../hooks/useRigidBody'
@@ -73,7 +85,7 @@
   onMount(async () => {
     await tick()
 
-    const scale = object.getWorldScale(new Vector3())
+    object.getWorldScale(scale)
 
     const scaledArgs = scaleColliderArgs(shape, args, scale)
 
@@ -95,23 +107,18 @@
     collisionGroups.registerColliders([collider])
 
     if (hasRigidBodyParent) {
-      const rigidBodyWorldPos = new Vector3()
-      const rigidBodyWorldQuatInversed = new Quaternion()
-
       parentRigidBodyObject?.getWorldPosition(rigidBodyWorldPos)
       parentRigidBodyObject?.getWorldQuaternion(rigidBodyWorldQuatInversed)
       rigidBodyWorldQuatInversed.invert()
 
-      const worldPosition = object.getWorldPosition(new Vector3()).sub(rigidBodyWorldPos)
-      const worldRotation = object
-        .getWorldQuaternion(new Quaternion())
-        .premultiply(rigidBodyWorldQuatInversed)
+      object.getWorldPosition(worldPosition).sub(rigidBodyWorldPos)
+      object.getWorldQuaternion(worldQuaternion).premultiply(rigidBodyWorldQuatInversed)
 
       collider.setTranslationWrtParent(worldPosition)
-      collider.setRotationWrtParent(worldRotation)
+      collider.setRotationWrtParent(worldQuaternion)
     } else {
-      collider.setTranslation(object.getWorldPosition(new Vector3()))
-      collider.setRotation(object.getWorldQuaternion(new Quaternion()))
+      collider.setTranslation(object.getWorldPosition(worldPosition))
+      collider.setRotation(object.getWorldQuaternion(worldQuaternion))
     }
   })
 
@@ -127,12 +134,15 @@
   $effect.pre(() => {
     collider?.setFrictionCombineRule(frictionCombineRule ?? CoefficientCombineRule.Average)
   })
-  $effect.pre(() => collider?.setSensor(sensor ?? false))
-  $effect.pre(() => collider?.setContactForceEventThreshold(contactForceEventThreshold ?? 0))
+  $effect.pre(() => {
+    collider?.setSensor(sensor ?? false)
+  })
+  $effect.pre(() => {
+    collider?.setContactForceEventThreshold(contactForceEventThreshold ?? 0)
+  })
   $effect.pre(() => {
     if (density !== undefined) collider?.setDensity(density)
   })
-
   $effect.pre(() => {
     if (collider && mass) {
       if (centerOfMass && principalAngularInertia && angularInertiaLocalFrame) {
@@ -195,10 +205,11 @@
 
   const parent3DObject = useParentObject3D()
   createParentObject3DContext(object)
-  watch(parent3DObject, (parent) => {
-    parent?.add(object)
+
+  $effect.pre(() => {
+    $parent3DObject?.add(object)
     return () => {
-      parent?.remove(object)
+      $parent3DObject?.remove(object)
     }
   })
 </script>

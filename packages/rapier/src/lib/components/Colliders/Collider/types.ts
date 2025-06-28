@@ -3,7 +3,7 @@ import type {
   Collider,
   ColliderDesc,
   Collider as RapierCollider
-} from '@dimforge/rapier3d-compat'
+} from '@dimforge/rapier3d-simd-compat'
 import { type Snippet } from 'svelte'
 import type { Euler, Vector3 } from 'three'
 import type { ColliderEvents, CreateEvent } from '../../../types/types'

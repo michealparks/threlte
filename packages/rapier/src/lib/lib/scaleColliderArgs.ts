@@ -1,4 +1,4 @@
-import type { ColliderDesc } from '@dimforge/rapier3d-compat'
+import type { ColliderDesc } from '@dimforge/rapier3d-simd-compat'
 import type { Vector3 } from 'three'
 import type { ColliderShapes } from '../types/types'
 

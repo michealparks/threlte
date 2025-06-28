@@ -1,4 +1,4 @@
-import type { RopeImpulseJoint } from '@dimforge/rapier3d-compat'
+import type { RopeImpulseJoint } from '@dimforge/rapier3d-simd-compat'
 import { Vector3 } from 'three'
 import { useJoint } from './useJoint'
 import { isVector3 } from './utils'

@@ -1,4 +1,4 @@
-import { Collider, EventQueue, type World } from '@dimforge/rapier3d-compat'
+import { Collider, EventQueue, type World } from '@dimforge/rapier3d-simd-compat'
 import { useTask, type CurrentWritable, type Stage } from '@threlte/core'
 import { Object3D, Quaternion, Vector3 } from 'three'
 import type { ColliderEvents, Framerate, RigidBodyEvents } from '../types/types'

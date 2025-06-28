@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { createParentObject3DContext, useParentObject3D, watch } from '@threlte/core'
+  import { createParentObject3DContext, useParentObject3D } from '@threlte/core'
   import { onDestroy, setContext, tick } from 'svelte'
   import { Object3D, Vector3 } from 'three'
   import { useRapier } from '../../hooks/useRapier'
@@ -72,6 +72,8 @@
 
   rigidBody = rigidBodyInternal
 
+  const defaultScale = new Vector3(1, 1, 1)
+
   /**
    * Apply transforms after the parent component added "object" to itself
    */
@@ -79,7 +81,7 @@
     await tick()
     object.updateMatrix()
     object.updateWorldMatrix(true, false)
-    const parentWorldScale = object.parent ? getWorldScale(object.parent) : new Vector3(1, 1, 1)
+    const parentWorldScale = object.parent ? getWorldScale(object.parent) : defaultScale
     const worldPosition = getWorldPosition(object).multiply(parentWorldScale)
     const worldQuaternion = getWorldQuaternion(object)
     setInitialRigidBodyState(object, worldPosition, worldQuaternion)
@@ -174,10 +176,10 @@
 
   const parent3DObject = useParentObject3D()
   createParentObject3DContext(object)
-  watch(parent3DObject, (parent) => {
-    parent?.add(object)
+  $effect.pre(() => {
+    $parent3DObject?.add(object)
     return () => {
-      parent?.remove(object)
+      $parent3DObject?.remove(object)
     }
   })
 </script>

@@ -1,4 +1,4 @@
-import { RigidBodyType } from '@dimforge/rapier3d-compat'
+import { RigidBodyType } from '@dimforge/rapier3d-simd-compat'
 
 export type RigidBodyTypeString = 'fixed' | 'dynamic' | 'kinematicPosition' | 'kinematicVelocity'
 

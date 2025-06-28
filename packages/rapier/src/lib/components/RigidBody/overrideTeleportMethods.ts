@@ -1,4 +1,4 @@
-import type { RigidBody } from '@dimforge/rapier3d-compat'
+import type { RigidBody } from '@dimforge/rapier3d-simd-compat'
 import type { Object3D } from 'three'
 
 export type ExtractMethods<ObjectType> = Pick<

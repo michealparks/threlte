@@ -1,4 +1,4 @@
-import type { Collider, ColliderHandle } from '@dimforge/rapier3d-compat'
+import type { Collider, ColliderHandle } from '@dimforge/rapier3d-simd-compat'
 import { getContext, onDestroy } from 'svelte'
 import { get } from 'svelte/store'
 import type { CollisionGroupsContext } from '../types/types'

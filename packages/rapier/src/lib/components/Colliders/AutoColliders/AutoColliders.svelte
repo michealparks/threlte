@@ -2,7 +2,7 @@
   lang="ts"
   generics="TMassDef extends MassDef"
 >
-  import { ActiveCollisionTypes, CoefficientCombineRule } from '@dimforge/rapier3d-compat'
+  import { ActiveCollisionTypes, CoefficientCombineRule } from '@dimforge/rapier3d-simd-compat'
   import { createParentObject3DContext, useParentObject3D, watch } from '@threlte/core'
   import { onDestroy, onMount } from 'svelte'
   import { Group } from 'three'

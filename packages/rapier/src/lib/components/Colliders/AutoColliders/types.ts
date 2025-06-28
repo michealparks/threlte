@@ -1,4 +1,4 @@
-import type { CoefficientCombineRule, Collider } from '@dimforge/rapier3d-compat'
+import type { CoefficientCombineRule, Collider } from '@dimforge/rapier3d-simd-compat'
 import { type Snippet } from 'svelte'
 import type { Euler, Vector3 } from 'three'
 import type { AutoCollidersShapes, ColliderEvents, CreateEvent } from '../../../types/types'

@@ -3,8 +3,8 @@ import type {
   ColliderHandle,
   RigidBody,
   RigidBodyHandle
-} from '@dimforge/rapier3d-compat'
-import RAPIER from '@dimforge/rapier3d-compat'
+} from '@dimforge/rapier3d-simd-compat'
+import RAPIER from '@dimforge/rapier3d-simd-compat'
 import { currentWritable, type Key, type Stage } from '@threlte/core'
 import { derived, writable } from 'svelte/store'
 import type { Object3D } from 'three'
