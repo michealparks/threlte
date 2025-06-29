@@ -1,17 +1,12 @@
-import { currentWritable, useLoader, watch } from '@threlte/core'
-import { onDestroy } from 'svelte'
+import { useLoader } from '@threlte/core'
 import { AudioLoader, type Audio, type PositionalAudio } from 'three'
 
-type AudioSource = string | AudioBuffer | HTMLMediaElement | AudioBufferSourceNode | MediaStream
-type AudioVolume = number | undefined
-type AudioPlaybackRate = number | undefined
-
 export type AudioProps = {
-  src: AudioSource
+  src: string | AudioBuffer | HTMLMediaElement | AudioBufferSourceNode | MediaStream
   autoplay?: boolean
   loop?: boolean
-  volume?: AudioVolume
-  playbackRate?: AudioPlaybackRate
+  volume?: number | undefined
+  playbackRate?: number | undefined
   detune?: number
 }
 
@@ -27,17 +22,26 @@ export type AudioEvents = {
  */
 export const useAudio = <T extends Audio<GainNode> | PositionalAudio>(
   audio: T,
+  getSrc: () => AudioProps['src'],
+  getAutoplay: () => boolean | undefined,
+  getDetune: () => number | undefined,
+  getVolume: () => number | undefined,
+  getLoop: () => boolean | undefined,
+  getPlaybackRate: () => number | undefined,
   props: Record<string, (arg?: unknown) => void> = {}
 ) => {
-  const loaded = currentWritable(false)
-  const autoplay = currentWritable(false)
-  const shouldPlay = currentWritable(false)
+  const autoplay = $derived(getAutoplay() ?? false)
+
+  let shouldPlay = $state(false)
+  let loaded = $state(false)
+
   let audioDestroyed = false
 
   const loader = useLoader(AudioLoader)
 
   const setSrc = async (source: AudioProps['src']) => {
-    loaded.set(false)
+    loaded = false
+
     try {
       if (typeof source === 'string') {
         const audioBuffer = await loader.load(source, {
@@ -55,7 +59,7 @@ export const useAudio = <T extends Audio<GainNode> | PositionalAudio>(
       } else if (source instanceof MediaStream) {
         audio.setMediaStreamSource(source)
       }
-      loaded.set(true)
+      loaded = true
 
       props.onload?.(audio.buffer)
     } catch (error) {
@@ -63,20 +67,13 @@ export const useAudio = <T extends Audio<GainNode> | PositionalAudio>(
     }
   }
 
-  const setVolume = (volume: AudioProps['volume']) => {
-    audio.setVolume(volume ?? 1)
-  }
-
-  const setPlaybackRate = (playbackRate: AudioProps['playbackRate']) => {
-    audio.setPlaybackRate(playbackRate ?? 1)
-  }
-
   const play = async (delay?: number) => {
     // source is not loaded yet, so we should play it after it's loaded
-    if (!loaded.current) {
-      shouldPlay.set(true)
+    if (!loaded) {
+      shouldPlay = true
       return
     }
+
     if (audio.context.state !== 'running') {
       await audio.context.resume()
       if (audioDestroyed) {
@@ -92,50 +89,54 @@ export const useAudio = <T extends Audio<GainNode> | PositionalAudio>(
   }
 
   const stop = () => {
-    if (!audio.source) return audio
-    return audio.stop()
+    return audio.source ? audio.stop() : audio
   }
 
-  const setAutoPlay = (value?: AudioProps['autoplay']) => {
-    autoplay.set(value ?? false)
-  }
+  $effect.pre(() => {
+    setSrc(getSrc())
+  })
 
-  const setDetune = (value?: AudioProps['detune']) => {
-    if (audio.source && audio.detune) {
-      audio.setDetune(value ?? 0)
+  $effect.pre(() => {
+    if (audio.source && 'detune' in audio) {
+      audio.setDetune(getDetune() ?? 0)
     }
-  }
+  })
 
-  const setLoop = (value?: AudioProps['loop']) => {
-    audio.setLoop(value ?? false)
-  }
+  $effect.pre(() => {
+    audio.setVolume(getVolume() ?? 1)
+  })
 
-  watch([loaded, autoplay, shouldPlay], ([loaded, autoplay, shouldPlay]) => {
+  $effect.pre(() => {
+    audio.setPlaybackRate(getPlaybackRate() ?? 1)
+  })
+
+  $effect.pre(() => {
+    audio.setLoop(getLoop() ?? false)
+  })
+
+  $effect.pre(() => {
     if (!loaded) {
       if (audio.isPlaying) stop()
       return
     }
+
     if (autoplay || shouldPlay) {
       play()
     }
   })
 
-  onDestroy(() => {
-    try {
-      audioDestroyed = true
-      stop()
-    } catch (error) {
-      console.warn('Error while destroying audio', error)
+  $effect.pre(() => {
+    return () => {
+      try {
+        audioDestroyed = true
+        stop()
+      } catch (error) {
+        console.warn('Error while destroying audio', error)
+      }
     }
   })
 
   return {
-    setVolume,
-    setSrc,
-    setPlaybackRate,
-    setAutoPlay,
-    setDetune,
-    setLoop,
     play,
     pause,
     stop

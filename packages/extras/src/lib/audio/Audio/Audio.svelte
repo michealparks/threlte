@@ -1,9 +1,13 @@
 <script lang="ts">
-  import { T } from '@threlte/core'
-  import { Audio as ThreeAudio } from 'three'
-  import { useAudio } from '../utils/useAudio'
+  import { T, type Props } from '@threlte/core'
+  import { Audio } from 'three'
+  import { useAudio } from '../utils/useAudio.svelte'
   import { useThrelteAudio } from '../useThrelteAudio'
-  import type { AudioProps } from './types'
+  import type { AudioProps as CommonAudioProps } from '../utils/useAudio.svelte'
+
+  interface AudioProps extends Props<Audio<GainNode>>, CommonAudioProps {
+    id?: string
+  }
 
   let {
     src,
@@ -15,7 +19,7 @@
     loop,
     ref = $bindable(),
     children,
-    ...props
+    ...rest
   }: AudioProps = $props()
 
   const { getAudioListener } = useThrelteAudio()
@@ -26,27 +30,24 @@
     throw new Error(`No Audiolistener with id ${id} found.`)
   }
 
-  const audio = new ThreeAudio<GainNode>(listener)
+  const audio = new Audio<GainNode>(listener)
 
-  const { setAutoPlay, setDetune, setLoop, setPlaybackRate, setSrc, setVolume, ...useAudioProps } =
-    useAudio(audio, props)
-
-  export const pause = useAudioProps.pause
-  export const play = useAudioProps.play
-  export const stop = useAudioProps.stop
-
-  $effect(() => setAutoPlay(autoplay))
-  $effect(() => void setSrc(src))
-  $effect(() => setVolume(volume))
-  $effect(() => setPlaybackRate(playbackRate))
-  $effect(() => setLoop(loop))
-  $effect(() => setDetune(detune))
+  export const { pause, play, stop } = useAudio(
+    audio,
+    () => src,
+    () => autoplay,
+    () => detune,
+    () => volume,
+    () => loop,
+    () => playbackRate,
+    rest
+  )
 </script>
 
 <T
   is={audio}
   bind:ref
-  {...props}
+  {...rest}
 >
   {@render children?.({ ref: audio })}
 </T>

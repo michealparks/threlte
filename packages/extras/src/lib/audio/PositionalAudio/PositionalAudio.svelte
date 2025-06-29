@@ -1,9 +1,22 @@
 <script lang="ts">
-  import { T } from '@threlte/core'
-  import { PositionalAudio as ThreePositionalAudio } from 'three'
-  import { useAudio } from '../utils/useAudio'
+  import { T, type Props } from '@threlte/core'
+  import { PositionalAudio } from 'three'
+  import { useAudio } from '../utils/useAudio.svelte'
   import { useThrelteAudio } from '../useThrelteAudio'
-  import type { PositionalAudioProps } from './types'
+  import type { AudioProps as CommonAudioProps } from '../utils/useAudio.svelte'
+
+  interface PositionalAudioProps extends Props<PositionalAudio>, CommonAudioProps {
+    id?: string
+    refDistance?: number
+    rolloffFactor?: number
+    distanceModel?: string
+    maxDistance?: number
+    directionalCone?: {
+      coneInnerAngle: number
+      coneOuterAngle: number
+      coneOuterGain: number
+    }
+  }
 
   let {
     src,
@@ -31,9 +44,20 @@
     throw new Error(`No Audiolistener with id ${id} found.`)
   }
 
-  const audio = new ThreePositionalAudio(listener)
+  const audio = new PositionalAudio(listener)
 
-  $effect(() => {
+  export const { pause, play, stop } = useAudio(
+    audio,
+    () => src,
+    () => autoplay,
+    () => detune,
+    () => volume,
+    () => loop,
+    () => playbackRate,
+    props
+  )
+
+  $effect.pre(() => {
     if (refDistance !== undefined) audio.setRefDistance(refDistance)
     if (rolloffFactor !== undefined) audio.setRolloffFactor(rolloffFactor)
     if (distanceModel !== undefined) audio.setDistanceModel(distanceModel)
@@ -46,27 +70,6 @@
       )
     }
   })
-
-  const {
-    setAutoPlay,
-    setDetune,
-    setLoop,
-    setPlaybackRate,
-    setSrc: setSource,
-    setVolume,
-    ...useAudioProps
-  } = useAudio(audio, props)
-
-  export const pause = useAudioProps.pause
-  export const play = useAudioProps.play
-  export const stop = useAudioProps.stop
-
-  $effect(() => setAutoPlay(autoplay))
-  $effect(() => void setSource(src))
-  $effect(() => setVolume(volume))
-  $effect(() => setPlaybackRate(playbackRate))
-  $effect(() => setLoop(loop))
-  $effect(() => setDetune(detune))
 </script>
 
 <T
