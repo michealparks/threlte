@@ -15,8 +15,6 @@
     "cleanup": "rimraf node_modules .svelte-kit dist"
   },
   "devDependencies": {
-    "@dimforge/rapier3d-compat": "^0.16.2",
-    "@dimforge/rapier3d-simd": "^0.17.3",
     "@dimforge/rapier3d-simd-compat": "^0.17.3",
     "@eslint/js": "catalog:",
     "@sveltejs/adapter-auto": "catalog:",
@@ -46,7 +44,7 @@
     "vite": "catalog:"
   },
   "peerDependencies": {
-    "@dimforge/rapier3d-compat": ">=0.16",
+    "@dimforge/rapier3d-simd-compat": ">=0.17",
     "svelte": ">=5",
     "three": ">=0.152"
   },

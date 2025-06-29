@@ -2,7 +2,7 @@
   import { Mesh, Vector3, Quaternion } from 'three'
   import { T, useTask } from '@threlte/core'
   import { Collider, RigidBody } from '@threlte/rapier'
-  import type { RigidBody as RapierRigidBody } from '@dimforge/rapier3d-compat'
+  import type { RigidBody as RapierRigidBody } from '@dimforge/rapier3d-simd-compat'
   import { Controller, Hand, useXR } from '@threlte/xr'
 
   const { isHandTracking } = useXR()

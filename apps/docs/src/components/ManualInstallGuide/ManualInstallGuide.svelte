@@ -52,7 +52,7 @@
     `npm install three @threlte/core${tag}${coreDivider}`,
     (installExtras || useGltf || installTheatre || installStudio) &&
       `${space}@threlte/extras${tag}${extrasDivider}`,
-    installRapier && `${space}@threlte/rapier${tag} @dimforge/rapier3d-compat${rapierDivider}`,
+    installRapier && `${space}@threlte/rapier${tag} @dimforge/rapier3d-simd-compat${rapierDivider}`,
     installTheatre &&
       `${space}@threlte/theatre${tag} @theatre/core @theatre/studio${theatreDivider}`,
     installXR && `${space}@threlte/xr${tag}${xrDivider}`,

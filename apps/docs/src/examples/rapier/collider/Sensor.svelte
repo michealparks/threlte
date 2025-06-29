@@ -1,5 +1,5 @@
 <script lang="ts">
-  import type { RigidBody as RapierRigidBody } from '@dimforge/rapier3d-compat'
+  import type { RigidBody as RapierRigidBody } from '@dimforge/rapier3d-simd-compat'
   import { T, useTask } from '@threlte/core'
   import { AutoColliders, Collider, RigidBody } from '@threlte/rapier'
   import { Color, MeshStandardMaterial, SphereGeometry } from 'three'

@@ -183,7 +183,7 @@ importers:
         specifier: ^5.6.3
         version: 5.6.3
     devDependencies:
-      '@dimforge/rapier3d-compat':
+      '@dimforge/rapier3d-simd-compat':
         specifier: ^0.16.2
         version: 0.16.2
       '@floating-ui/dom':
@@ -676,9 +676,9 @@ importers:
 
   packages/rapier:
     devDependencies:
-      '@dimforge/rapier3d-compat':
-        specifier: ^0.16.2
-        version: 0.16.2
+      '@dimforge/rapier3d-simd-compat':
+        specifier: ^0.17.3
+        version: 0.17.3
       '@eslint/js':
         specifier: 'catalog:'
         version: 9.26.0
@@ -1467,8 +1467,11 @@ packages:
     resolution: {integrity: sha512-IchNf6dN4tHoMFIn/7OE8LWZ19Y6q/67Bmf6vnGREv8RSbBVb9LPJxEcnwrcwX6ixSvaiGoomAUvu4YSxXrVgw==}
     engines: {node: '>=12'}
 
-  '@dimforge/rapier3d-compat@0.16.2':
-    resolution: {integrity: sha512-VM4pOmZbWUgXzuSJbNmoiDVhurCV8KnHhg0/MB7cNcJEjkrhwTSlnMSAe7OCUU0MXnSJciXdIFOgJU8eCzGGkQ==}
+  '@dimforge/rapier3d-simd-compat@0.16.2':
+    resolution: {integrity: sha512-97XWadjTkvRhLaQ73dnSsFFtG7J2kFW/rVe88mhPSTX0bOcItXtZDLZoFUy9nFLfmp0fdalOj7I33AERD95MIw==}
+
+  '@dimforge/rapier3d-simd-compat@0.17.3':
+    resolution: {integrity: sha512-u45vk0wuzKsGXVOd40q1hGoYZU2LwNSN811jNIcFJ2F7TSVDUMAfSCJT9RppIccAMor3UplD8dlQDRRNH0odGg==}
 
   '@emmetio/abbreviation@2.3.3':
     resolution: {integrity: sha512-mgv58UrU3rh4YgbE/TzgLQwJ3pFsHHhCLqY20aJq+9comytTXUDNGG/SMtSeMJdkpxgXSXunBGLD8Boka3JyVA==}
@@ -9361,7 +9364,9 @@ snapshots:
       '@jridgewell/trace-mapping': 0.3.9
     optional: true
 
-  '@dimforge/rapier3d-compat@0.16.2': {}
+  '@dimforge/rapier3d-simd-compat@0.16.2': {}
+
+  '@dimforge/rapier3d-simd-compat@0.17.3': {}
 
   '@emmetio/abbreviation@2.3.3':
     dependencies:

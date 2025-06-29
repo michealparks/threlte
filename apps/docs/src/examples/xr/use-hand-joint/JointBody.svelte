@@ -1,7 +1,7 @@
 <script lang="ts">
   import { useTask } from '@threlte/core'
   import { handJoints, useHandJoint } from '@threlte/xr'
-  import type { RigidBody as RapierRigidBody } from '@dimforge/rapier3d-compat'
+  import type { RigidBody as RapierRigidBody } from '@dimforge/rapier3d-simd-compat'
   import { Collider, RigidBody } from '@threlte/rapier'
 
   export let jointIndex: number

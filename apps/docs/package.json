@@ -42,7 +42,7 @@
     "typescript": "^5.6.3"
   },
   "devDependencies": {
-    "@dimforge/rapier3d-compat": "^0.16.2",
+    "@dimforge/rapier3d-simd-compat": "^0.16.2",
     "@floating-ui/dom": "^1.6.4",
     "@inquirer/prompts": "^3.2.0",
     "@lumaai/luma-web": "^0.1.15",

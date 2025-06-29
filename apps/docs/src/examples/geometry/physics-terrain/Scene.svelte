@@ -1,6 +1,6 @@
 <script lang="ts">
   import FallingShapes from './FallingShapes.svelte'
-  import RAPIER from '@dimforge/rapier3d-compat'
+  import RAPIER from '@dimforge/rapier3d-simd-compat'
   import { Collider, Debug, RigidBody } from '@threlte/rapier'
   import { DEG2RAD } from 'three/src/math/MathUtils.js'
   import { DoubleSide, PlaneGeometry } from 'three'

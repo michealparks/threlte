@@ -1,5 +1,5 @@
 <script lang="ts">
-  import type { Vector } from '@dimforge/rapier3d-compat'
+  import type { Vector } from '@dimforge/rapier3d-simd-compat'
   import { T, useTask, type Task } from '@threlte/core'
   import { BufferGeometry, DoubleSide, Group, Mesh, Vector3 } from 'three'
 

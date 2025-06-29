@@ -2,7 +2,7 @@
   import {
     CoefficientCombineRule,
     type RigidBody as RapierRigidBody
-  } from '@dimforge/rapier3d-compat'
+  } from '@dimforge/rapier3d-simd-compat'
   import { T, useTask } from '@threlte/core'
   import { AutoColliders, RigidBody } from '@threlte/rapier'
   import { arenaHeight, playerHeight, playerToBorderDistance } from '../../config'

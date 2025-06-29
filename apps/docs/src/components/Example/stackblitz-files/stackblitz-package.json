@@ -10,7 +10,7 @@
     "check": "svelte-check --tsconfig ./tsconfig.json"
   },
   "devDependencies": {
-    "@dimforge/rapier3d-compat": "*",
+    "@dimforge/rapier3d-simd-compat": "*",
     "@sveltejs/vite-plugin-svelte": "*",
     "@theatre/core": "*",
     "@theatre/studio": "*",

@@ -1,5 +1,5 @@
 <script lang="ts">
-  import type { Collider } from '@dimforge/rapier3d-compat'
+  import type { Collider } from '@dimforge/rapier3d-simd-compat'
   import { T, useTask } from '@threlte/core'
   import { Edges, useGltf } from '@threlte/extras'
   import { AutoColliders } from '@threlte/rapier'

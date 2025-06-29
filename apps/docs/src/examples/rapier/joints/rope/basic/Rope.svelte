@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { RigidBody as RapierRigidBody } from '@dimforge/rapier3d-compat'
+  import { RigidBody as RapierRigidBody } from '@dimforge/rapier3d-simd-compat'
   import { observe, T, useTask } from '@threlte/core'
   import { MeshLineGeometry, MeshLineMaterial } from '@threlte/extras'
   import { Collider, RigidBody, useRopeJoint } from '@threlte/rapier'

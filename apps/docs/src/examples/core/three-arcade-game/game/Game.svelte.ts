@@ -1,6 +1,6 @@
 import { Color, PerspectiveCamera, Scene, Texture } from 'three'
 import { levels } from './scenes/levels'
-import type { RigidBody } from '@dimforge/rapier3d-compat'
+import type { RigidBody } from '@dimforge/rapier3d-simd-compat'
 import { Sound } from './sound'
 
 type GameStates =
