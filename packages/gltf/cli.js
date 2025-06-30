@@ -29,6 +29,8 @@ const cli = meow(
     --isolated, -i      Output as isolated module (No $$restProps usage)
     --root, -r          Sets directory from which .gltf file is served
     --transform, -T     Transform the asset for the web (draco, prune, resize)
+      --palette         Creates palette textures and merges materials. Set a number for minimum number of blocks.
+      --flatten         Flattens the scene graph when possible
       --resolution, -R  Transform resolution for texture resizing (default: 1024)
       --simplify, -S    Transform simplification (default: false) (experimental!)
         --weld          Weld tolerance (default: 0.0001)
@@ -53,6 +55,9 @@ const cli = meow(
       draco: { type: 'string', alias: 'd' },
       root: { type: 'string', alias: 'r' },
       transform: { type: 'boolean', alias: 'T' },
+      palette: { type: 'number', default: 5 },
+      flatten: { type: 'boolean' },
+      join: { type: 'boolean' },
       resolution: { type: 'number', alias: 'R', default: 1024 },
       simplify: { type: 'boolean', alias: 'S', default: false },
       weld: { type: 'number', default: 0.0001 },

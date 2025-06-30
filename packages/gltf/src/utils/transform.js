@@ -6,13 +6,22 @@ import {
   resample,
   prune,
   textureCompress,
-  draco
+  draco,
+  flatten,
+  palette,
+  join
 } from '@gltf-transform/functions'
 import { ALL_EXTENSIONS } from '@gltf-transform/extensions'
 import { MeshoptDecoder, MeshoptEncoder, MeshoptSimplifier } from 'meshoptimizer'
 import draco3d from 'draco3dgltf'
 import sharp from 'sharp'
 
+/**
+ *
+ * @param {string} file
+ * @param {string} output
+ * @param {import('./Options').Options} config
+ */
 async function transform(file, output, config = {}) {
   await MeshoptDecoder.ready
   await MeshoptEncoder.ready
@@ -32,12 +41,20 @@ async function transform(file, output, config = {}) {
     // Remove duplicate vertex or texture data, if any.
     dedup(),
     // Remove unused nodes, textures, or other data.
-    prune(),
-    // Resize and convert textures (using webp and sharp)
-    textureCompress({ targetFormat: 'webp', encoder: sharp, resize: [resolution, resolution] }),
-    // Add Draco compression.
-    draco()
+    prune()
   ]
+
+  if (config.palette) {
+    functions.push(palette({ min: typeof config.palette === 'number' ? config.palette : 5 }))
+  }
+
+  if (config.flatten) {
+    functions.push(flatten())
+  }
+
+  if (config.join) {
+    functions.push(join({ keepNamed: false }))
+  }
 
   if (config.simplify) {
     functions.push(
@@ -51,6 +68,13 @@ async function transform(file, output, config = {}) {
       })
     )
   }
+
+  functions.push(
+    // Resize and convert textures (using webp and sharp)
+    textureCompress({ targetFormat: 'webp', encoder: sharp, resize: [resolution, resolution] }),
+    // Add Draco compression.
+    draco()
+  )
 
   await document.transform(...functions)
 

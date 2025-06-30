@@ -2,7 +2,6 @@ import 'jsdom-global'
 import fs from 'fs'
 import path from 'path'
 import transform from './utils/transform.js'
-// import { GLTFLoader, DRACOLoader } from 'three-stdlib'
 import * as prettier from 'prettier'
 import THREE from 'three'
 

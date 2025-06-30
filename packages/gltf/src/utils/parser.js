@@ -88,6 +88,12 @@ function parse(fileName, gltf, options = {}) {
     return rNbr(number)
   }
 
+  /**
+   *
+   * @param {import('three').Object3D} objects
+   * @param {import('three').AnimationClip[]} animations
+   * @returns {string}
+   */
   function printThrelteTypes(objects, animations) {
     let meshes = objects.filter((o) => o.isMesh && o.__removed === undefined)
     let bones = objects.filter(
@@ -123,6 +129,11 @@ function parse(fileName, gltf, options = {}) {
     return types.join('\n')
   }
 
+  /**
+   *
+   * @param {import('three').Object3D} obj
+   * @returns {string}
+   */
   function getType(obj) {
     let type = obj.type.charAt(0).toLowerCase() + obj.type.slice(1)
     // Turn object3d's into groups, it should be faster according to the threejs docs
@@ -365,12 +376,18 @@ function parse(fileName, gltf, options = {}) {
   /**
    * Transforms a type like "mesh" into "T.Mesh".
    * @param {string} type
-   * @returns
+   * @returns {string}
    */
   function getThrelteComponentName(type) {
     return `T.${type[0].toUpperCase()}${type.slice(1)}`
   }
 
+  /**
+   *
+   * @param {import('three').Object3D} obj
+   * @param {boolean} silent
+   * @returns
+   */
   function printThrelte(obj, silent = false) {
     let result = ''
     let children = ''
@@ -423,6 +440,11 @@ function parse(fileName, gltf, options = {}) {
     } else return ''
   }
 
+  /**
+   *
+   * @param {import('three').Object3D} obj
+   * @param {number} line
+   */
   function p(obj, line) {
     console.log(
       [...new Array(line * 2)].map(() => ' ').join(''),

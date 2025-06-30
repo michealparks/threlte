@@ -15,6 +15,7 @@ export type Options = {
   transform?: boolean
   resolution?: number
   simplify?: boolean
+  flatten?: boolean
   weld?: number
   ratio?: number
   error?: number
