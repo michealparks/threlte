@@ -1,0 +1,73 @@
+{
+	"name": "csg",
+	"version": "0.0.1",
+	"scripts": {
+		"dev": "vite dev",
+		"build": "vite build && npm run prepack",
+		"preview": "vite preview",
+		"prepare": "svelte-kit sync || echo ''",
+		"prepack": "svelte-kit sync && svelte-package && publint",
+		"check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
+		"check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch",
+		"format": "prettier --write .",
+		"lint": "prettier --check . && eslint .",
+		"test:unit": "vitest",
+		"test": "npm run test:unit -- --run"
+	},
+	"files": [
+		"dist",
+		"!dist/**/*.test.*",
+		"!dist/**/*.spec.*"
+	],
+	"sideEffects": [
+		"**/*.css"
+	],
+	"svelte": "./dist/index.js",
+	"types": "./dist/index.d.ts",
+	"type": "module",
+	"exports": {
+		".": {
+			"types": "./dist/index.d.ts",
+			"svelte": "./dist/index.js"
+		}
+	},
+	"devDependencies": {
+		"@eslint/compat": "^1.2.5",
+		"@eslint/js": "catalog:",
+		"@sveltejs/adapter-static": "^3.0.8",
+		"@sveltejs/kit": "catalog:",
+		"@sveltejs/package": "catalog:",
+		"@sveltejs/vite-plugin-svelte": "catalog:",
+		"@threlte/core": "workspace:*",
+		"@threlte/extras": "workspace:*",
+		"@types/three": "catalog:",
+		"@vitest/browser": "^3.2.3",
+		"eslint": "catalog:",
+		"eslint-config-prettier": "^10.0.1",
+		"eslint-plugin-svelte": "catalog:",
+		"globals": "catalog:",
+		"playwright": "^1.53.0",
+		"prettier": "catalog:",
+		"prettier-plugin-svelte": "catalog:",
+		"publint": "catalog:",
+		"svelte": "catalog:",
+		"svelte-check": "catalog:",
+		"three": "catalog:",
+		"typescript": "catalog:",
+		"typescript-eslint": "catalog:",
+		"vite": "catalog:",
+		"vite-plugin-devtools-json": "^0.2.0",
+		"vitest": "^3.2.3",
+		"vitest-browser-svelte": "^0.1.0"
+	},
+	"peerDependencies": {
+		"svelte": ">=5",
+		"three": ">=0.160"
+	},
+	"keywords": [
+		"svelte"
+	],
+	"dependencies": {
+		"three-bvh-csg": "^0.0.17"
+	}
+}

@@ -40,22 +40,14 @@ const activeLinkStyles = '!text-orange'
     class="fixed z-40 mx-auto hidden h-[70px] w-full flex-row items-center justify-between gap-6 border-b border-b-orange/25 bg-[#0A0F19] px-6 md:flex"
     transition:name="desktop_nav"
   >
-    <div class="justify flex items-center justify-start gap-6 xl:gap-12">
+    <div class="justify flex items-center justify-start gap-4 xl:gap-8">
       <a href="/">
-        <Image
-          src={Logo}
-          alt="threlte logo"
-          width={152}
-          height={37}
-          class="h-[37px] w-auto object-contain md:hidden lg:block"
-          loading="eager"
-        />
         <Image
           src={LogoOnly}
           alt="threlte logo"
           width={37}
           height={37}
-          class="hidden h-[37px] w-[37px] object-contain md:block lg:hidden"
+          class="h-[34px] w-[34px] object-contain"
           loading="lazy"
         />
       </a>
@@ -154,6 +146,16 @@ const activeLinkStyles = '!text-orange'
           >
             <Package class="hidden h-[16px] md:block" />studio
           </a>
+          <a
+            href="/docs/reference/csg/getting-started"
+            class:list={[
+              linkStyles,
+              activeUrlPathName.includes('/docs/reference/csg') && activeLinkStyles
+            ]}
+            data-astro-prefetch
+          >
+            <Package class="hidden h-[16px] md:block" />csg
+          </a>
         </div>
       </div>
     </div>
@@ -175,9 +177,9 @@ const activeLinkStyles = '!text-orange'
       slot="logo"
       src={Logo}
       alt="threlte logo"
-      width={152}
-      height={37}
-      class="h-[37px] w-auto"
+      height={33}
+      width={135}
+      class="h-[33px] w-auto"
     />
 
     <Socials slot="after-navigation" />
