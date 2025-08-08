@@ -36,7 +36,7 @@ by demand invalidate the frame loop.
 <script lang="ts">
   import { isInstanceOf, T, useParent, useTask, useThrelte } from '@threlte/core'
   import { TrackballControls as ThreeTrackballControls } from 'three/examples/jsm/controls/TrackballControls.js'
-  import { useControlsContext } from '../useControlsContext'
+  import { useControlsContext } from '../useControlsContext.svelte'
   import type { TrackballControlsProps } from './types'
   import type { Event } from 'three'
 
@@ -72,7 +72,7 @@ by demand invalidate the frame loop.
     controls.handleResize()
   })
 
-  const { trackballControls } = useControlsContext()
+  const controlsCtx = useControlsContext()
 
   $effect.pre(() => {
     const handleChange = (event: Event<any, ThreeTrackballControls>) => {
@@ -81,10 +81,10 @@ by demand invalidate the frame loop.
     }
     const currentControls = controls
 
-    trackballControls.set(controls)
+    controlsCtx.trackball = controls
     currentControls.addEventListener('change', handleChange)
     return () => {
-      trackballControls.set(undefined)
+      controlsCtx.trackball = undefined
       currentControls.removeEventListener('change', handleChange)
     }
   })

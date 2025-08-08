@@ -7,12 +7,7 @@ export type TransformControlsProps = Props<Group> &
     /**
      * @default true
      */
-    autoPauseOrbitControls?: boolean
-
-    /**
-     * @default true
-     */
-    autoPauseTrackballControls?: boolean
+    autoPauseControls?: boolean
 
     object?: Object3D
     group?: Group

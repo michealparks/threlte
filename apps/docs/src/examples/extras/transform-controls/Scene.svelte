@@ -1,10 +1,15 @@
 <script lang="ts">
   import { T } from '@threlte/core'
-  import { OrbitControls, TrackballControls, TransformControls } from '@threlte/extras'
+  import {
+    CameraControls,
+    OrbitControls,
+    TrackballControls,
+    TransformControls
+  } from '@threlte/extras'
   import { PerspectiveCamera } from 'three'
 
   interface Props {
-    controls?: '<TrackballControls>' | '<OrbitControls>'
+    controls: 'none' | '<TrackballControls>' | '<OrbitControls>' | '<CameraControls>'
   }
 
   let { controls = '<OrbitControls>' }: Props = $props()
@@ -12,7 +17,7 @@
   let camera = $state.raw<PerspectiveCamera>()
 
   $effect(() => {
-    if (controls === '<OrbitControls>') {
+    if (controls === '<OrbitControls>' || controls === '<CameraControls>') {
       // This snaps the camera back into a position that makes sense for OrbitControls
       camera?.up.set(0, 1, 0)
     }
@@ -28,6 +33,8 @@
     <TrackballControls />
   {:else if controls === '<OrbitControls>'}
     <OrbitControls />
+  {:else if controls === '<CameraControls>'}
+    <CameraControls />
   {/if}
 </T.PerspectiveCamera>
 

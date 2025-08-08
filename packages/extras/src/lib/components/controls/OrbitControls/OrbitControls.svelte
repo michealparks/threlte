@@ -1,7 +1,7 @@
 <script lang="ts">
   import { isInstanceOf, T, useParent, useTask, useThrelte } from '@threlte/core'
   import { OrbitControls as ThreeOrbitControls } from 'three/examples/jsm/controls/OrbitControls.js'
-  import { useControlsContext } from '../useControlsContext'
+  import { useControlsContext } from '../useControlsContext.svelte'
   import type { OrbitControlsProps } from './types'
   import type { Event } from 'three'
 
@@ -17,7 +17,7 @@
   // <HTML> sets canvas pointer-events to "none" if occluding, so events must be placed on the canvas parent.
   const controls = new ThreeOrbitControls($parent, dom)
 
-  const { orbitControls } = useControlsContext()
+  const controlsCtx = useControlsContext()
 
   const { start, stop } = useTask(
     () => {
@@ -43,10 +43,10 @@
       props.onchange?.(event)
     }
 
-    orbitControls.set(controls)
+    controlsCtx.orbit = controls
     controls.addEventListener('change', handleChange)
     return () => {
-      orbitControls.set(undefined)
+      controlsCtx.orbit = undefined
       controls.removeEventListener('change', handleChange)
     }
   })

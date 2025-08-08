@@ -52,6 +52,7 @@
     Vector4,
     type PerspectiveCamera
   } from 'three'
+  import { useControlsContext } from '../controls/useControlsContext.svelte'
 
   install()
 
@@ -63,6 +64,8 @@
 
   const { dom, camera: defaultCamera, invalidate } = useThrelte()
   const parent = useParent()
+
+  const controlsCtx = useControlsContext()
 
   const camera = $derived.by(() => {
     if (userCamera) {
@@ -79,6 +82,13 @@
   const controls = new CC(camera, dom)
   $effect.pre(() => {
     controls.camera = camera
+  })
+
+  $effect.pre(() => {
+    controlsCtx.camera = controls
+    return () => {
+      controlsCtx.camera = undefined
+    }
   })
 
   useTask(

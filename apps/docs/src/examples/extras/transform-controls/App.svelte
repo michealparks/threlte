@@ -4,12 +4,14 @@
   import Scene from './Scene.svelte'
   import Settings from './Settings.svelte'
 
-  let controls: '<TrackballControls>' | '<OrbitControls>' = '<OrbitControls>'
+  let controls = $state<'none' | '<TrackballControls>' | '<OrbitControls>' | '<CameraControls>'>(
+    '<OrbitControls>'
+  )
 </script>
 
 <div>
   <Canvas>
-    <Scene />
+    <Scene {controls} />
   </Canvas>
 </div>
 

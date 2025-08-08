@@ -1,16 +1,15 @@
 <script lang="ts">
-  import { T, observe, useThrelte, type Props } from '@threlte/core'
+  import { T, useThrelte, type Props } from '@threlte/core'
   import { Group } from 'three'
   import {
     TransformControls,
     type TransformControlsEventMap
   } from 'three/examples/jsm/controls/TransformControls.js'
-  import { useControlsContext } from '../useControlsContext'
+  import { useControlsContext } from '../useControlsContext.svelte'
   import type { TransformControlsProps } from './types'
 
   let {
-    autoPauseOrbitControls = true,
-    autoPauseTrackballControls = true,
+    autoPauseControls = true,
     object,
     controls = $bindable(),
     group = $bindable(),
@@ -20,39 +19,25 @@
 
   const { camera, dom, invalidate, scene } = useThrelte()
 
-  const { orbitControls, trackballControls } = useControlsContext()
+  const controlsCtx = useControlsContext()
 
   let isDragging = $state(false)
 
-  observe(
-    () => [orbitControls, isDragging, autoPauseOrbitControls],
-    ([orbitControls, isDragging, useAutoPauseOrbitControls]) => {
-      // if there are no orbitcontrols or we're not even
-      // dragging, or the orbitcontrols are disabled, return
-      if (!orbitControls || (!orbitControls.enabled && isDragging)) return
-      orbitControls.enabled = !(isDragging && useAutoPauseOrbitControls)
-      return () => {
-        // we know they were enabled before, so we can
-        // safely re-enable them
-        orbitControls.enabled = true
-      }
-    }
-  )
+  const camControls = $derived(controlsCtx.camera ?? controlsCtx.orbit ?? controlsCtx.trackball)
 
-  observe(
-    () => [trackballControls, isDragging, autoPauseTrackballControls],
-    ([trackballControls, isDragging, useAutoPausetrackballControls]) => {
-      // if there are no trackballcontrols or we're not even
-      // dragging, or the trackballcontrols are disabled, return
-      if (!trackballControls || (!trackballControls.enabled && isDragging)) return
-      trackballControls.enabled = !(isDragging && useAutoPausetrackballControls)
-      return () => {
-        // we know they were enabled before, so we can
-        // safely re-enable them
-        trackballControls.enabled = true
-      }
+  $effect.pre(() => {
+    if (!autoPauseControls || !camControls?.enabled) {
+      return
     }
-  )
+
+    let enabled = camControls.enabled
+
+    camControls.enabled = !isDragging
+
+    return () => {
+      camControls.enabled = enabled
+    }
+  })
 
   const attachGroup = new Group()
   group = attachGroup
@@ -90,8 +75,8 @@
     'onobjectChange'
   ]
 
-  let transformProps: Props<TransformControls> = $state({})
-  let objectProps: Props<Group> = $state({})
+  let transformProps = $state<Props<TransformControls>>({})
+  let objectProps = $state<Props<Group>>({})
 
   $effect.pre(() => {
     transformProps = {}
