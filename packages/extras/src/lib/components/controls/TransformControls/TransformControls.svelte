@@ -9,8 +9,9 @@
   import type { TransformControlsProps } from './types'
 
   let {
-    autoPauseControls = true,
+    autoPauseCameraControls = true,
     object,
+    cameraControls,
     controls = $bindable(),
     group = $bindable(),
     children,
@@ -23,10 +24,15 @@
 
   let isDragging = $state(false)
 
-  const camControls = $derived(controlsCtx.camera ?? controlsCtx.orbit ?? controlsCtx.trackball)
+  const camControls = $derived(
+    cameraControls ?? controlsCtx.camera ?? controlsCtx.orbit ?? controlsCtx.trackball
+  )
+  const pauseControls = $derived(
+    autoPauseCameraControls ?? props.autoPauseOrbitControls ?? props.autoPauseTrackballControls
+  )
 
   $effect.pre(() => {
-    if (!autoPauseControls || !camControls?.enabled) {
+    if (!pauseControls || !camControls?.enabled) {
       return
     }
 
@@ -51,8 +57,8 @@
   })
 
   $effect.pre(() => {
-    transformControls?.attach(object ?? attachGroup)
-    return () => transformControls?.detach()
+    transformControls.attach(object ?? attachGroup)
+    return () => transformControls.detach()
   })
 
   // This component is receiving the props for the controls as well as the props
