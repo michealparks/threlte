@@ -14,12 +14,15 @@ export { useViewport } from './hooks/useViewport'
 export { meshBounds } from './utilities/meshBounds'
 
 // abstractions
+export { default as Align } from './components/Align/Align.svelte'
 export { default as AnimatedSpriteMaterial } from './components/AnimatedSpriteMaterial/AnimatedSpriteMaterial.svelte'
-export { default as Decal } from './components/Decal/Decal.svelte'
+export { default as AxesHelper } from './components/AxesHelper/AxesHelper.svelte'
+export { default as CubeCamera } from './components/CubeCamera/CubeCamera.svelte'
 export {
   default as CameraControls,
-  type CameraControlsRef
+  CameraControlsRef
 } from './components/CameraControls/CameraControls.svelte'
+export { default as Decal } from './components/Decal/Decal.svelte'
 export { default as Edges } from './components/Edges/Edges.svelte'
 export { default as HTML } from './components/HTML/HTML.svelte'
 export { default as HUD } from './components/HUD/HUD.svelte'
@@ -44,7 +47,6 @@ export { default as MeshLineGeometry } from './components/MeshLine/MeshLineGeome
 export { default as MeshLineMaterial } from './components/MeshLine/MeshLineMaterial.svelte'
 export { default as PointsMaterial } from './components/PointsMaterial/PointsMaterial.svelte'
 export { default as Sky } from './components/Sky/Sky.svelte'
-export { default as Align } from './components/Align/Align.svelte'
 export { default as CSM } from './components/CSM/CSM.svelte'
 export { default as Billboard } from './components/Billboard/Billboard.svelte'
 export { default as FakeGlowMaterial } from './components/FakeGlowMaterial/FakeGlowMaterial.svelte'
@@ -59,7 +61,6 @@ export { default as BakeShadows } from './components/BakeShadows/BakeShadows.sve
 export { default as Detailed } from './components/Detailed/Detailed.svelte'
 export { default as MeshDiscardMaterial } from './components/MeshDiscardMaterial/MeshDiscardMaterial.svelte'
 export { default as Resize } from './components/Resize/Resize.svelte'
-export { default as CubeCamera } from './components/CubeCamera/CubeCamera.svelte'
 export { default as LinearGradientTexture } from './components/GradientTexture/linear/LinearGradientTexture.svelte'
 export { default as RadialGradientTexture } from './components/GradientTexture/radial/RadialGradientTexture.svelte'
 export type { GradientStop, RadialGradientOuterRadius } from './components/GradientTexture/types'
