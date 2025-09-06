@@ -2,7 +2,23 @@
   module
   lang="ts"
 >
-  import CC from 'camera-controls'
+  import { T, useTask, useParent, useThrelte, isInstanceOf } from '@threlte/core'
+  import {
+    Box3,
+    Matrix4,
+    OrthographicCamera,
+    Quaternion,
+    Raycaster,
+    Sphere,
+    Spherical,
+    Vector2,
+    Vector3,
+    Vector4,
+    type PerspectiveCamera
+  } from 'three'
+  import type { CameraControlsProps } from './types'
+  import CameraControls from 'camera-controls'
+  import { useControlsContext } from '../controls/useControlsContext.svelte'
 
   export { default as CameraControlsRef } from 'camera-controls'
 
@@ -13,7 +29,7 @@
       return
     }
 
-    CC.install({
+    CameraControls.install({
       THREE: {
         Vector2,
         Vector3,
@@ -32,42 +48,16 @@
 </script>
 
 <script lang="ts">
-  import {
-    T,
-    useTask,
-    useParent,
-    useThrelte,
-    type Props as ThrelteProps,
-    isInstanceOf
-  } from '@threlte/core'
-  import {
-    Box3,
-    Matrix4,
-    Quaternion,
-    Raycaster,
-    Sphere,
-    Spherical,
-    Vector2,
-    Vector3,
-    Vector4,
-    type PerspectiveCamera
-  } from 'three'
-  import { useControlsContext } from '../controls/useControlsContext.svelte'
-
   install()
 
-  interface Props extends ThrelteProps<CC> {
-    ref?: CC
-  }
-
-  let { ref = $bindable(), camera: userCamera, children, ...rest }: Props = $props()
+  let { ref = $bindable(), camera: userCamera, children, ...rest }: CameraControlsProps = $props()
 
   const { dom, camera: defaultCamera, invalidate } = useThrelte()
   const parent = useParent()
 
   const controlsCtx = useControlsContext()
 
-  const camera = $derived.by(() => {
+  const getCamera = () => {
     if (userCamera) {
       return userCamera
     }
@@ -76,10 +66,12 @@
       return $parent
     }
 
-    return $defaultCamera as PerspectiveCamera
-  })
+    return $defaultCamera as PerspectiveCamera | OrthographicCamera
+  }
 
-  const controls = new CC(camera, dom)
+  const camera = $derived(getCamera())
+
+  const controls = new CameraControls(getCamera(), dom)
   $effect.pre(() => {
     controls.camera = camera
   })

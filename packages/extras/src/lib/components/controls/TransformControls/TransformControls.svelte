@@ -45,12 +45,9 @@
     }
   })
 
-  const attachGroup = new Group()
-  group = attachGroup
-
   // `<HTML> sets canvas pointer-events to "none" if occluding, so events must be placed on the canvas parent.
   const transformControls = new TransformControls(camera.current, dom)
-  controls = transformControls
+  const attachGroup = new Group()
 
   $effect.pre(() => {
     transformControls.camera = $camera
@@ -114,6 +111,7 @@
 <!-- TransformControls need to be added to the scene -->
 <T
   is={transformControls}
+  bind:ref={controls}
   {onchange}
   {...transformProps}
   attach={({ ref }) => {
@@ -131,9 +129,8 @@
 
 <T
   is={attachGroup}
+  bind:ref={group}
   {...objectProps}
 >
-  {#if children}
-    {@render children({ ref: attachGroup })}
-  {/if}
+  {@render children?.({ ref: attachGroup })}
 </T>
