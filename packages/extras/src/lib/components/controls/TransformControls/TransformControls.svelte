@@ -27,12 +27,9 @@
   const camControls = $derived(
     cameraControls ?? controlsCtx.camera ?? controlsCtx.orbit ?? controlsCtx.trackball
   )
-  const pauseControls = $derived(
-    autoPauseCameraControls ?? props.autoPauseOrbitControls ?? props.autoPauseTrackballControls
-  )
 
   $effect.pre(() => {
-    if (!pauseControls || !camControls?.enabled) {
+    if (!autoPauseCameraControls || !camControls?.enabled) {
       return
     }
 

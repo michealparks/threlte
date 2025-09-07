@@ -25,14 +25,14 @@ export type TransformControlsProps = Omit<
     autoPauseCameraControls?: boolean
 
     /**
-     * @deprecated Use autoPauseCameraControls
+     * @removed Use autoPauseCameraControls
      */
-    autoPauseOrbitControls?: boolean
+    autoPauseOrbitControls?: never
 
     /**
-     * @deprecated Use autoPauseCameraControls
+     * @removed Use autoPauseCameraControls
      */
-    autoPauseTrackballControls?: boolean
+    autoPauseTrackballControls?: never
 
     /**
      * An optional instance of a camera controls class,
