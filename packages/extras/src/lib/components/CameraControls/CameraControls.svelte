@@ -54,7 +54,6 @@
 
   const { dom, camera: defaultCamera, invalidate } = useThrelte()
   const parent = useParent()
-
   const controlsCtx = useControlsContext()
 
   const getCamera = () => {
@@ -69,9 +68,9 @@
     return $defaultCamera as PerspectiveCamera | OrthographicCamera
   }
 
-  const camera = $derived(getCamera())
-
   const controls = new CameraControls(getCamera(), dom)
+
+  const camera = $derived(getCamera())
   $effect.pre(() => {
     controls.camera = camera
   })

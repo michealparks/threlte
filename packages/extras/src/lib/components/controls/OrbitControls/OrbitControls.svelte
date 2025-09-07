@@ -1,23 +1,48 @@
 <script lang="ts">
+  import type { Event, PerspectiveCamera, OrthographicCamera } from 'three'
   import { isInstanceOf, T, useParent, useTask, useThrelte } from '@threlte/core'
   import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js'
   import { useControlsContext } from '../useControlsContext.svelte'
   import type { OrbitControlsProps } from './types'
-  import type { Event } from 'three'
 
-  let { ref = $bindable(), children, ...props }: OrbitControlsProps = $props()
+  let { camera: userCamera, ref = $bindable(), children, ...props }: OrbitControlsProps = $props()
 
+  const { dom, camera: defaultCamera, invalidate } = useThrelte()
   const parent = useParent()
-  const { dom, invalidate } = useThrelte()
+  const controlsCtx = useControlsContext()
 
-  if (!isInstanceOf($parent, 'Camera')) {
-    throw new Error('Parent missing: <OrbitControls> need to be a child of a <Camera>')
+  const getCamera = () => {
+    if (userCamera) {
+      return userCamera
+    }
+
+    if (isInstanceOf($parent, 'PerspectiveCamera') || isInstanceOf($parent, 'OrthographicCamera')) {
+      return $parent
+    }
+
+    return $defaultCamera as PerspectiveCamera | OrthographicCamera
   }
 
-  // <HTML> sets canvas pointer-events to "none" if occluding, so events must be placed on the canvas parent.
-  const controls = new OrbitControls($parent, dom)
+  const controls = new OrbitControls(getCamera(), dom)
 
-  const controlsCtx = useControlsContext()
+  const camera = $derived(getCamera())
+  $effect.pre(() => {
+    controls.object = camera
+  })
+
+  $effect.pre(() => {
+    const handleChange = (event: Event<'change', OrbitControls>) => {
+      invalidate()
+      props.onchange?.(event)
+    }
+
+    controlsCtx.orbit = controls
+    controls.addEventListener('change', handleChange)
+    return () => {
+      controlsCtx.orbit = undefined
+      controls.removeEventListener('change', handleChange)
+    }
+  })
 
   const { start, stop } = useTask(
     () => {
@@ -34,20 +59,6 @@
       start()
     } else {
       stop()
-    }
-  })
-
-  $effect.pre(() => {
-    const handleChange = (event: Event<'change', OrbitControls>) => {
-      invalidate()
-      props.onchange?.(event)
-    }
-
-    controlsCtx.orbit = controls
-    controls.addEventListener('change', handleChange)
-    return () => {
-      controlsCtx.orbit = undefined
-      controls.removeEventListener('change', handleChange)
     }
   })
 </script>

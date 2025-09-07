@@ -33,7 +33,7 @@
       return
     }
 
-    let enabled = camControls.enabled
+    const { enabled } = camControls
 
     camControls.enabled = !isDragging
 

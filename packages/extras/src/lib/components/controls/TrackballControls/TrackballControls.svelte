@@ -34,48 +34,45 @@ the DOM element the renderer is rendering to as the DOM element to listen to. It
 by demand invalidate the frame loop.
 -->
 <script lang="ts">
+  import type { Event, PerspectiveCamera, OrthographicCamera } from 'three'
   import { isInstanceOf, T, useParent, useTask, useThrelte } from '@threlte/core'
-  import { TrackballControls as ThreeTrackballControls } from 'three/examples/jsm/controls/TrackballControls.js'
+  import { TrackballControls } from 'three/examples/jsm/controls/TrackballControls.js'
   import { useControlsContext } from '../useControlsContext.svelte'
   import type { TrackballControlsProps } from './types'
-  import type { Event } from 'three'
 
-  let { onchange, ref = $bindable(), children, ...props }: TrackballControlsProps = $props()
+  let {
+    camera: userCamera,
+    onchange,
+    ref = $bindable(),
+    children,
+    ...props
+  }: TrackballControlsProps = $props()
 
+  const { dom, camera: defaultCamera, invalidate, size } = useThrelte()
   const parent = useParent()
-  const { dom, invalidate, size } = useThrelte()
-
-  if (!isInstanceOf($parent, 'Camera')) {
-    throw new Error('Parent missing: <TrackballControls> need to be a child of a <Camera>')
-  }
-
-  // `<HTML> sets canvas pointer-events to "none" if occluding, so events must be placed on the canvas parent.
-  const controls = $derived(new ThreeTrackballControls($parent))
-
-  useTask(
-    () => {
-      controls.update()
-    },
-    {
-      autoInvalidate: false
-    }
-  )
-
-  $effect(() => {
-    controls.connect(dom)
-    return () => controls.disconnect()
-  })
-
-  $effect(() => {
-    // eslint-disable-next-line @typescript-eslint/no-unused-expressions
-    $size
-    controls.handleResize()
-  })
-
   const controlsCtx = useControlsContext()
 
+  const getCamera = () => {
+    if (userCamera) {
+      return userCamera
+    }
+
+    if (isInstanceOf($parent, 'PerspectiveCamera') || isInstanceOf($parent, 'OrthographicCamera')) {
+      return $parent
+    }
+
+    return $defaultCamera as PerspectiveCamera | OrthographicCamera
+  }
+
+  const controls = new TrackballControls(getCamera())
+
+  const camera = $derived(getCamera())
   $effect.pre(() => {
-    const handleChange = (event: Event<any, ThreeTrackballControls>) => {
+    controls.object = camera
+  })
+
+  $effect.pre(() => {
+    const handleChange = (event: Event<'change', TrackballControls>) => {
       invalidate()
       onchange?.(event)
     }
@@ -88,6 +85,26 @@ by demand invalidate the frame loop.
       currentControls.removeEventListener('change', handleChange)
     }
   })
+
+  $effect(() => {
+    controls.connect(dom)
+    return () => controls.disconnect()
+  })
+
+  $effect(() => {
+    // eslint-disable-next-line @typescript-eslint/no-unused-expressions
+    $size
+    controls.handleResize()
+  })
+
+  useTask(
+    () => {
+      controls.update()
+    },
+    {
+      autoInvalidate: false
+    }
+  )
 </script>
 
 <T
