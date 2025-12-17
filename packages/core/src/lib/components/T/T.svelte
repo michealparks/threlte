@@ -38,7 +38,7 @@
 
   // Plugins are initialized here so that pluginsProps
   // is available in the props update
-  const plugins = usePlugins(() => ({
+  const plugins = usePlugins({
     get ref() {
       return internalRef
     },
@@ -60,7 +60,7 @@
     get props() {
       return props
     }
-  }))
+  })
 
   // Props
   const propKeys = Object.keys(props)

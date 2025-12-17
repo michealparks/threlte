@@ -8,7 +8,7 @@ export { T, extend } from './components/T/T.js'
 export type { Props } from './components/T/types.js'
 
 // plugins
-export { injectPlugin } from './plugins/injectPlugin.js'
+export { injectPlugin } from './plugins/injectPlugin.svelte.js'
 export type { Plugin } from './plugins/types.js'
 
 // hooks

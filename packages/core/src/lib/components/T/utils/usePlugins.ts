@@ -1,24 +1,27 @@
 import { getContext } from 'svelte'
-import { type Plugin, type PluginContext, pluginContextKey } from '../../../plugins/types.js'
+import { type Plugin } from '../../../plugins/types.js'
+import { type PluginContext, pluginContextKey } from '../../../plugins/injectPlugin.svelte.js'
 
-export const usePlugins = (args: () => Parameters<Plugin>[0]) => {
-  const plugins = getContext<PluginContext | undefined>(pluginContextKey)
+export const usePlugins = (args: Parameters<Plugin>[0]) => {
+  const context = getContext<PluginContext | undefined>(pluginContextKey)
 
-  if (!plugins) return
+  if (!context?.plugins || context.pluginValues.length === 0) {
+    return
+  }
 
   const pluginsProps: string[] = []
-  const pluginsArray = Object.values(plugins)
+  const { pluginValues } = context
 
-  if (pluginsArray.length > 0) {
-    const pluginArgs = args()
-    // initalize plugins
-    for (let i = 0; i < pluginsArray.length; i++) {
-      const plugin = pluginsArray[i]
-      // initialize plugin
-      const p = plugin(pluginArgs)
-      if (p && p.pluginProps) {
-        pluginsProps.push(...p.pluginProps)
-      }
+  const pluginArgs = args()
+
+  // initalize plugins
+  for (let i = 0, l = pluginValues.length; i < l; i++) {
+    const plugin = pluginValues[i]
+
+    // initialize plugin
+    const p = plugin(pluginArgs)
+    if (p?.pluginProps) {
+      pluginsProps.push(...p.pluginProps)
     }
   }
 
