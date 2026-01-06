@@ -1,14 +1,14 @@
 <script lang="ts">
   import SliceMaterial from './SliceMaterial.svelte'
-  import type { Mesh } from 'three/webgpu'
-  import { ACESFilmicToneMapping, Color, DoubleSide, Group } from 'three/webgpu'
+  import type { ColorRepresentation, Mesh } from 'three/webgpu'
+  import { ACESFilmicToneMapping, DoubleSide, Group } from 'three/webgpu'
   import { Environment, OrbitControls, useDraco, useGltf } from '@threlte/extras'
   import { T, useTask, useThrelte } from '@threlte/core'
 
   type SceneProps = {
     arcAngle: number
     rotate: boolean
-    sliceColor: Color
+    sliceColor: ColorRepresentation
     startAngle: number
   }
 
