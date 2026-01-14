@@ -263,7 +263,7 @@ export const setupPointerControls = (
     }
   )
 
-  observe(
+  observe.pre(
     () => [hand, handContext.enabled],
     ([input, enabled]) => {
       if (input === undefined) return

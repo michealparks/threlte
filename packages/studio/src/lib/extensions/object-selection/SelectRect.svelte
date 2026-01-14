@@ -29,7 +29,7 @@
 
   const studioObjectsRegistry = useStudioObjectsRegistry()
 
-  $effect(()=> {
+  $effect.pre(() => {
     selectionBox.camera = $camera
   })
 

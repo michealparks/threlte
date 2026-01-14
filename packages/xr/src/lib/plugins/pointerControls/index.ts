@@ -75,7 +75,7 @@ export const pointerControls = (handedness: 'left' | 'right', options?: PointerC
 
   const handContext = getHandContext(handedness)
 
-  observe(
+  observe.pre(
     () => [handContext.enabled],
     ([enabled]) => {
       controlsCounter += enabled ? 1 : -1
@@ -83,7 +83,7 @@ export const pointerControls = (handedness: 'left' | 'right', options?: PointerC
     }
   )
 
-  observe(
+  observe.pre(
     () => [handContext.pointerOverTarget],
     ([hovering]) => {
       pointerState[handedness].hovering = hovering

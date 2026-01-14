@@ -26,7 +26,7 @@
     format: RGBAFormat
   })
 
-  $effect(() => {
+  $effect.pre(() => {
     renderTarget.setSize($size.width, $size.height)
   })
 

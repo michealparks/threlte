@@ -60,7 +60,7 @@ export const teleportControls = (
 
   const handContext = getHandContext(handedness)
 
-  observe(
+  observe.pre(
     () => [handContext.enabled],
     ([enabled]) => {
       controlsCounter += enabled ? 1 : -1
@@ -68,7 +68,7 @@ export const teleportControls = (
     }
   )
 
-  observe(
+  observe.pre(
     () => [handContext.active],
     ([hovering]) => {
       teleportState[handedness].hovering = hovering

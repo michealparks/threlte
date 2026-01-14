@@ -25,7 +25,7 @@
     hideStore.set(hide)
   })
 
-  observe(
+  observe.pre(
     () => [studio, hideStore],
     ([studio, hide]) => {
       if (hide) {
