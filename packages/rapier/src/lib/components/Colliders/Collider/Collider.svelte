@@ -195,10 +195,11 @@
 
   const parent3DObject = useParentObject3D()
   createParentObject3DContext(object)
-  watch(parent3DObject, (parent) => {
-    parent?.add(object)
+
+  $effect.pre(() => {
+    $parent3DObject?.add(object)
     return () => {
-      parent?.remove(object)
+      $parent3DObject?.remove(object)
     }
   })
 </script>

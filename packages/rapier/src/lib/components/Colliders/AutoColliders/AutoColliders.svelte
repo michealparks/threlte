@@ -126,10 +126,11 @@
 
   const parent3DObject = useParentObject3D()
   createParentObject3DContext(group)
-  watch(parent3DObject, (parent) => {
-    parent?.add(group)
+
+  $effect.pre(() => {
+    $parent3DObject?.add(group)
     return () => {
-      parent?.remove(group)
+      $parent3DObject?.remove(group)
     }
   })
 </script>
