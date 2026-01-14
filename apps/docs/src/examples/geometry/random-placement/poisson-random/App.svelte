@@ -15,7 +15,6 @@
     title="regenerate"
     on:click={() => {
       regen += 1
-      console.log('click')
     }}
   />
   <Slider
