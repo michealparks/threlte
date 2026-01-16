@@ -423,7 +423,7 @@ export function useGamepad(options: UseGamepadOptions = {}) {
       })
     }
 
-    $effect(() => {
+    $effect.pre(() => {
       for (const index of [0, 1]) {
         const controller = xr.getController(index)
         controller.addEventListener('connected', handleConnected)
@@ -509,7 +509,7 @@ export function useGamepad(options: UseGamepadOptions = {}) {
     // Check if gamepads are already connected.
     handleGamepadConnected()
 
-    $effect(() => {
+    $effect.pre(() => {
       window.addEventListener('gamepadconnected', handleGamepadConnected)
       window.addEventListener('gamepaddisconnected', handleGamepadDisconnected)
 

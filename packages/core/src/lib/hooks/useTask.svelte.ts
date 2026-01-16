@@ -9,6 +9,8 @@ export interface ThrelteUseTask {
   /**
    * @deprecated pass the `running` option to `useTask` instead.
    *
+   * To stop the task, set the options.running state variable to false
+   *
    * ```ts
    * let running = $state(true)
    *
@@ -17,6 +19,8 @@ export interface ThrelteUseTask {
    * }, {
    *   running: () => running
    * })
+   *
+   * running = false
    * ```
    */
   stop: () => void
@@ -24,14 +28,18 @@ export interface ThrelteUseTask {
   /**
    * @deprecated pass the `running` option to `useTask` instead.
    *
+   * To start the task, set the options.running state variable to true
+   *
    * ```ts
-   * let running = $state(true)
+   * let running = $state(false)
    *
    * useTask((delta) => {
    *   // do something
    * }, {
    *   running: () => running
    * })
+   *
+   * running = true
    * ```
    */
   start: () => void
@@ -234,8 +242,12 @@ export function useTask(
 
   return {
     task,
-    start: () => (running = true),
-    stop: () => (running = false),
+    start: () => {
+      running = true
+    },
+    stop: () => {
+      running = false
+    },
     started: toStore(() => running)
   }
 }
