@@ -44,19 +44,6 @@ export interface ThrelteUseTask {
    */
   start: () => void
 
-  /**
-   * @deprecated pass the `running` option to `useTask` instead.
-   *
-   * ```ts
-   * let running = $state(true)
-   *
-   * useTask((delta) => {
-   *   // do something
-   * }, {
-   *   running: () => running
-   * })
-   * ```
-   */
   started: Readable<boolean>
 }
 
