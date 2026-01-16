@@ -18,15 +18,18 @@
     args: [renderer]
   })
 
-  let framesRendered = $state(0)
+  let framesRendered = 0
+  let running = $state(false)
+
   useTask(
     () => {
       framesRendered++
-    },
-    {
       // render for 10 frames
-      running: () => framesRendered < 10
-    }
+      if (framesRendered >= 10) {
+        running = false
+      }
+    },
+    { running: () => running }
   )
 </script>
 
@@ -44,7 +47,9 @@
         toneMapped
       }
     ]}
-    oncreate={start}
+    oncreate={() => {
+      running = true
+    }}
   >
     {@render children?.({ ref: Splat })}
   </T>
