@@ -18,17 +18,15 @@
     args: [renderer]
   })
 
-  let framesRendered = 0
-  const { start, stop } = useTask(
+  let framesRendered = $state(0)
+  useTask(
     () => {
       framesRendered++
-      // render for 10 frames
-      if (framesRendered >= 10) {
-        stop()
-        framesRendered = 0
-      }
     },
-    { autoStart: false }
+    {
+      // render for 10 frames
+      running: () => framesRendered < 10
+    }
   )
 </script>
 
