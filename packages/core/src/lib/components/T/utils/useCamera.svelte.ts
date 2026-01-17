@@ -12,7 +12,9 @@ const updateProjectionMatrixKeys = new Set([
   'right',
   'top',
   'bottom',
-  'zoom'
+  'zoom',
+  'filmGauge',
+  'filmOffset'
 ])
 
 const defaultCameras = new Set()
@@ -49,35 +51,39 @@ export const useCamera = (
     }
   })
 
-  $effect(() => {
-    if (manual) return
+  $effect.pre(() => {
+    if (manual) {
+      return
+    }
 
     for (const key in props()) {
       if (updateProjectionMatrixKeys.has(key)) {
         camera.updateProjectionMatrix()
+        invalidate()
         break
       }
     }
   })
 
   $effect.pre(() => {
-    if (getManual()) {
+    if (manual) {
       return
     }
 
     const { width, height } = size.current
 
-    if (isInstanceOf(camera, 'PerspectiveCamera')) {
-      camera.aspect = width / height
-    } else if (isInstanceOf(camera, 'OrthographicCamera')) {
-      camera.left = width / -2
-      camera.right = width / 2
-      camera.top = height / 2
-      camera.bottom = height / -2
+    if ((camera as PerspectiveCamera).isPerspectiveCamera) {
+      const perspective = camera as PerspectiveCamera
+      perspective.aspect = width / height
+    } else if ((camera as OrthographicCamera).isOrthographicCamera) {
+      const ortho = camera as OrthographicCamera
+      ortho.left = width / -2
+      ortho.right = width / 2
+      ortho.top = height / 2
+      ortho.bottom = height / -2
     }
 
     camera.updateProjectionMatrix()
-    camera.updateMatrixWorld()
     invalidate()
   })
 }

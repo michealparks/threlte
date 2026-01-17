@@ -119,7 +119,12 @@ export const transitions = () => {
       if (t) {
         const global = 'global' in t
         const flag = global ? globalFlags[prop] : localFlags[prop]
-        transition(flag, el, () => convertTransition(t))
+
+        try {
+          transition(flag, el, () => convertTransition(t))
+        } catch (error) {
+          console.error('Threlte transitions are not compatible with this version of Svelte.')
+        }
       }
     }
 

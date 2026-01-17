@@ -12,7 +12,7 @@
 <T.PerspectiveCamera
   name="Camera"
   makeDefault
-  position={[0, 1.5, 8.9958]}
+  position={[ 0, 1, 8.9958 ]}
   fov={33.25}
 />
 
