@@ -6,12 +6,14 @@ on:
       - main
       - next
 
+permissions: write-all
+
 jobs:
   release:
     name: Release
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout Repo
+      - name: Checkout 🛎️
         uses: actions/checkout@v4
         with:
           token: ${{ secrets.CHANGESETS_TOKEN }}
@@ -19,14 +21,14 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 24
 
+      - name: Install pnpm 🔧
       - uses: pnpm/action-setup@v4
+        with:
+          run_install: true
 
-      - name: Install deps
-        run: pnpm run install:packages
-
-      - name: Build packages
+      - name: Build packages 🔧
         run: pnpm run package
 
       - name: Create Release Pull Request or Publish to npm
