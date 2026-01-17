@@ -89,17 +89,12 @@ export function useGltfAnimations<
     }
   })
 
-  const { start, stop } = useTask(
+  useTask(
     (delta) => {
       mixer.update(delta)
     },
-    { autoStart: false }
+    { running: () => Object.keys(actions).length > 0 }
   )
-
-  watch(actions, (actions) => {
-    if (Object.keys(actions).length) start()
-    else stop()
-  })
 
   return {
     gltf,
