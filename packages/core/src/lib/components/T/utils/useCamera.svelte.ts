@@ -3,16 +3,30 @@ import { useThrelte } from '../../../context/compounds/useThrelte.js'
 import { isInstanceOf } from '../../../utilities/index.js'
 import type { OrthographicCamera, PerspectiveCamera } from 'three'
 
+const updateProjectionMatrixKeys = new Set([
+  'fov',
+  'aspect',
+  'near',
+  'far',
+  'left',
+  'right',
+  'top',
+  'bottom',
+  'zoom'
+])
+
 const defaultCameras = new Set()
 
 export const useCamera = (
   getCamera: () => PerspectiveCamera | OrthographicCamera,
   getManual: () => boolean,
-  getMakeDefault: () => boolean
+  getMakeDefault: () => boolean,
+  props: () => Record<string, unknown>
 ) => {
   const { invalidate, size: sizeStore, camera: defaultCamera } = useThrelte()
 
   const camera = $derived(getCamera())
+  const manual = $derived(getManual())
   const size = fromStore(sizeStore)
 
   $effect.pre(() => {
@@ -31,6 +45,17 @@ export const useCamera = (
       if (defaultCameras.size === 0) {
         defaultCamera.set(undefined!)
         invalidate()
+      }
+    }
+  })
+
+  $effect(() => {
+    if (manual) return
+
+    for (const key in props()) {
+      if (updateProjectionMatrixKeys.has(key)) {
+        camera.updateProjectionMatrix()
+        break
       }
     }
   })

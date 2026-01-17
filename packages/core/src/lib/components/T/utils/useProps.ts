@@ -1,19 +1,7 @@
 import { useThrelte } from '../../../context/compounds/useThrelte.js'
 import { resolvePropertyPath } from '../../../utilities/index.js'
 
-const ignoredProps = new Set(['$$scope', '$$slots', 'type', 'args', 'attach', 'instance'])
-
-const updateProjectionMatrixKeys = new Set([
-  'fov',
-  'aspect',
-  'near',
-  'far',
-  'left',
-  'right',
-  'top',
-  'bottom',
-  'zoom'
-])
+const ignoredProps = new Set(['type', 'args', 'attach', 'instance'])
 
 /**
  * Only scalar values are memoized, objects and arrays are considered
@@ -114,15 +102,6 @@ export const useProps = () => {
       }
     } else {
       createSetter(target, key, value)(target, key, value)
-    }
-
-    if (manualCamera) return
-
-    if (
-      updateProjectionMatrixKeys.has(key) &&
-      (target.isPerspectiveCamera || target.isOrthographicCamera)
-    ) {
-      target.updateProjectionMatrix()
     }
   }
 

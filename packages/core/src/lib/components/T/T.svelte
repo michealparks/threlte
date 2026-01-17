@@ -11,8 +11,8 @@
   import { usePlugins } from './utils/usePlugins.js'
   import { useProps } from './utils/useProps.js'
   import { determineRef } from './utils/utils.js'
-  import { isInstanceOf } from '../../utilities/index.js'
   import { untrack } from 'svelte'
+  import type { OrthographicCamera, PerspectiveCamera } from 'three'
 
   let {
     is = useIs<Type>(),
@@ -30,17 +30,13 @@
   /**
    * When "is" or "args" change, we need to create a new ref.
    */
-  const internalRef = $derived(determineRef<Type>(is, args))
-  $effect.pre(() => {
-    if (ref === internalRef) return
-    ref = internalRef
-  })
+  const object = $derived(determineRef<Type>(is, args))
 
   // Plugins are initialized here so that pluginsProps
   // is available in the props update
   const plugins = usePlugins(() => ({
     get ref() {
-      return internalRef
+      return object
     },
     get args() {
       return args
@@ -68,26 +64,27 @@
   propKeys.forEach((key) => {
     const prop = $derived(props[key])
     $effect.pre(() => {
-      updateProp(internalRef, key, prop, plugins?.pluginsProps, manual)
+      updateProp(object, key, prop, plugins?.pluginsProps, manual)
     })
   })
 
   // Attachment
   useAttach<Type>(
-    () => internalRef,
+    () => object,
     () => attach
   )
 
   // Camera management
   $effect.pre(() => {
     if (
-      isInstanceOf(internalRef, 'PerspectiveCamera') ||
-      isInstanceOf(internalRef, 'OrthographicCamera')
+      (object as PerspectiveCamera).isPerspectiveCamera ||
+      (object as OrthographicCamera).isOrthographicCamera
     ) {
       useCamera(
-        () => internalRef,
+        () => object as PerspectiveCamera | OrthographicCamera,
         () => manual,
-        () => makeDefault
+        () => makeDefault,
+        () => props
       )
     }
   })
@@ -96,28 +93,28 @@
   useSetDispose(() => dispose)
 
   $effect.pre(() => {
-    if (isDisposableObject(internalRef)) {
-      useDispose(() => internalRef)
+    if (isDisposableObject(object)) {
+      useDispose(() => object)
     }
   })
 
   // Events
-  useEvents(() => internalRef, propKeys, props)
+  useEvents(() => object, propKeys, props)
 
   /**
    * oncreate needs to be called after all other hooks
    * so that props will have been set once ref is passed
    * to this callback
    */
-  $effect(() => {
+  $effect.pre(() => {
     // eslint-disable-next-line @typescript-eslint/no-unused-expressions
-    internalRef
-    let cleanup: void | (() => void) = undefined
-    untrack(() => {
-      cleanup = oncreate?.(internalRef)
+    object
+
+    return untrack(() => {
+      ref = object
+      return oncreate?.(object)
     })
-    return cleanup
   })
 </script>
 
-{@render children?.({ ref: internalRef })}
+{@render children?.({ ref: object })}
