@@ -3,25 +3,6 @@ import { useThrelte } from '../../../context/compounds/useThrelte.js'
 import { resolvePropertyPath } from '../../../utilities/index.js'
 import { untrack } from 'svelte'
 
-/**
- * Only scalar values are memoized, objects and arrays are considered
- * non-equa by default, to ensure reactivity works as you would
- * expect in svelte.
- * @param value
- * @returns
- */
-export const memoizeProp = (value: unknown): boolean => {
-  // scalar values are memoized
-  if (typeof value === 'string') return true
-  if (typeof value === 'number') return true
-  if (typeof value === 'boolean') return true
-  if (typeof value === 'undefined') return true
-  if (value === null) return true
-
-  // objects and arrays cannot be reliably memoized
-  return false
-}
-
 export const useProps = <Type>(
   object: () => Type,
   props: () => Record<string, unknown>,
@@ -32,12 +13,14 @@ export const useProps = <Type>(
   const setProp = <Type>(instance: Type, propertyPath: string, value: any) => {
     const { key, target } = resolvePropertyPath(instance, propertyPath)
 
+    const typeofValue = typeof value
+
     /**
      * If we can determine that this is an event listener prop,
      * attach it.
      */
     if (
-      typeof value === 'function' &&
+      typeofValue === 'function' &&
       key.startsWith('on') &&
       !propertyPath.includes('.') &&
       'addEventListener' in (target as EventDispatcher)
@@ -52,31 +35,29 @@ export const useProps = <Type>(
       }
     }
 
+    const prop = target[key]
+    const valueIsArray = Array.isArray(value)
+
     if (
-      !Array.isArray(value) &&
-      typeof value === 'number' &&
-      typeof target[key] === 'object' &&
-      target[key] !== null &&
-      typeof target[key]?.setScalar === 'function' &&
+      !valueIsArray &&
+      typeofValue === 'number' &&
+      typeof prop === 'object' &&
+      prop !== null &&
+      typeof prop?.setScalar === 'function' &&
       // colors do have a setScalar function, but we don't want to use it, because
       // the hex notation (i.e. 0xff0000) is very popular and matches the number
       // type. So we exclude colors here.
-      !target[key]?.isColor
+      !prop?.isColor
     ) {
       // edge case of setScalar setters
-      target[key].setScalar(value)
+      prop.setScalar(value)
     } else {
-      console.log(instance, target, key)
-      if (
-        typeof target[key]?.set === 'function' &&
-        typeof target[key] === 'object' &&
-        target[key] !== null
-      ) {
+      if (typeof prop?.set === 'function' && typeof prop === 'object' && prop !== null) {
         // if the property has a "set" function, we can use it
-        if (Array.isArray(value)) {
-          target[key].set(...value)
+        if (valueIsArray) {
+          prop.set(...value)
         } else {
-          target[key].set(value)
+          prop.set(value)
         }
       } else {
         // otherwise, we just set the value
