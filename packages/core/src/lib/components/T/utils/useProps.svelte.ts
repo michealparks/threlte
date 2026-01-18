@@ -65,6 +65,8 @@ export const useProps = <Type>(
       }
     }
 
+    invalidate()
+
     return
   }
 
@@ -76,11 +78,11 @@ export const useProps = <Type>(
     return untrack(() => {
       for (const key in _props) {
         $effect.pre(() => {
-          if (!_pluginProps?.includes(key)) {
-            setProp(_object, key, _props[key])
+          if (_pluginProps?.includes(key)) {
+            return
           }
 
-          invalidate()
+          return setProp(_object, key, _props[key])
         })
       }
     })

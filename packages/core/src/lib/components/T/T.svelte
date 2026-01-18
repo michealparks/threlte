@@ -57,12 +57,6 @@
     }
   }))
 
-  $effect.pre(() => {
-    if (isDisposableObject(object)) {
-      useDispose(() => object)
-    }
-  })
-
   // Props
   useProps(
     () => object,
@@ -91,9 +85,6 @@
     () => attach
   )
 
-  // Disposal
-  useSetDispose(() => dispose)
-
   /**
    * oncreate needs to be called after all other hooks
    * so that props will have been set once ref is passed
@@ -107,6 +98,15 @@
       ref = object
       return oncreate?.(object)
     })
+  })
+
+  // Disposal
+  useSetDispose(() => dispose)
+
+  $effect.pre(() => {
+    if (isDisposableObject(object)) {
+      useDispose(() => object)
+    }
   })
 </script>
 
