@@ -31,6 +31,8 @@
    */
   const object = $derived(determineRef<Type>(is, args))
 
+  $effect(() => object)
+
   // Plugins are initialized here so that pluginsProps
   // is available in the props update
   const plugins = usePlugins(() => ({
