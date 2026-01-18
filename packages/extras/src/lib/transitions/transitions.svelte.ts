@@ -123,7 +123,10 @@ export const transitions = () => {
         try {
           transition(flag, el, () => convertTransition(t))
         } catch (error) {
-          console.error('Threlte transitions are not compatible with this version of Svelte.')
+          console.error(
+            'Threlte transitions are not compatible with this version of Svelte.',
+            error
+          )
         }
       }
     }
