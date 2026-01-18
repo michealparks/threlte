@@ -31,7 +31,15 @@
    */
   const object = $derived(determineRef<Type>(is, args))
 
-  $effect(() => object)
+  /**
+   * @TODO: HMR is broken if this is removed.
+   * () => object calls below return "undefined", which makes no sense.
+   * We need to report a bug to svelte.
+   */
+  $effect(() => {
+    // eslint-disable-next-line @typescript-eslint/no-unused-expressions
+    object
+  })
 
   // Plugins are initialized here so that pluginsProps
   // is available in the props update
