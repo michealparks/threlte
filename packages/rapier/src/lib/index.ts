@@ -21,6 +21,10 @@ export { default as AutoColliders } from './components/Colliders/AutoColliders/A
 export { default as CollisionGroups } from './components/CollisionGroups/CollisionGroups.svelte'
 export { default as Attractor } from './components/Attractor/Attractor.svelte'
 
+// Character controller
+export { default as Character } from './components/CharacterController/CharacterController.svelte'
+export { default as CharacterDebug } from './components/CharacterController/Debug.svelte'
+
 // lib
 export { computeBitMask } from './lib/computeBitMask.js'
 
