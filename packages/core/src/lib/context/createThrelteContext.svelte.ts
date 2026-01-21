@@ -1,6 +1,6 @@
 import { createCacheContext } from './fragments/cache.js'
 import { createCameraContext } from './fragments/camera.js'
-import { createDisposalContext } from './fragments/disposal.js'
+import { createDisposalContext } from './fragments/disposal.svelte.js'
 import { createDOMContext, type CreateDOMContextOptions } from './fragments/dom.js'
 import { createParentContext } from './fragments/parent.js'
 import { createRootParentObject3DContext } from './fragments/parentObject3D.js'

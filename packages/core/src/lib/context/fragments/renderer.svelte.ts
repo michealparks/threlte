@@ -12,7 +12,7 @@ import type { Task } from '../../frame-scheduling/index.js'
 import { useTask } from '../../hooks/useTask.svelte.js'
 import { currentWritable, watch, type CurrentWritable } from '../../utilities/index.js'
 import { useCamera } from './camera.js'
-import { useDisposal } from './disposal.js'
+import { useDisposal } from './disposal.svelte.js'
 import { useDOM } from './dom.js'
 import { useScene } from './scene.js'
 import { useScheduler } from './scheduler.svelte.js'
@@ -67,7 +67,6 @@ export type CreateRendererContextOptions<T extends Renderer> = {
 export const createRendererContext = <T extends Renderer>(
   options: CreateRendererContextOptions<T>
 ): RendererContext<T> => {
-  const { dispose } = useDisposal()
   const { camera } = useCamera()
   const { scene } = useScene()
   const { invalidate, renderStage, autoRender, scheduler, resetFrameInvalidation } = useScheduler()
@@ -162,16 +161,14 @@ export const createRendererContext = <T extends Renderer>(
   if ('setAnimationLoop' in context.renderer) {
     const renderer = context.renderer
     renderer.setAnimationLoop((time) => {
-      dispose()
       scheduler.run(time)
       resetFrameInvalidation()
     })
   }
 
-  onDestroy(() => {
-    if ('dispose' in context.renderer) {
-      const dispose = context.renderer.dispose as () => void
-      dispose()
+  $effect(() => {
+    return () => {
+      context.renderer.dispose?.()
     }
   })
 
