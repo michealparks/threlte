@@ -1,4 +1,4 @@
-import { getContext, onDestroy, setContext } from 'svelte'
+import { getContext, setContext } from 'svelte'
 import {
   AgXToneMapping,
   ColorManagement,
@@ -12,7 +12,6 @@ import type { Task } from '../../frame-scheduling/index.js'
 import { useTask } from '../../hooks/useTask.svelte.js'
 import { currentWritable, watch, type CurrentWritable } from '../../utilities/index.js'
 import { useCamera } from './camera.js'
-import { useDisposal } from './disposal.svelte.js'
 import { useDOM } from './dom.js'
 import { useScene } from './scene.js'
 import { useScheduler } from './scheduler.svelte.js'
