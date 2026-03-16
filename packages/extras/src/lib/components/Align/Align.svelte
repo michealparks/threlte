@@ -1,15 +1,14 @@
 <script lang="ts">
   import {
+    injectPlugin,
     isInstanceOf,
     observe,
     T,
     useStage,
     useTask,
-    useThrelte,
-    type Plugin
+    useThrelte
   } from '@threlte/core'
   import { Box3, Group, Sphere, Vector3 } from 'three'
-  import InjectPlugin from '../InjectPlugin/InjectPlugin.svelte'
   import type { AlignProps } from './types.js'
 
   const { renderStage } = useThrelte()
@@ -94,7 +93,7 @@
     }
   )
 
-  const plugin: Plugin = (args) => {
+  injectPlugin('align', (args) => {
     if (!isInstanceOf(args.ref, 'Object3D')) return
     observe.pre(
       () => [args.ref],
@@ -105,7 +104,7 @@
         }
       }
     )
-  }
+  })
 </script>
 
 <T
@@ -115,12 +114,10 @@
 >
   <T is={outerGroup}>
     <T is={innerGroup}>
-      <InjectPlugin
-        name="align"
-        {plugin}
-      >
-        {@render children?.({ align: () => (scheduleAligning = true), ref: group })}
-      </InjectPlugin>
+      {@render children?.({
+        align,
+        ref: group
+      })}
     </T>
   </T>
 </T>
