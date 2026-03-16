@@ -4,16 +4,16 @@
   import { DEG2RAD } from 'three/src/math/MathUtils.js'
   import Scene from './Scene.svelte'
 
-  let text = 'Hello\nWorld'
-  let bevelEnabled = true
-  let bevelOffset = 0
-  let bevelSegments = 20
-  let bevelSize = 0.2
-  let bevelThickness = 0.1
-  let curveSegments = 12
-  let depth = 1
-  let size = 5
-  let smooth = 0.1
+  let text = $state('Hello\nWorld')
+  let bevelEnabled = $state(true)
+  let bevelOffset = $state(0)
+  let bevelSegments = $state(20)
+  let bevelSize = $state(0.2)
+  let bevelThickness = $state(0.1)
+  let curveSegments = $state(12)
+  let depth = $state(1)
+  let size = $state(5)
+  let smooth = $state(0.1)
 </script>
 
 <Pane

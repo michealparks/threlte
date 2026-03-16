@@ -60,7 +60,7 @@ export const asyncWritable = <T>(promise: Promise<T>): AsyncWritable<T> => {
       store.set(result)
     })
     .catch((e) => {
-      console.error('Error in asyncWritable:', e.message)
+      console.error('Error in asyncWritable:', e.message, e)
       error.set(e)
     })
 

@@ -4,13 +4,17 @@
 
   import { BoxGeometry, MeshStandardMaterial } from 'three'
 
-  export let staticMoving: boolean
-  export let noRotate: boolean
-  export let rotateSpeed: number
-  export let noZoom: boolean
-  export let zoomSpeed: number
-  export let noPan: boolean
-  export let panSpeed: number
+  interface Props {
+    staticMoving: boolean
+    noRotate: boolean
+    rotateSpeed: number
+    noZoom: boolean
+    zoomSpeed: number
+    noPan: boolean
+    panSpeed: number
+  }
+
+  let { staticMoving, noRotate, rotateSpeed, noZoom, zoomSpeed, noPan, panSpeed }: Props = $props()
 </script>
 
 <T.PerspectiveCamera

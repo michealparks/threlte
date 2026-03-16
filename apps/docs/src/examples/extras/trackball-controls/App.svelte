@@ -4,13 +4,13 @@
   import Scene from './Scene.svelte'
   import Settings from './Settings.svelte'
 
-  let staticMoving: boolean = false
-  let noRotate: boolean = false
-  let rotateSpeed: number = 1
-  let noZoom: boolean = false
-  let zoomSpeed: number = 1.2
-  let noPan: boolean = false
-  let panSpeed: number = 0.3
+  let staticMoving: boolean = $state(false)
+  let noRotate: boolean = $state(false)
+  let rotateSpeed: number = $state(1)
+  let noZoom: boolean = $state(false)
+  let zoomSpeed: number = $state(1.2)
+  let noPan: boolean = $state(false)
+  let panSpeed: number = $state(0.3)
 </script>
 
 <div>

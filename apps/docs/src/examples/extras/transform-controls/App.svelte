@@ -4,7 +4,7 @@
   import Scene from './Scene.svelte'
   import Settings from './Settings.svelte'
 
-  let controls: '<TrackballControls>' | '<OrbitControls>' = '<OrbitControls>'
+  let controls: '<TrackballControls>' | '<OrbitControls>' = $state('<OrbitControls>')
 </script>
 
 <div>

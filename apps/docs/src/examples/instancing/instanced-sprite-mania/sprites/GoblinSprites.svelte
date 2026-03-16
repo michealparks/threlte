@@ -8,12 +8,18 @@
  -->
 
 <script lang="ts">
+  import { run } from 'svelte/legacy'
+
   import { useTask } from '@threlte/core'
   import { InstancedSprite, buildSpritesheet, type SpritesheetMetadata } from '@threlte/extras'
   import { Matrix4 } from 'three'
 
-  export let billboarding = false
-  export let fps: number
+  interface Props {
+    billboarding?: boolean
+    fps: number
+  }
+
+  let { billboarding = false, fps }: Props = $props()
 
   // DECLARE SPRIRESHEET META & BUILD IT
   const goblinSpriteMeta: SpritesheetMetadata = [
@@ -56,17 +62,17 @@
 
   const goblinSpritesheet = buildSpritesheet.from(goblinSpriteMeta)
 
-  let spriteMesh: any
+  let spriteMesh: any = $state()
   const goblinCount = 80
   const goblinPositionSpread = 50
   const tempMatrix = new Matrix4()
-  let animationNames: string[] = []
+  let animationNames: string[] = $state([])
 
   /**
    * GOBLIN LOGIC -
    * randomize positions by directly accessing the instanced sprite api without any helpers
    */
-  $: {
+  run(() => {
     if (spriteMesh) {
       //
       for (let i = 0; i < goblinCount; i++) {
@@ -80,7 +86,7 @@
       }
       animationNames = Object.keys(spriteMesh.spritesheet.animations)
     }
-  }
+  })
 
   let goblinId = 0
 

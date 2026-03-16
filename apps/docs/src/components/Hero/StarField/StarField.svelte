@@ -8,13 +8,25 @@
     type WebGLProgramParametersWithUniforms
   } from 'three'
 
-  export let amount = 100
-  export let radius = 100
-  export let color = '#ffffff'
-  export let opacity = 1
-  export let size = 0.1
-  export let speed = 1
-  export let direction: [number, number, number] = [0, 0, 1]
+  interface Props {
+    amount?: number
+    radius?: number
+    color?: string
+    opacity?: number
+    size?: number
+    speed?: number
+    direction?: [number, number, number]
+  }
+
+  let {
+    amount = 100,
+    radius = 100,
+    color = '#ffffff',
+    opacity = 1,
+    size = 0.1,
+    speed = 1,
+    direction = [0, 0, 1]
+  }: Props = $props()
 
   const geometry = new BufferGeometry()
 
@@ -29,9 +41,11 @@
 
   geometry.setAttribute('position', new Float32BufferAttribute(vertices, 3))
 
-  const material = new PointsMaterial({
-    transparent: true
-  })
+  const material = $state(
+    new PointsMaterial({
+      transparent: true
+    })
+  )
 
   const settings = {
     elapsedTime: 0,

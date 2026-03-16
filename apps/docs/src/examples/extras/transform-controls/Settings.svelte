@@ -1,7 +1,11 @@
 <script lang="ts">
   import { Pane, List, ThemeUtils } from 'svelte-tweakpane-ui'
 
-  export let controls: '<TrackballControls>' | '<OrbitControls>' = '<OrbitControls>'
+  interface Props {
+    controls?: '<TrackballControls>' | '<OrbitControls>'
+  }
+
+  let { controls = $bindable('<OrbitControls>') }: Props = $props()
 </script>
 
 <Pane
