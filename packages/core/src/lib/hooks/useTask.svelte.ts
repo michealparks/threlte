@@ -159,7 +159,8 @@ export function useTask(
 
   let stage: Stage = schedulerCtx.mainStage
 
-  let running = $derived(opts?.running?.() ?? opts?.autoStart ?? true)
+  let legacyRunning = $state(opts?.autoStart ?? true)
+  const running = $derived(opts?.running ? opts.running() : legacyRunning)
 
   if (opts) {
     if (opts.stage) {
@@ -202,19 +203,13 @@ export function useTask(
   const task = stage.createTask(key, fn, opts)
 
   $effect.pre(() => {
-    if (!running) {
-      return
-    }
-
-    task.start()
-
-    if (autoInvalidate) {
-      schedulerCtx.autoInvalidations.add(fn)
-    }
-
-    return () => {
+    if (running) {
+      task.start()
+      if (autoInvalidate) {
+        schedulerCtx.autoInvalidations.add(fn)
+      }
+    } else {
       task.stop()
-
       if (autoInvalidate) {
         schedulerCtx.autoInvalidations.delete(fn)
       }
@@ -223,6 +218,10 @@ export function useTask(
 
   $effect.pre(() => {
     return () => {
+      task.stop()
+      if (autoInvalidate) {
+        schedulerCtx.autoInvalidations.delete(fn)
+      }
       stage.removeTask(key)
     }
   })
@@ -230,10 +229,10 @@ export function useTask(
   return {
     task,
     start: () => {
-      running = true
+      legacyRunning = true
     },
     stop: () => {
-      running = false
+      legacyRunning = false
     },
     started: toStore(() => running)
   }

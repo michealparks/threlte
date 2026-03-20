@@ -1,9 +1,9 @@
-import { observe } from '@threlte/core'
 import type { Context, HandContext } from './context.js'
 import { controllers } from '../../hooks/useController.svelte.js'
 import { useTeleport } from '../../hooks/useTeleport.js'
 import { useFixed } from '../../internal/useFixed.js'
 import { isPresenting, teleportIntersection } from '../../internal/state.svelte.js'
+import { fromStore } from 'svelte/store'
 
 export const setupTeleportControls = (
   context: Context,
@@ -11,6 +11,7 @@ export const setupTeleportControls = (
   fixedStep = 1 / 40
 ) => {
   const handedness = handContext.hand
+  const handContextEnabled = fromStore(handContext.enabled)
   const controller = $derived(controllers[handedness])
   const teleport = useTeleport()
 
@@ -19,7 +20,7 @@ export const setupTeleportControls = (
     teleportIntersection[handedness] = undefined
   }
 
-  const { start, stop } = useFixed(
+  useFixed(
     () => {
       const gamepad = controller?.inputSource.gamepad
 
@@ -66,18 +67,7 @@ export const setupTeleportControls = (
     },
     {
       fixedStep,
-      autoStart: false
-    }
-  )
-
-  observe.pre(
-    () => [isPresenting.current, handContext.enabled],
-    ([isPresenting, $enabled]) => {
-      if (isPresenting && $enabled) {
-        start()
-      } else {
-        stop()
-      }
+      running: () => handContextEnabled.current && isPresenting.current
     }
   )
 }

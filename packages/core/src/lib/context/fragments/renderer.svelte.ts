@@ -10,13 +10,14 @@ import {
 } from 'three'
 import type { Task } from '../../frame-scheduling/index.js'
 import { useTask } from '../../hooks/useTask.svelte.js'
-import { currentWritable, watch, type CurrentWritable } from '../../utilities/index.js'
+import { currentWritable, observe, watch, type CurrentWritable } from '../../utilities/index.js'
 import { useCamera } from './camera.js'
 import { useDisposal } from './disposal.js'
 import { useDOM } from './dom.js'
 import { useScene } from './scene.js'
 import { useScheduler } from './scheduler.svelte.js'
 import type { WebGPURenderer } from 'three/webgpu'
+import { fromStore } from 'svelte/store'
 
 export type Renderer = WebGLRenderer | WebGPURenderer
 
@@ -98,21 +99,62 @@ export const createRendererContext = <T extends Renderer>(
 
   setContext<RendererContext<T>>('threlte-renderer-context', context)
 
-  watch([context.colorManagementEnabled], ([colorManagementEnabled]) => {
-    ColorManagement.enabled = colorManagementEnabled
+  const colorManagementEnabled = fromStore(context.colorManagementEnabled)
+  $effect.pre(() => {
+    ColorManagement.enabled = colorManagementEnabled.current
   })
 
-  watch([context.colorSpace], ([colorSpace]) => {
+  const colorSpace = fromStore(context.colorSpace)
+  $effect.pre(() => {
     if ('outputColorSpace' in renderer) {
-      renderer.outputColorSpace = colorSpace
+      renderer.outputColorSpace = colorSpace.current
     }
   })
 
-  watch([context.dpr], ([dpr]) => {
+  const dpr = fromStore(context.dpr)
+  $effect.pre(() => {
     if ('setPixelRatio' in renderer) {
-      renderer.setPixelRatio(dpr)
+      renderer.setPixelRatio(dpr.current)
     }
   })
+
+  const shadows = fromStore(context.shadows)
+  $effect(() => {
+    if (!('shadowMap' in renderer)) return
+
+    renderer.shadowMap.enabled = !!shadows
+    if (shadows.current && shadows.current !== true) {
+      renderer.shadowMap.type = shadows.current
+    } else if (shadows.current === true) {
+      renderer.shadowMap.type = PCFSoftShadowMap
+    }
+  })
+
+  const toneMapping = fromStore(context.toneMapping)
+  $effect(() => {
+    if (!('toneMapping' in renderer)) return
+    renderer.toneMapping = toneMapping.current
+  })
+
+  const auto = fromStore(autoRender)
+  $effect(() => {
+    if (auto) {
+      context.autoRenderTask.start()
+    } else {
+      context.autoRenderTask.stop()
+    }
+    return () => {
+      context.autoRenderTask.stop()
+    }
+  })
+
+  if ('setAnimationLoop' in context.renderer) {
+    renderer.setAnimationLoop((time) => {
+      dispose()
+      scheduler.run(time)
+      resetFrameInvalidation()
+    })
+  }
 
   // Resize the renderer when the size changes
   const { start, stop } = useTask(
@@ -128,52 +170,12 @@ export const createRendererContext = <T extends Renderer>(
       autoInvalidate: false
     }
   )
-  watch([size], () => {
-    start()
-  })
-
-  watch([context.shadows], ([shadows]) => {
-    if (!('shadowMap' in renderer)) return
-
-    renderer.shadowMap.enabled = !!shadows
-    if (shadows && shadows !== true) {
-      renderer.shadowMap.type = shadows
-    } else if (shadows === true) {
-      renderer.shadowMap.type = PCFSoftShadowMap
+  observe(
+    () => [size],
+    () => {
+      start()
     }
-  })
-
-  watch([context.toneMapping], ([toneMapping]) => {
-    if (!('toneMapping' in renderer)) return
-    renderer.toneMapping = toneMapping
-  })
-
-  watch([autoRender], ([autoRender]) => {
-    if (autoRender) {
-      context.autoRenderTask.start()
-    } else {
-      context.autoRenderTask.stop()
-    }
-    return () => {
-      context.autoRenderTask.stop()
-    }
-  })
-
-  if ('setAnimationLoop' in context.renderer) {
-    const renderer = context.renderer
-    renderer.setAnimationLoop((time) => {
-      dispose()
-      scheduler.run(time)
-      resetFrameInvalidation()
-    })
-  }
-
-  onDestroy(() => {
-    if ('dispose' in context.renderer) {
-      const dispose = context.renderer.dispose as () => void
-      dispose()
-    }
-  })
+  )
 
   $effect.pre(() => {
     context.colorManagementEnabled.set(options.colorManagementEnabled ?? true)
@@ -189,6 +191,12 @@ export const createRendererContext = <T extends Renderer>(
   })
   $effect.pre(() => {
     context.dpr.set(options.dpr ?? window.devicePixelRatio)
+  })
+
+  $effect(() => {
+    return () => {
+      renderer.dispose()
+    }
   })
 
   return context

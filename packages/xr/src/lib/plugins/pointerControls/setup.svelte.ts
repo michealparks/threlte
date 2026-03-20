@@ -12,6 +12,7 @@ import { controllers } from '../../hooks/useController.svelte.js'
 import { useHand } from '../../hooks/useHand.svelte.js'
 import { useFixed } from '../../internal/useFixed.js'
 import { isPresenting, pointerIntersection } from '../../internal/state.svelte.js'
+import { fromStore } from 'svelte/store'
 
 type PointerEventName = (typeof events)[number]
 
@@ -29,6 +30,7 @@ export const setupPointerControls = (
   fixedStep = 1 / 40
 ) => {
   const handedness = handContext.hand
+  const handContextEnabled = fromStore(handContext.enabled)
   const controller = $derived(controllers[handedness])
   const hand = useHand(handedness)
   const { dispatchers } = getInternalContext()
@@ -219,7 +221,7 @@ export const setupPointerControls = (
     }
   }
 
-  const { start, stop } = useFixed(
+  useFixed(
     () => {
       hits = processHits()
 
@@ -235,7 +237,7 @@ export const setupPointerControls = (
     },
     {
       fixedStep,
-      autoStart: false
+      running: () => handContextEnabled.current && isPresenting.current
     }
   )
 
@@ -283,17 +285,6 @@ export const setupPointerControls = (
       } else {
         removeHandlers()
         return
-      }
-    }
-  )
-
-  observe.pre(
-    () => [isPresenting.current, handContext.enabled],
-    ([isPresenting, $enabled]) => {
-      if (isPresenting && $enabled) {
-        start()
-      } else {
-        stop()
       }
     }
   )
