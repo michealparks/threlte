@@ -25,12 +25,13 @@
   shadow.camera.left={-2.5}
   shadow.camera.right={2.5}
 />
-<T.AmbientLight intensity={0.2} />
+<T.AmbientLight intensity={0.2} position={[ 0, 9.2, 0 ]} />
 
 <T.Mesh
   name="Floor"
   rotation={[-1.5708, 0, 0]}
   receiveShadow
+  position={[ 0, 0, -5.3 ]}
 >
   <T.CircleGeometry args={[3, 64]} />
   <T.MeshStandardMaterial color="#e9e9e9" />
@@ -48,7 +49,7 @@
 
 <T.Mesh
   name="Torus"
-  position={[1.2, 0.8556, 0.75]}
+  position={[ 1.5, 0.8556, 0.75 ]}
   castShadow
 >
   <T.TorusKnotGeometry args={[0.5, 0.15, 100, 12, 2, 3]} />
@@ -60,7 +61,7 @@
 
 <T.Mesh
   name="Icosahedron"
-  position={[-1.4, 0.8494, 0.75]}
+  position={[ -1.4, 0.8494, 0.8 ]}
   castShadow
   visible
 >
