@@ -1,9 +1,10 @@
 name: Docs Preview
 
 on:
-  pull_request:
+  pull_request_target:
     branches:
       - main
+    types: [opened, synchronize, reopened, closed]
 
 permissions:
   contents: write
@@ -15,10 +16,15 @@ concurrency:
 
 jobs:
   deploy-preview:
+    if: github.event.action != 'closed'
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout
+      # pull_request_target runs in the base repo context for write access,
+      # but we need to build the PR's code, not the base branch.
+      - name: Checkout PR head
         uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
