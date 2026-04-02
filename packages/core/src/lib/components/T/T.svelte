@@ -4,7 +4,6 @@
 >
   import type { TProps } from './types.js'
   import { useAttach } from './utils/useAttach.svelte.js'
-  import { useCamera } from './utils/useCamera.svelte.js'
   import { useDispose } from './utils/useDispose.svelte.js'
   import { useIs } from './utils/useIs.js'
   import { usePlugins } from './utils/usePlugins.js'
@@ -12,6 +11,9 @@
   import { determineRef } from './utils/utils.js'
   import { isInstanceOf } from '../../utilities/isInstanceOf.js'
   import { untrack } from 'svelte'
+  import { createParentContext } from '../../context/fragments/parent.js'
+  import { createParentObject3DContext } from '../../context/fragments/parentObject3D.js'
+  import Camera from './Camera.svelte'
 
   let {
     is = useIs<Type>(),
@@ -74,20 +76,10 @@
     () => attach
   )
 
-  // Camera management
-  $effect.pre(() => {
-    if (
-      isInstanceOf(internalRef, 'PerspectiveCamera') ||
-      isInstanceOf(internalRef, 'OrthographicCamera')
-    ) {
-      useCamera(
-        () => internalRef,
-        () => manual,
-        () => makeDefault,
-        () => props
-      )
-    }
-  })
+  createParentContext(() => internalRef)
+  createParentObject3DContext(() =>
+    isInstanceOf(internalRef, 'Object3D') ? internalRef : undefined
+  )
 
   // Disposal
   useDispose(
@@ -101,14 +93,21 @@
    * to this callback
    */
   $effect(() => {
-    // eslint-disable-next-line @typescript-eslint/no-unused-expressions
-    internalRef
-    let cleanup: void | (() => void) = undefined
-    untrack(() => {
-      cleanup = oncreate?.(internalRef)
-    })
-    return cleanup
+    if (internalRef) {
+      return untrack(() => {
+        return oncreate?.(internalRef)
+      })
+    }
   })
 </script>
+
+{#if isInstanceOf(internalRef, 'PerspectiveCamera') || isInstanceOf(internalRef, 'OrthographicCamera')}
+  <Camera
+    ref={internalRef}
+    {manual}
+    {makeDefault}
+    {...props}
+  />
+{/if}
 
 {@render children?.({ ref: internalRef })}

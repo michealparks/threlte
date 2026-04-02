@@ -1,14 +1,11 @@
 import { getContext, setContext } from 'svelte'
-import { derived, readable, writable, type Readable } from 'svelte/store'
 import type { Object3D } from 'three'
+import { runeToCurrentReadable } from '../../utilities/currentWritable.js'
 
-const parentObject3DContextKey = Symbol('threlte-parent-object3d-context')
-type ParentObject3DContext = Readable<Object3D>
+const key = Symbol('threlte-parent-object3d-context')
 
-export const createRootParentObject3DContext = (object: Object3D) => {
-  const ctx: ParentObject3DContext = readable<Object3D>(object)
-  setContext(parentObject3DContextKey, ctx)
-  return ctx
+interface Context {
+  current: Object3D
 }
 
 /**
@@ -17,14 +14,22 @@ export const createRootParentObject3DContext = (object: Object3D) => {
  * parentObject3D context of the parent component when the local context store
  * is `undefined`.
  */
-export const createParentObject3DContext = (object?: Object3D) => {
-  const parentObject3D = getContext<ParentObject3DContext>(parentObject3DContextKey)
-  const object3D = writable<Object3D | undefined>(object)
-  const ctx = derived([object3D, parentObject3D], ([object3D, parentObject3D]) => {
-    return object3D ?? parentObject3D
-  })
-  setContext(parentObject3DContextKey, ctx)
-  return object3D
+export const createParentObject3DContext = (object: () => Object3D | undefined) => {
+  const parent = useParentObject3D()
+
+  const context: Context = {
+    get current() {
+      return object() ?? parent.current
+    }
+  }
+
+  setContext(key, context)
+
+  return context
+}
+
+export const useParentObject3D = () => {
+  return getContext<Context>(key)
 }
 
 /**
@@ -43,6 +48,7 @@ export const createParentObject3DContext = (object?: Object3D) => {
  * The parentObject3D as retrieved inside the component `<CustomComponent>`
  * will be the mesh created by the `<T.Mesh>` component.
  */
-export const useParentObject3D = () => {
-  return getContext<ParentObject3DContext>(parentObject3DContextKey)
+export const useParentObject3DExternal = () => {
+  const parent = useParentObject3D()
+  return runeToCurrentReadable(() => parent.current)
 }

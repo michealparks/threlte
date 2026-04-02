@@ -177,7 +177,7 @@
   })
 
   const parent3DObject = useParentObject3D()
-  createParentObject3DContext(object)
+  createParentObject3DContext(() => object)
 
   $effect(() => {
     $parent3DObject?.add(object)

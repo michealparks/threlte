@@ -23,8 +23,8 @@
   createDOMContext({ dom, canvas: parentContext.canvas })
   createCacheContext()
   const { scene } = createSceneContext()
-  createParentContext(scene)
-  createParentObject3DContext(scene)
+  createParentContext(() => scene)
+  createParentObject3DContext(() => scene)
   const { camera } = createCameraContext()
   createUserContext()
 

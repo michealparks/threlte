@@ -125,7 +125,7 @@
   onDestroy(cleanup)
 
   const parent3DObject = useParentObject3D()
-  createParentObject3DContext(group)
+  createParentObject3DContext(() => group)
 
   $effect.pre(() => {
     $parent3DObject?.add(group)
