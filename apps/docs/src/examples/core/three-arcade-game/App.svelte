@@ -1,7 +1,7 @@
 <script lang="ts">
   import { Canvas, extend } from '@threlte/core'
   import { useProgress } from '@threlte/extras'
-  import { World } from '@threlte/rapier'
+  import { Debug, World } from '@threlte/rapier'
   import { CustomGridHelper } from './game/objects/CustomGridHelper'
   import { game } from './game/Game.svelte'
   import Scene from './Scene.svelte'
@@ -36,6 +36,7 @@
     >
       <World gravity={[0, 0, 0]}>
         <Scene />
+        <Debug />
       </World>
     </Canvas>
   </div>

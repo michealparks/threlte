@@ -7,9 +7,8 @@
     CoefficientCombineRule,
     ColliderDesc
   } from '@dimforge/rapier3d-compat'
-  import { createParentObject3DContext, useParentObject3D, useTask } from '@threlte/core'
-  import { onDestroy, onMount, tick } from 'svelte'
-  import { Object3D, Quaternion, Vector3 } from 'three'
+  import { useParentObject3D, useTask } from '@threlte/core'
+  import { Quaternion, Vector3 } from 'three'
   import { useCollisionGroups } from '../../../hooks/useCollisionGroups.js'
   import { useRapier } from '../../../hooks/useRapier.js'
   import { useRigidBody } from '../../../hooks/useRigidBody.js'
@@ -18,7 +17,6 @@
   import { getWorldPosition, getWorldQuaternion } from '../../../lib/getWorldTransforms.js'
   import { useParentRigidbodyObject } from '../../../lib/rigidBodyObjectContext.js'
   import { scaleColliderArgs } from '../../../lib/scaleColliderArgs.js'
-  import { useCreateEvent } from '../../../lib/useCreateEvent.js'
   import type { ColliderProps, MassDef, Shape } from './types.js'
 
   let {
@@ -42,59 +40,50 @@
     oncollisionexit,
     oncontact,
     onsensorenter,
-    onsensorexit,
-    children
+    onsensorexit
   }: ColliderProps<TShape, TMassDef> = $props()
 
-  const object = new Object3D()
-
-  const { updateRef } = useCreateEvent(oncreate)
   const rigidBody = useRigidBody()
   const parentRigidBodyObject = useParentRigidbodyObject()
-  const hasRigidBodyParent = !!rigidBody
+  const parent3DObject = useParentObject3D()
 
   const rapierContext = useRapier()
   const { world } = rapierContext
 
   const collisionGroups = useCollisionGroups()
 
-  const events = {
+  const events = $derived({
     oncollisionenter,
     oncollisionexit,
     oncontact,
     onsensorenter,
     onsensorexit
-  }
+  })
 
   /**
-   * Actual collider setup happens onMount as only then
-   * the transforms are finished.
+   * Create the collider. Runs after the parent Object3D is available.
+   * The cleanup function handles teardown — no async gap, no orphan leak.
    */
-  onMount(async () => {
-    await tick()
+  $effect(() => {
+    const parentObject = $parent3DObject
+    if (!parentObject) return
 
-    const scale = object.getWorldScale(new Vector3())
+    parentObject.updateWorldMatrix(true, false)
 
+    const scale = parentObject.getWorldScale(new Vector3())
     const scaledArgs = scaleColliderArgs(shape, args, scale)
 
     // @ts-expect-error
     const colliderDesc = ColliderDesc[shape](...scaledArgs) as ColliderDesc
 
-    collider = world.createCollider(colliderDesc, rigidBody)
-    collider.setActiveCollisionTypes(ActiveCollisionTypes.ALL)
-    updateRef(collider)
+    const c = world.createCollider(colliderDesc, rigidBody)
+    c.setActiveCollisionTypes(ActiveCollisionTypes.ALL)
+    collider = c
 
-    /**
-     * Add collider to context
-     */
-    rapierContext.addColliderToContext(collider, object, events)
+    rapierContext.addColliderToContext(c, parentObject, events)
+    collisionGroups.registerColliders([c])
 
-    /**
-     * For use in conjunction with component <CollisionGroups>
-     */
-    collisionGroups.registerColliders([collider])
-
-    if (hasRigidBodyParent) {
+    if (rigidBody) {
       const rigidBodyWorldPos = new Vector3()
       const rigidBodyWorldQuatInversed = new Quaternion()
 
@@ -102,39 +91,58 @@
       parentRigidBodyObject?.getWorldQuaternion(rigidBodyWorldQuatInversed)
       rigidBodyWorldQuatInversed.invert()
 
-      const worldPosition = object.getWorldPosition(new Vector3()).sub(rigidBodyWorldPos)
-      const worldRotation = object
+      const localPosition = parentObject
+        .getWorldPosition(new Vector3())
+        .sub(rigidBodyWorldPos)
+        .applyQuaternion(rigidBodyWorldQuatInversed)
+
+      const localRotation = parentObject
         .getWorldQuaternion(new Quaternion())
         .premultiply(rigidBodyWorldQuatInversed)
 
-      collider.setTranslationWrtParent(worldPosition)
-      collider.setRotationWrtParent(worldRotation)
+      c.setTranslationWrtParent(localPosition)
+      c.setRotationWrtParent(localRotation)
     } else {
-      collider.setTranslation(object.getWorldPosition(new Vector3()))
-      collider.setRotation(object.getWorldQuaternion(new Quaternion()))
+      c.setTranslation(parentObject.getWorldPosition(new Vector3()))
+      c.setRotation(parentObject.getWorldQuaternion(new Quaternion()))
+    }
+
+    const cleanup = oncreate?.(c)
+
+    return () => {
+      rapierContext.removeColliderFromContext(c)
+      collisionGroups.removeColliders([c])
+      if (c.isValid()) {
+        world.removeCollider(c, true)
+      }
+      collider = undefined
+      cleanup?.()
     }
   })
 
-  $effect.pre(() => {
+  $effect(() => {
     collider?.setRestitution(restitution ?? 0)
   })
-  $effect.pre(() => {
+  $effect(() => {
     collider?.setRestitutionCombineRule(restitutionCombineRule ?? CoefficientCombineRule.Average)
   })
-  $effect.pre(() => {
+  $effect(() => {
     collider?.setFriction(friction ?? 0.7)
   })
-  $effect.pre(() => {
+  $effect(() => {
     collider?.setFrictionCombineRule(frictionCombineRule ?? CoefficientCombineRule.Average)
   })
-  $effect.pre(() => collider?.setSensor(sensor ?? false))
-  $effect.pre(() => collider?.setContactForceEventThreshold(contactForceEventThreshold ?? 0))
-  $effect.pre(() => {
+  $effect(() => {
+    collider?.setSensor(sensor ?? false)
+  })
+  $effect(() => {
+    collider?.setContactForceEventThreshold(contactForceEventThreshold ?? 0)
+  })
+  $effect(() => {
     if (density !== undefined) collider?.setDensity(density)
   })
-
-  $effect.pre(() => {
-    if (collider && mass) {
+  $effect(() => {
+    if (collider && mass !== undefined) {
       if (centerOfMass && principalAngularInertia && angularInertiaLocalFrame) {
         collider.setMassProperties(
           mass,
@@ -152,20 +160,42 @@
     }
   })
 
-  $effect.pre(() => {
+  $effect(() => {
     if (collider) {
+      rapierContext.colliderEventDispatchers.set(collider.handle, events)
       applyColliderActiveEvents(collider, events, rigidBody?.userData?.events)
     }
   })
 
   export const refresh = () => {
-    if (!collider) return
-    collider.setTranslation(getWorldPosition(object))
-    collider.setRotation(getWorldQuaternion(object))
+    const parentObject = $parent3DObject
+    if (!collider || !parentObject) return
+
+    if (rigidBody) {
+      const rigidBodyWorldPos = new Vector3()
+      const rigidBodyWorldQuatInversed = new Quaternion()
+
+      parentRigidBodyObject?.getWorldPosition(rigidBodyWorldPos)
+      parentRigidBodyObject?.getWorldQuaternion(rigidBodyWorldQuatInversed)
+      rigidBodyWorldQuatInversed.invert()
+
+      const localPosition = getWorldPosition(parentObject, new Vector3())
+        .sub(rigidBodyWorldPos)
+        .applyQuaternion(rigidBodyWorldQuatInversed)
+
+      const localRotation = getWorldQuaternion(parentObject, new Quaternion())
+        .premultiply(rigidBodyWorldQuatInversed)
+
+      collider.setTranslationWrtParent(localPosition)
+      collider.setRotationWrtParent(localRotation)
+    } else {
+      collider.setTranslation(getWorldPosition(parentObject))
+      collider.setRotation(getWorldQuaternion(parentObject))
+    }
   }
 
   /**
-   * If the Collider isAttached (i.e. NOT child of a RigidBody), update the
+   * If the Collider is NOT attached to a RigidBody, update the
    * transforms on every frame.
    */
   useTask(
@@ -173,30 +203,7 @@
       refresh()
     },
     {
-      running: () => !hasRigidBodyParent && type === 'dynamic'
+      running: () => rigidBody === undefined && type === 'dynamic'
     }
   )
-
-  /**
-   * Cleanup
-   */
-  onDestroy(() => {
-    if (!collider) return
-    rapierContext.removeColliderFromContext(collider)
-    collisionGroups.removeColliders([collider])
-    world.removeCollider(collider, true)
-    collider = undefined
-  })
-
-  const parent3DObject = useParentObject3D()
-  createParentObject3DContext(object)
-
-  $effect.pre(() => {
-    $parent3DObject?.add(object)
-    return () => {
-      $parent3DObject?.remove(object)
-    }
-  })
 </script>
-
-{@render children?.({ collider })}

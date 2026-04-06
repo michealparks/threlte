@@ -1,12 +1,14 @@
 import type { RigidBody as RapierRigidBody } from '@dimforge/rapier3d-compat'
 import type { Snippet } from 'svelte'
-import type { Euler, Vector3 } from 'three'
+import type { Euler, Group, Vector3 } from 'three'
 import type { RigidBodyTypeString } from '../../lib/parseRigidBodyType.js'
 import type { CreateEvent, RigidBodyEvents } from '../../types/types.js'
+import type { Props } from '@threlte/core'
 
 export type Boolean3Array = [x: boolean, y: boolean, z: boolean]
 
-export type RigidBodyProps = CreateEvent<RapierRigidBody> &
+export type RigidBodyProps = Props<Group> &
+  CreateEvent<RapierRigidBody> &
   RigidBodyEvents & {
     rigidBody?: RapierRigidBody | undefined
 

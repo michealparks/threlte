@@ -4,7 +4,6 @@ import type {
   ColliderDesc,
   Collider as RapierCollider
 } from '@dimforge/rapier3d-compat'
-import type { Snippet } from 'svelte'
 import type { Euler, Vector3 } from 'three'
 import type { ColliderEvents, CreateEvent } from '../../../types/types.js'
 
@@ -126,6 +125,4 @@ export type ColliderProps<TShape extends Shape, TMassDef extends MassDef> = Crea
   ColliderEvents &
   BaseProps &
   ShapeProps<TShape> &
-  MassProps<TMassDef> & {
-    children?: Snippet<[{ collider?: RapierCollider }]>
-  }
+  MassProps<TMassDef>

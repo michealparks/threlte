@@ -8,14 +8,13 @@
   import { arenaHeight, playerHeight, playerToBorderDistance } from '../../config'
   import { game } from '../../Game.svelte'
   import { ballGeometry, ballMaterial } from './common'
-  import { onMount } from 'svelte'
+  import { untrack } from 'svelte'
 
   type Props = {
     startAtPosX: number
   }
   let { startAtPosX }: Props = $props()
 
-  let posX = $state(0)
   let rigidBody: RapierRigidBody | undefined = $state()
 
   const map = (value: number, inMin: number, inMax: number, outMin: number, outMax: number) => {
@@ -23,7 +22,7 @@
   }
 
   const ballSpeed = $derived.by(() => {
-    return map(game.levelIndex, 0, 9, 0.1, 0.3)
+    return map(game.levelIndex, 0, 9, 5, 8)
   })
 
   let ballIsSpawned = false
@@ -32,6 +31,7 @@
     ballIsSpawned = true
     const randomSign = Math.random() > 0.5 ? 1 : -1
     const randomX = (randomSign * Math.random() * ballSpeed) / 2
+    console.log(ballSpeed)
     rigidBody.applyImpulse({ x: randomX, y: 0, z: -ballSpeed }, true)
   }
 
@@ -54,15 +54,13 @@
       z: rbTranslation?.z ?? 0
     }
   })
+
   $effect(() => {
     if (rigidBody) game.ballRigidBody = rigidBody
   })
-  onMount(() => {
-    posX = startAtPosX
-  })
 </script>
 
-<T.Group position={[posX, 0, startAtPosZ]}>
+<T.Group position={[untrack(() => startAtPosX), 0, startAtPosZ]}>
   <RigidBody
     bind:rigidBody
     type={'dynamic'}

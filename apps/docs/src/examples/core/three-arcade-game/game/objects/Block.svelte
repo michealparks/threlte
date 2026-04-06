@@ -67,19 +67,19 @@
         }
       }}
       mass={1}
-    >
-      <T.Mesh scale={scale.current}>
-        <T.BoxGeometry args={[size, 1, size]} />
-        <T.MeshStandardMaterial
-          color={innerColor}
-          transparent
-          opacity={0.6}
-        />
-        <Edges
-          color={outerColor}
-          scale={1.01}
-        />
-      </T.Mesh>
-    </Collider>
+    />
+
+    <T.Mesh scale={scale.current}>
+      <T.BoxGeometry args={[size, 1, size]} />
+      <T.MeshStandardMaterial
+        color={innerColor}
+        transparent
+        opacity={0.6}
+      />
+      <Edges
+        color={outerColor}
+        scale={1.01}
+      />
+    </T.Mesh>
   </RigidBody>
 </T.Group>
