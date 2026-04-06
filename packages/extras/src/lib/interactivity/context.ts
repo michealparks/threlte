@@ -59,6 +59,7 @@ export type InteractivityContext = {
   filter?: FilterFunction | undefined
   clickDistanceThreshold: number
   clickTimeThreshold: number
+  refreshPointerState: () => void
   addInteractiveObject: (object: Object3D, events: Events) => void
   removeInteractiveObject: (object: Object3D) => void
 }
@@ -89,6 +90,7 @@ export const setInteractivityContext = (options?: InteractivityOptions) => {
     filter: options?.filter,
     clickDistanceThreshold: options?.clickDistanceThreshold ?? 8,
     clickTimeThreshold: options?.clickTimeThreshold ?? Number.POSITIVE_INFINITY,
+    refreshPointerState: () => {},
     addInteractiveObject: (object: Object3D, events: Events) => {
       // Always update handlers so re-registration picks up new callbacks,
       // even if the object is already in the list.

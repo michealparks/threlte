@@ -111,6 +111,8 @@ export const setupInteractivity = (context: InteractivityContext) => {
   }
 
   const handleEvent = (event: DomEvent) => {
+    context.lastEvent = event
+
     const name = event.type
     const isPointerMove = name === 'pointermove'
     const isClickEvent = name === 'click' || name === 'contextmenu' || name === 'dblclick'
@@ -245,6 +247,7 @@ export const setupInteractivity = (context: InteractivityContext) => {
 
   let moveRAF = 0
   let queuedMoveEvent: DomEvent | null = null
+  let lastMoveEvent: DomEvent | undefined
   let lastMoveX = -Infinity
   let lastMoveY = -Infinity
   const MIN_MOVE_DELTA = 0.25 // pixels; ignore tiny jitter
@@ -262,6 +265,7 @@ export const setupInteractivity = (context: InteractivityContext) => {
       return
     }
 
+    lastMoveEvent = event
     lastMoveX = event.offsetX
     lastMoveY = event.offsetY
 
@@ -322,4 +326,10 @@ export const setupInteractivity = (context: InteractivityContext) => {
       disconnect(current)
     }
   })
+
+  context.refreshPointerState = () => {
+    if (!lastMoveEvent) return
+    handlePointerLeaveOrCancel()
+    handleEvent(lastMoveEvent)
+  }
 }

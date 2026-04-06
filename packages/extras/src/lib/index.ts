@@ -120,6 +120,9 @@ export {
   type InteractivityProps
 } from './interactivity/index.js'
 
+// cycleRaycast
+export { cycleRaycast } from './cycleRaycast/index.svelte.js'
+
 // layers
 export { layers, type ThrelteLayers, type ThrelteLayersContext } from './layers/index.js'
 

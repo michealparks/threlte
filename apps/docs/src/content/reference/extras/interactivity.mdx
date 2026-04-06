@@ -217,6 +217,29 @@ You can filter and sort events by passing a `filter` to the `interactivity` plug
 </script>
 ```
 
+## Refreshing pointer state
+
+By default, the interactivity plugin only raycasts in response to DOM pointer events. If your
+scene has animated objects that move under a stationary cursor, hover state will go stale until
+the user moves the pointer. You can call `refreshPointerState()` to force a re-evaluation of
+hover state using the last known pointer position.
+
+```svelte title="Scene.svelte"
+<script>
+  import { useTask } from '@threlte/core'
+  import { interactivity, useInteractivity } from '@threlte/extras'
+
+  interactivity()
+
+  const { refreshPointerState } = useInteractivity()
+
+  // Re-evaluate hover state every frame (useful when objects animate under the cursor)
+  useTask(() => {
+    refreshPointerState()
+  })
+</script>
+```
+
 ## Interactivity state
 
 To access the interactivity state, you can use the `useInteractivity` hook in any child component of the component that implements the `interactivity` plugin as follows:
@@ -249,6 +272,7 @@ export type State = {
   filter?: FilterFunction
   clickDistanceThreshold: number
   clickTimeThreshold: number
+  refreshPointerState: () => void
 }
 ```
 

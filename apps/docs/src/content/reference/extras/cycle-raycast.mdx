@@ -1,0 +1,115 @@
+---
+category: '@threlte/extras'
+group: 'Interaction'
+sourcePath: 'packages/extras/src/lib/cycleRaycast'
+title: 'cycleRaycast'
+type: 'plugin'
+---
+
+When multiple 3D objects overlap under the cursor, only the nearest one receives pointer events
+by default. `cycleRaycast` lets users cycle through all objects beneath the cursor using the
+scroll wheel, keyboard, or repeated clicks. This is useful for complex selection scenarios like
+CAD data, layered interfaces, or editor tools where determining which object to interact with
+isn't obvious.
+
+`cycleRaycast` must be called after `interactivity()` in the same component.
+
+```svelte title="Scene.svelte"
+<script>
+  import { interactivity, cycleRaycast } from '@threlte/extras'
+
+  interactivity()
+  cycleRaycast()
+</script>
+```
+
+<Example path="extras/cycle-raycast" />
+
+## How it works
+
+`cycleRaycast` wraps the interactivity plugin's [filter function](/docs/reference/extras/interactivity#event-filtering)
+to rotate the order of raycast intersections. When the user triggers a cycle (via scroll, keyboard,
+or repeated click), the next object in the stack becomes the "top" hit — receiving hover and click
+events as if it were the nearest object.
+
+For cycling to work correctly, event handlers must call `event.stopPropagation()` so that only
+one object is interactive at a time. Without this, events pass through to all overlapping objects
+regardless of cycle order.
+
+```svelte title="Scene.svelte"
+<T.Mesh
+  onclick={(e) => {
+    e.stopPropagation()
+    console.log('selected', e.object)
+  }}
+  onpointerenter={(e) => {
+    e.stopPropagation()
+  }}
+>
+  <T.BoxGeometry />
+  <T.MeshStandardMaterial />
+</T.Mesh>
+```
+
+## Cycling triggers
+
+By default, all three cycling methods are enabled:
+
+- **Scroll wheel**: hovering over overlapping objects and scrolling cycles through them.
+- **Keyboard**: pressing <kbd>Tab</kbd> while the pointer is over the canvas cycles to the next object.
+- **Modifier click**: holding <kbd>Alt</kbd> and clicking selects the next object behind the
+  current one. Each modified click fires on the newly cycled-to object.
+
+The cycle resets automatically when the pointer moves to a different set of objects.
+
+## Return value
+
+`cycleRaycast` returns reactive state about the current cycle:
+
+```svelte title="Scene.svelte"
+<script>
+  import { interactivity, cycleRaycast } from '@threlte/extras'
+
+  interactivity()
+
+  const { hits, index } = cycleRaycast()
+
+  $effect(() => {
+    console.log('Current intersections:', hits.current)
+    console.log('Cycle index:', index.current)
+  })
+</script>
+```
+
+| Property | Type | Description |
+|----------|------|-------------|
+| `hits.current` | `THREE.Intersection[]` | All intersections beneath the cursor (before rotation). |
+| `index.current` | `number` | The current cycle index. Resets to `0` when the set of intersected objects changes. |
+
+## Reactive options
+
+Options are passed as a function, making them reactive:
+
+```svelte title="Scene.svelte"
+<script>
+  import { interactivity, cycleRaycast } from '@threlte/extras'
+
+  interactivity()
+
+  let enableScroll = $state(true)
+
+  const { hits, index } = cycleRaycast(() => ({
+    scroll: enableScroll,
+    key: 'Tab',
+    clickModifier: 'Alt'
+  }))
+</script>
+```
+
+## Options
+
+| Option | Type | Default | Description |
+|--------|------|---------|-------------|
+| `scroll` | `boolean` | `true` | Enable cycling via mouse wheel over the target element. |
+| `key` | `string \| undefined` | `'Tab'` | Keyboard [`key`](https://developer.mozilla.org/en-US/docs/Web/API/KeyboardEvent/key) that triggers cycling. Set to `undefined` to disable. |
+| `clickModifier` | `'Alt' \| 'Shift' \| 'Control' \| 'Meta' \| false` | `'Alt'` | Modifier key that turns a click into a cycle action. Set to `false` to disable. |
