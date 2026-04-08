@@ -2,8 +2,8 @@
   import { T, useTask } from '@threlte/core'
   import { Instance, InstancedMesh } from '@threlte/extras'
 
-  let dn = $state(Date.now())
-  useTask(() => (dn = Date.now()))
+  let now = $state(0)
+  useTask((delta) => (now += delta))
 </script>
 
 <InstancedMesh>
@@ -12,23 +12,23 @@
 
   <Instance
     position.x={-2}
-    position.y={Math.sin(dn / 1000 + 40)}
+    position.y={Math.sin(now + 100)}
   />
   <Instance
     position.x={-1}
-    position.y={Math.sin(dn / 1000 + 10)}
+    position.y={Math.sin(now + 200)}
   />
   <Instance
     position.x={0}
-    position.y={Math.sin(dn / 1000 + 5)}
+    position.y={Math.sin(now + 300)}
   />
   <Instance
     position.x={1}
-    position.y={Math.sin(dn / 1000 + 200)}
+    position.y={Math.sin(now + 400)}
   />
   <Instance
     position.x={2}
-    position.y={Math.sin(dn / 1000 + 550)}
+    position.y={Math.sin(now + 500)}
   />
 </InstancedMesh>
 
