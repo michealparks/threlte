@@ -1,0 +1,316 @@
+---
+category: '@threlte/extras'
+group: 'Interaction'
+sourcePath: 'packages/extras/src/lib/hooks/useShake.svelte.ts'
+title: useShake
+type: 'hook'
+---
+
+`useShake` adds shake to any `Object3D` — often a camera. It supports
+both a constant ambient `intensity` and one-shot `trigger`s that decay over
+time, with multiple triggers stacking additively on top of each other and
+the ambient layer.
+
+The hook samples simplex noise so the motion looks organic instead of
+mechanical, and runs in a stage **after** `mainStage` so the shake decorates
+the final pose without disturbing whatever set it.
+
+<Example path="extras/use-shake" />
+
+```svelte
+<script lang="ts">
+  import { T } from '@threlte/core'
+  import { CameraControls, useShake, type CameraControlsRef } from '@threlte/extras'
+
+  let controls = $state.raw<CameraControlsRef>()
+
+  const shake = useShake(() => ({ target: controls?.camera }))
+</script>
+
+<T.PerspectiveCamera
+  makeDefault
+  position={[0, 3, 6]}
+/>
+
+<CameraControls bind:ref={controls} />
+
+<button onclick={() => shake.trigger({ amplitude: 0.4, duration: 0.3 })}>Hit</button>
+```
+
+The hook expects the target's pose to be re-derived from elsewhere each
+frame (`<CameraControls>`'s update, your own task, an animation system).
+That re-derivation is what keeps shake offsets from accumulating: the next
+frame starts with a fresh pose, shake is added on top, render, repeat.
+Shaking a static object that nothing else touches will drift.
+
+## trigger
+
+`shake.trigger({ amplitude, duration })` adds a decaying shake. The
+amplitude linearly fades to zero over `duration` seconds and the trigger
+removes itself when finished.
+
+```ts
+// Light combat hit
+shake.trigger({ amplitude: 0.2, duration: 0.15 })
+
+// Explosion
+shake.trigger({ amplitude: 1.5, duration: 0.6 })
+```
+
+`trigger` is a plain method, not a reactive prop, so call it from any event
+handler — pointer clicks, keypresses, collision callbacks, network
+messages.
+
+### axisScale
+
+Per-axis multiplier (world-space) on the random shake — only the positional
+noise is scaled, rotation always uses the unscaled amplitude. Use to bias a
+shake toward a single axis instead of getting full omnidirectional jitter.
+
+```ts
+// Vertical-mostly footstep
+shake.trigger({
+  amplitude: 0.3,
+  duration: 0.2,
+  axisScale: [0.2, 1, 0.2]
+})
+
+// Horizontal-only train rumble
+shake.trigger({
+  amplitude: 0.1,
+  duration: 1,
+  axisScale: [1, 0, 1]
+})
+```
+
+### direction
+
+Deterministic translation added each frame, decaying with the same
+envelope as the noise. Use for **directional kicks** like gunshot recoil,
+where you want the camera to push primarily one way rather than scatter.
+Independent of `amplitude` — combine both for "kick + scatter".
+
+```ts
+import { cubicIn } from 'svelte/easing'
+
+// Gunshot: small noise scatter + 0.3 unit upward push, snappy release
+shake.trigger({
+  amplitude: 0.05,
+  duration: 0.2,
+  direction: [0, 0.3, 0],
+  release: cubicIn
+})
+
+// Block reaction: pushed away from attacker
+shake.trigger({
+  amplitude: 0.1,
+  duration: 0.3,
+  direction: pushAwayFromAttacker.toArray()
+})
+```
+
+The vector is in world space. For a camera-local kick (e.g. "always up on
+screen regardless of camera orientation"), transform the vector through
+the camera's matrix at trigger time.
+
+### rotationDirection
+
+Rotational analog of `direction` — a deterministic Euler kick (radians,
+YXZ order: `[pitch, yaw, roll]`) added each frame and scaled by the
+envelope. Use when you want a single tilt direction throughout the
+trigger instead of the noise-based scatter on rotation. Suppressed when
+the hook's `rotational` option is `false`.
+
+```ts
+import { cubicIn, cubicOut } from 'svelte/easing'
+
+// Speaker-style hop: pop up + tilt to one random direction, settle back
+const randomTilt = () => (Math.random() * 2 - 1) * 0.07
+shake.trigger({
+  amplitude: 0,                  // no rotation noise
+  duration: 0.25,
+  direction: [0, 0.1, 0],
+  rotationDirection: [randomTilt(), 0, randomTilt()],
+  axisScale: [0, 0, 0],          // no positional noise
+  attackDuration: 0.2,
+  releaseDuration: 0.8,
+  attack: cubicOut,
+  release: cubicIn
+})
+
+// Recoil pitch (camera kicks up on Y position + pitches up)
+shake.trigger({
+  amplitude: 0.05,
+  duration: 0.2,
+  direction: [0, 0.3, 0],
+  rotationDirection: [-0.04, 0, 0],
+  release: cubicIn
+})
+```
+
+### Envelope: attack / release / sustain
+
+The amplitude envelope has up to three phases — **attack** (rise from 0
+to peak), **sustain** (hold at peak), **release** (fall from peak to 0).
+You shape it with four params:
+
+| Param             | Type      | Default  | Description                                                         |
+| ----------------- | --------- | -------- | ------------------------------------------------------------------- |
+| `attackDuration`  | `number`  | `0`      | Length of attack phase as fraction of `duration`                    |
+| `releaseDuration` | `number`  | `1`      | Length of release phase as fraction of `duration`                   |
+| `attack`          | function  | `linear` | Easing for the attack phase, called with `t ∈ [0, 1]`               |
+| `release`         | function  | `linear` | Easing for the release phase, called with `t ∈ [0, 1]`              |
+
+Sustain duration is the leftover: `1 - attackDuration - releaseDuration`.
+
+Defaults give an instant peak and linear release over the full duration —
+classic shake decay. Set `attackDuration > 0` for a rise phase, leave
+some sustain in the middle for a "hold near peak" feel.
+
+`svelte/easing` functions plug straight into `attack` and `release`
+because their signature matches:
+
+```ts
+import { sineInOut, cubicIn, cubicOut } from 'svelte/easing'
+
+// Bell — symmetric grow-and-shrink
+shake.trigger({
+  amplitude: 0.4,
+  duration: 0.5,
+  attackDuration: 0.5,
+  releaseDuration: 0.5,
+  attack: sineInOut,
+  release: sineInOut
+})
+
+// Asymmetric speaker hop: snappy rise, longer release
+shake.trigger({
+  amplitude: 0.4,
+  duration: 0.3,
+  attackDuration: 0.2,
+  releaseDuration: 0.8,
+  attack: cubicOut,
+  release: cubicIn
+})
+
+// Wind gust trapezoid: 15% attack, ~55% sustain, 30% release
+shake.trigger({
+  amplitude: 0.2,
+  duration: 1.5,
+  direction: [0.4, 0, 0],
+  attackDuration: 0.15,
+  releaseDuration: 0.3,
+  attack: sineInOut,
+  release: sineInOut
+})
+
+// Default — pure linear decay, no attack
+shake.trigger({ amplitude: 0.4, duration: 0.25 })
+```
+
+## Stacking
+
+Multiple active triggers stack additively each frame: a new explosion
+called while an earlier hit is still decaying produces shake of the sum of
+both amplitudes (each scaled by its own remaining decay). This keeps fast
+sequences of impacts feeling layered rather than clipped to whichever was
+loudest.
+
+```ts
+shake.trigger({ amplitude: 0.8, duration: 0.4 }) // explosion
+setTimeout(() => {
+  shake.trigger({ amplitude: 0.2, duration: 0.1 }) // footstep mid-explosion
+}, 100)
+```
+
+Use `shake.clear()` to remove every active trigger at once — handy on
+scene resets or pause. The ambient `intensity` option is not affected.
+
+## intensity
+
+Constant ambient amplitude in world units that adds on top of any active
+triggers. Use it for scene-wide effects like an earthquake or low-grade
+rumble; leave at the default `0` for trigger-only shake.
+
+```ts
+const shake = useShake(() => ({
+  target: controls?.camera,
+  intensity: earthquakeActive ? 0.05 : 0
+}))
+```
+
+Because the option is reactive, you can ramp it up and down with a derived
+expression — the per-frame work scales with the current value.
+
+## frequency
+
+Rate at which the noise is sampled, in noise-units per second. Higher
+values produce a faster, jitterier shake; lower values feel like a slow
+sway.
+
+```ts
+const shake = useShake(() => ({
+  target: controls?.camera,
+  frequency: 40 // jittery
+}))
+```
+
+The default of `25` lands in the "explosion / impact" range that most games
+use. Drop to `~8` for cinematic sway, push to `~60` for a buzzy /
+electrified feel.
+
+## rotational
+
+Whether to additively perturb the target's rotation in addition to its
+position. Enabled by default — disabling it gives a "tracked dolly" feel
+(target translates but doesn't tumble).
+
+```ts
+const shake = useShake(() => ({
+  target: controls?.camera,
+  rotational: false
+}))
+```
+
+Rotational amplitude is a fixed fraction of the positional amplitude
+(radians per world-unit), so a single `amplitude` knob drives both.
+
+## Composing with useFollow
+
+`useShake` runs in its own stage after `mainStage`. `useFollow`'s smoothing
+happens **inside** `mainStage` (before `<CameraControls>`' update), so
+shake naturally layers on top — just point both hooks at the same camera:
+
+```svelte
+<script lang="ts">
+  import { Group } from 'three'
+  import { CameraControls, useFollow, useShake, type CameraControlsRef } from '@threlte/extras'
+
+  let controls = $state.raw<CameraControlsRef>()
+  const character = new Group()
+
+  const follow = useFollow(() => ({ target: character, controls }))
+  const shake = useShake(() => ({ target: controls?.camera }))
+</script>
+
+<CameraControls bind:ref={controls} />
+```
+
+Camera-controls recomputes the camera position from its own state every
+frame, so shake offsets never accumulate — they're applied once for the
+frame and naturally "reset" on the next.
+
+## Task ordering
+
+`useShake` runs its update in `task`, in a dedicated stage between
+`mainStage` and `renderStage`. Schedule any work that needs to see the
+shaken pose **after** `task`.
+
+```ts
+useTask(
+  () => {
+    // shaken target pose visible here
+  },
+  { after: shake.task }
+)
+```
