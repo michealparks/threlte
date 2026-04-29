@@ -107,7 +107,7 @@ const ROT_AMP_RATIO = 0.1
 
 const linearEasing: ShakeEasingFn = (t) => t
 
-export interface ShakeTriggerHandle {
+export interface ShakeTrigger {
   /**
    * Promise that resolves when the trigger expires — naturally on
    * timeout, via `cancel()`, or via the hook's `clear()`.
@@ -237,7 +237,7 @@ export const useShake = (optionsFn?: () => UseShakeOptions) => {
     { stage, autoInvalidate: false }
   )
 
-  const trigger = (params: ShakeTriggerParams): ShakeTriggerHandle => {
+  const trigger = (params: ShakeTriggerParams): ShakeTrigger => {
     const attackDuration = Math.max(0, Math.min(1, params.attackDuration ?? 0))
     const releaseDuration = Math.max(
       0,
@@ -300,7 +300,7 @@ export const useShake = (optionsFn?: () => UseShakeOptions) => {
      * (instant peak, classic decay). Multiple active triggers stack
      * additively.
      *
-     * Returns a `ShakeTriggerHandle` with a `done` Promise that resolves
+     * Returns a `ShakeTrigger` with a `done` Promise that resolves
      * when the trigger expires (naturally, via the handle's `cancel()`,
      * or via the hook's `clear()`) and a `cancel()` method to remove
      * this specific trigger. Most call sites can ignore the return value.

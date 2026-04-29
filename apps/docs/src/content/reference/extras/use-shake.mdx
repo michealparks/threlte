@@ -61,6 +61,20 @@ shake.trigger({ amplitude: 1.5, duration: 0.6 })
 handler — pointer clicks, keypresses, collision callbacks, network
 messages.
 
+It returns a `ShakeTrigger` you can ignore (most call sites do) or use to
+await completion or cancel a specific trigger:
+
+```ts
+const shakeTrigger = shake.trigger({ amplitude: 0.4, duration: 0.5 })
+await shakeTrigger.done   // resolves when the trigger expires
+shakeTrigger.cancel()     // remove this specific trigger immediately
+```
+
+`done` resolves on natural expiry, on `shakeTrigger.cancel()`, or on the
+hook's `shake.clear()`. Useful for cinematic sequencing — `await
+shake.trigger(...); fadeOut()`. For fire-and-forget event handlers, just
+ignore the return value.
+
 ### axisScale
 
 Per-axis multiplier (world-space) on the random shake — only the positional
