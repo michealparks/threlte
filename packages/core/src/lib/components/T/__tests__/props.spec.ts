@@ -21,6 +21,22 @@ describe('<T> props', () => {
     expect(group.quaternion.toArray()).toStrictEqual(quaternion)
   })
 
+  it('does not reapply shallow-equal tuple props', async () => {
+    const group = new Group()
+    const setPosition = vi.spyOn(group.position, 'set')
+    const { rerender } = render(T, {
+      props: { is: group, position: [1, 2, 3] }
+    })
+
+    expect(setPosition).toHaveBeenCalledTimes(1)
+
+    await rerender({ position: [1, 2, 3] })
+    expect(setPosition).toHaveBeenCalledTimes(1)
+
+    await rerender({ position: [1, 2, 4] })
+    expect(setPosition).toHaveBeenCalledTimes(2)
+  })
+
   it('sets a pierced prop', () => {
     const group = new Group()
     const x = 3

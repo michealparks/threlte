@@ -73,4 +73,17 @@ describe('<T> events', () => {
     controls.dispatchEvent({ type: 'change' })
     expect(onchange).toHaveBeenCalledTimes(0)
   })
+
+  it('removes the previous event listener when the prop changes', async () => {
+    const first = vi.fn()
+    const second = vi.fn()
+    const controls = new OrbitControls(new PerspectiveCamera(), document.createElement('div'))
+
+    const { rerender } = render(T, { is: controls, onchange: first })
+    await rerender({ onchange: second })
+
+    controls.dispatchEvent({ type: 'change' })
+    expect(first).toHaveBeenCalledTimes(0)
+    expect(second).toHaveBeenCalledOnce()
+  })
 })
