@@ -32,12 +32,12 @@
       body?.setLinvel({ x: 0, y: 0, z: 0 }, true)
       body?.setAngvel({ x: 0, y: 0, z: 0 }, true)
       body?.setTranslation(
-        { x: (Math.random() - 0.5) * 0.1, y: 5, z: (Math.random() - 0.5) * 0.1 },
+        { x: (Math.random() - 0.5) * 0.2, y: 5, z: (Math.random() - 0.5) * 0.2 },
         true
       )
     }, 400)
 
-    return clearInterval(intervalId)
+    return () => clearInterval(intervalId)
   })
 </script>
 
@@ -100,7 +100,7 @@
   <RigidBody
     bind:rigidBody={bodies[index]}
     oncreate={(ref) => {
-      ref.setTranslation({ x: 0, y: -10 + index, z: 0 }, true)
+      ref.setTranslation({ x: Math.random() - 0.5, y: -10 + index, z: 0 }, true)
     }}
   >
     <T.Mesh castShadow>

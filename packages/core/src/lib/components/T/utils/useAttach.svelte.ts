@@ -83,6 +83,15 @@ export const useAttach = <T extends MaybeInstance<any>>(
       }
     }
 
+    // Attach to parent Object3D
+    if (isInstanceOf(currentAttach, 'Object3D') && isRefObject3d) {
+      currentAttach.add(currentRef)
+      return () => {
+        invalidate()
+        currentAttach.remove(currentRef)
+      }
+    }
+
     // Custom attach function
     if (typeof currentAttach === 'function') {
       const cleanup = currentAttach({
@@ -93,15 +102,6 @@ export const useAttach = <T extends MaybeInstance<any>>(
       return () => {
         invalidate()
         cleanup?.()
-      }
-    }
-
-    // Attach to parent Object3D
-    if (isInstanceOf(currentAttach, 'Object3D') && isRefObject3d) {
-      currentAttach.add(currentRef)
-      return () => {
-        invalidate()
-        currentAttach.remove(currentRef)
       }
     }
 
