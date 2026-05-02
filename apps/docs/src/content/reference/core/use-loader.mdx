@@ -5,12 +5,11 @@ sourcePath: 'packages/core/src/lib/hooks/useLoader.ts'
 order: 5.4
 ---
 
-A hook to load data with an arbitrary `THREE` loader class. The result of `load`
-is cached and subsequent calls with the same arguments will yield the same
-return value (i.e. the same reference) across the entire Threlte app. The hook
-can use async loaders (using `loader.loadAsync`) as well as sync/callback-based
-loaders (using `loader.load`) and will default to the async version if
-available.
+A hook to load data with an arbitrary `THREE` loader class. The raw loader
+result is cached and subsequent calls with the same arguments will reuse the
+same loaded asset across the entire Threlte app. The hook can use async loaders
+(using `loader.loadAsync`) as well as sync/callback-based loaders (using
+`loader.load`) and will default to the async version if available.
 
 ```typescript
 const loader = useLoader(AudioLoader)
@@ -155,13 +154,6 @@ You can also provide a map of paths to load multiple assets at once. In this cas
 
 ### Transforming the result
 
-<Tip
-  type="warning"
-  title="Caching"
->
-  The result of the transformation is cached and subsequent calls will return the same result.
-</Tip>
-
 The `load` method accepts an optional second argument to transform the result of the loader:
 
 ```svelte
@@ -180,3 +172,5 @@ The `load` method accepts an optional second argument to transform the result of
 ```
 
 The return type of the transformation is used to infer the return type of the `load` method.
+The raw loaded asset is cached before `transform` runs, so each call to `load` applies its own
+transformation to the cached asset.

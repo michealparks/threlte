@@ -4,7 +4,6 @@
 >
   import type { TProps } from './types.js'
   import { useAttach } from './utils/useAttach.svelte.js'
-  import { useCamera } from './utils/useCamera.svelte.js'
   import { useDispose } from './utils/useDispose.svelte.js'
   import { useIs } from './utils/useIs.js'
   import { usePlugins } from './utils/usePlugins.js'
@@ -14,13 +13,12 @@
   import { untrack } from 'svelte'
   import { createParentObject3DContext } from '../../context/fragments/parentObject3D.js'
   import { createParentContext } from '../../context/fragments/parent.js'
+  import Camera from './Camera.svelte'
 
   let {
     is = useIs<Type>(),
     args,
     attach,
-    manual = false,
-    makeDefault = false,
     dispose,
     ref = $bindable(),
     oncreate,
@@ -39,7 +37,7 @@
 
   // Plugins are initialized here so that pluginsProps
   // is available in the props update
-  const plugins = usePlugins(() => ({
+  const plugins = usePlugins({
     get ref() {
       return internalRef
     },
@@ -50,10 +48,10 @@
       return attach
     },
     get manual() {
-      return manual
+      return props.manual
     },
     get makeDefault() {
-      return makeDefault
+      return props.makeDefault
     },
     get dispose() {
       return dispose
@@ -61,7 +59,7 @@
     get props() {
       return props
     }
-  }))
+  })
 
   // Props
   useProps(
@@ -75,21 +73,6 @@
     () => internalRef,
     () => attach
   )
-
-  // Camera management
-  $effect.pre(() => {
-    if (
-      isInstanceOf(internalRef, 'PerspectiveCamera') ||
-      isInstanceOf(internalRef, 'OrthographicCamera')
-    ) {
-      useCamera(
-        () => internalRef,
-        () => manual,
-        () => makeDefault,
-        () => props
-      )
-    }
-  })
 
   // Disposal
   useDispose(
@@ -110,12 +93,15 @@
   $effect(() => {
     // eslint-disable-next-line @typescript-eslint/no-unused-expressions
     internalRef
-    let cleanup: void | (() => void) = undefined
-    untrack(() => {
-      cleanup = oncreate?.(internalRef)
-    })
-    return cleanup
+    return untrack(() => oncreate?.(internalRef))
   })
 </script>
+
+{#if isInstanceOf(internalRef, 'PerspectiveCamera') || isInstanceOf(internalRef, 'OrthographicCamera')}
+  <Camera
+    ref={internalRef}
+    {...props}
+  />
+{/if}
 
 {@render children?.({ ref: internalRef })}

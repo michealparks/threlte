@@ -25,10 +25,8 @@ describe('<T> plugins', () => {
         lookat: [0, 0, 0],
         name: 'child'
       },
-
-      /** @todo(mp) Should these two only exist on cameras components? */
-      makeDefault: false,
-      manual: false
+      makeDefault: undefined,
+      manual: undefined
     })
 
     /**

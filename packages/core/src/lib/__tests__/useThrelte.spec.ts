@@ -5,10 +5,13 @@ import {
   Scene,
   VSMShadowMap
 } from 'three'
-import { describe, it, expect } from 'vitest'
-import { tick } from 'svelte'
+import { describe, it, expect, vi } from 'vitest'
+import { mount, tick } from 'svelte'
 import { render } from '@threlte/test'
 import { T } from '../components/T/T.js'
+import CanvasContext from './__fixtures__/CanvasContext.svelte'
+import type { ThrelteContext } from '../context/compounds/useThrelte.js'
+import type { Renderer } from '../context/fragments/renderer.svelte.js'
 
 describe('useThrelte', () => {
   it('updates renderer colorSpace when set via context', async () => {
@@ -58,6 +61,27 @@ describe('useThrelte', () => {
     const scene = new Scene()
     context.scene = scene
     expect(context.scene).toBe(scene)
+  })
+
+  it('renders the current scene after setting a custom scene', async () => {
+    const oncontext = vi.fn()
+
+    mount(CanvasContext, {
+      target: document.body,
+      props: { oncontext }
+    })
+    await tick()
+
+    const context = oncontext.mock.calls[0]![0] as ThrelteContext<Renderer>
+    const scene = new Scene()
+    const renderSpy = vi.spyOn(context.renderer, 'render')
+
+    context.scene = scene
+    context.invalidate()
+    context.scheduler.run(16)
+
+    expect(renderSpy.mock.calls.at(-1)?.[0]).toBe(scene)
+    expect(renderSpy.mock.calls.at(-1)?.[1]).toBe(context.camera.current)
   })
 
   it('allows switching renderMode', () => {

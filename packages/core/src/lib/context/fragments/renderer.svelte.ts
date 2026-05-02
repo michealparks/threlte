@@ -83,7 +83,7 @@ export const createRendererContext = <T extends Renderer>(
   options: () => CreateRendererContextOptions<T>
 ): RendererContext<T> => {
   const { camera, manual } = useCamera()
-  const { scene } = useScene()
+  const sceneCtx = useScene()
   const {
     invalidate,
     mainStage,
@@ -128,7 +128,7 @@ export const createRendererContext = <T extends Renderer>(
   })
 
   const autoRenderTask = renderStage.createTask(Symbol('threlte-auto-render-task'), () => {
-    renderer.render(scene, camera.current)
+    renderer.render(sceneCtx.scene, camera.current)
   })
 
   const optsColorSpace = $derived(opts.colorSpace)

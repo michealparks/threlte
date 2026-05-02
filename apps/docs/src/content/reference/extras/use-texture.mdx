@@ -69,6 +69,6 @@ loaded.
 ```
 
 <Tip type="warning">
-  Be aware that the transformed result will be cached for subsequent calls to `useTexture` with the
-  same URL.
+  Be aware that the loaded texture is cached by URL. Each call applies its own `transform` to that
+  cached texture unless your transform returns a separate object.
 </Tip>

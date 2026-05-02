@@ -206,13 +206,13 @@ export function useTask(
       task.start()
 
       if (autoInvalidate) {
-        schedulerCtx.autoInvalidations.add(fn)
+        schedulerCtx.autoInvalidations.add(task)
       }
     } else {
       task.stop()
 
       if (autoInvalidate) {
-        schedulerCtx.autoInvalidations.delete(fn)
+        schedulerCtx.autoInvalidations.delete(task)
       }
     }
   })
@@ -221,7 +221,7 @@ export function useTask(
     return () => {
       stage.removeTask(key)
       if (autoInvalidate) {
-        schedulerCtx.autoInvalidations.delete(fn)
+        schedulerCtx.autoInvalidations.delete(task)
       }
     }
   })

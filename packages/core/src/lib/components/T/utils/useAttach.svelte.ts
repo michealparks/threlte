@@ -1,3 +1,4 @@
+import type { BufferGeometry, Mesh } from 'three'
 import { useParent } from '../../../context/fragments/parent.js'
 import { useParentObject3D } from '../../../context/fragments/parentObject3D.js'
 import { useScheduler } from '../../../context/fragments/scheduler.svelte.js'
@@ -5,49 +6,44 @@ import { isInstanceOf } from '../../../utilities/isInstanceOf.js'
 import { resolvePropertyPath } from '../../../utilities/resolvePropertyPath.js'
 import type { BaseProps, MaybeInstance } from '../types.js'
 
-const isObject = (ref: unknown): ref is Record<string, any> => {
-  return typeof ref === 'object' && ref !== null
-}
-
 export const useAttach = <T extends MaybeInstance<any>>(
-  getRef: () => T,
-  getAttach: () => BaseProps<T>['attach']
+  ref: () => T,
+  attach: () => BaseProps<T>['attach']
 ) => {
   const { invalidate } = useScheduler()
-  const ref = $derived(getRef())
-  const attach = $derived(getAttach())
   const parent = useParent()
   const parentObject3D = useParentObject3D()
 
   $effect.pre(() => {
+    const currentRef = ref()
+    const currentAttach = attach()
+    const isRefObject3d = isInstanceOf(currentRef, 'Object3D')
+
     invalidate()
 
-    // Save the current ref in case it is destroyed / changed
-    const current = ref
-
     // Most common: auto-attach to parent Object3D
-    if (attach === undefined && isInstanceOf(current, 'Object3D')) {
-      const currentParent = parentObject3D.current
-      currentParent?.add(current)
-      return () => {
-        invalidate()
-        currentParent?.remove(current)
-      }
-    }
+    if (currentAttach === undefined) {
+      if (isRefObject3d) {
+        const currentParent = parentObject3D.current
+        currentParent?.add(currentRef)
+        return () => {
+          invalidate()
+          currentParent?.remove(currentRef)
+        }
 
-    // Auto-attach to parent material or geometry
-    if (attach === undefined && isObject(parent.current)) {
-      const p = parent.current
-      if (isInstanceOf(current, 'Material')) {
+        // Auto-attach to parent material or geometry
+      } else if (isInstanceOf(currentRef, 'Material')) {
+        const p = parent.current as Mesh
         const originalMaterial = p.material
-        p.material = current
+        p.material = currentRef
         return () => {
           invalidate()
           p.material = originalMaterial
         }
-      } else if (isInstanceOf(current, 'BufferGeometry')) {
+      } else if (isInstanceOf(currentRef, 'BufferGeometry')) {
+        const p = parent.current as Mesh
         const originalGeometry = p.geometry
-        p.geometry = current
+        p.geometry = currentRef as BufferGeometry
         return () => {
           invalidate()
           p.geometry = originalGeometry
@@ -56,16 +52,41 @@ export const useAttach = <T extends MaybeInstance<any>>(
     }
 
     // Explicitly do not attach
-    if (attach === false) {
+    if (currentAttach === false) {
       return () => {
         invalidate()
       }
     }
 
+    // Attach to parent prop
+    if (typeof currentAttach === 'string') {
+      const { target, key } = resolvePropertyPath(parent.current, currentAttach)
+
+      if (key in target) {
+        // If the key is already in the target, we need to save
+        // the value before attaching …
+        const valueBeforeAttach = target[key]
+        target[key] = currentRef
+        return () => {
+          invalidate()
+          // … and restore it when the component unmounts
+          target[key] = valueBeforeAttach
+        }
+      } else {
+        // If the key is not in the target, we need to add it …
+        target[key] = currentRef
+        return () => {
+          invalidate()
+          // … and delete it when the component unmounts
+          delete target[key]
+        }
+      }
+    }
+
     // Custom attach function
-    if (typeof attach === 'function') {
-      const cleanup = attach({
-        ref: current as MaybeInstance<T>,
+    if (typeof currentAttach === 'function') {
+      const cleanup = currentAttach({
+        ref: currentRef as MaybeInstance<T>,
         parent: parent.current,
         parentObject3D: parentObject3D.current
       })
@@ -75,37 +96,12 @@ export const useAttach = <T extends MaybeInstance<any>>(
       }
     }
 
-    // Attach to parent prop
-    if (typeof attach === 'string') {
-      const { target, key } = resolvePropertyPath(parent.current, attach)
-
-      if (key in target) {
-        // If the key is already in the target, we need to save
-        // the value before attaching …
-        const valueBeforeAttach = target[key]
-        target[key] = current
-        return () => {
-          invalidate()
-          // … and restore it when the component unmounts
-          target[key] = valueBeforeAttach
-        }
-      } else {
-        // If the key is not in the target, we need to add it …
-        target[key] = current
-        return () => {
-          invalidate()
-          // … and delete it when the component unmounts
-          delete target[key]
-        }
-      }
-    }
-
     // Attach to parent Object3D
-    if (isInstanceOf(attach, 'Object3D') && isInstanceOf(current, 'Object3D')) {
-      attach.add(current)
+    if (isInstanceOf(currentAttach, 'Object3D') && isRefObject3d) {
+      currentAttach.add(currentRef)
       return () => {
         invalidate()
-        attach.remove(current)
+        currentAttach.remove(currentRef)
       }
     }
 

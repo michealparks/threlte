@@ -117,13 +117,12 @@ export function useLoader<Proto extends LoaderProtoWithoutArgs>(
     // Allow Async and Sync loaders
     const loadResource = async (url: string) => {
       if ('loadAsync' in loader) {
-        const result = await loader.loadAsync(url, options?.onProgress)
-        return options?.transform?.(result) ?? result
+        return loader.loadAsync(url, options?.onProgress)
       } else {
         return new Promise((resolve, reject) => {
           ;(loader as SyncLoader).load(
             url,
-            (data) => resolve(options?.transform?.(data) ?? data),
+            resolve,
             (event) => options?.onProgress?.(event),
             reject
           )
@@ -131,17 +130,22 @@ export function useLoader<Proto extends LoaderProtoWithoutArgs>(
       }
     }
 
+    const loadTransformedResource = async (url: string) => {
+      const result = await remember(() => loadResource(url), [Proto, url])
+      return options?.transform?.(result) ?? result
+    }
+
     if (Array.isArray(input)) {
       // map over the input array and return an array of promises
       const promises = input.map((url) => {
-        return remember(() => loadResource(url), [Proto, url])
+        return loadTransformedResource(url)
       })
 
       // return an AsyncWritable that resolves to the array of promises
       const store = asyncWritable(Promise.all(promises))
       return store as any // TODO: Dirty escape hatch
     } else if (typeof input === 'string') {
-      const promise = remember(() => loadResource(input), [Proto, input])
+      const promise = loadTransformedResource(input)
 
       // return an AsyncWritable that resolves to the promise
       const store = asyncWritable(promise)
@@ -149,7 +153,7 @@ export function useLoader<Proto extends LoaderProtoWithoutArgs>(
     } else {
       // map over the input object and return an array of promises
       const promises = Object.values(input).map((url) => {
-        return remember(() => loadResource(url), [Proto, url])
+        return loadTransformedResource(url)
       })
       // return an AsyncWritable that resolves to the object of promises
       const store = asyncWritable(
