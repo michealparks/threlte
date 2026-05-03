@@ -14,6 +14,7 @@
   } from 'postprocessing'
   import { HalfFloatType } from 'three'
   import { StaticNoiseEffect } from './StaticNoise/StaticNoise'
+  import { untrack } from 'svelte'
 
   let {
     bloomIntensity = 2,
@@ -87,7 +88,7 @@
     bcEffect.brightness = brightness
   })
 
-  const { renderer, scene, camera, autoRender, renderStage } = useThrelte()
+  const { renderer, size, scene, camera, autoRender, renderStage } = useThrelte()
 
   const composer = new EffectComposer(renderer, {
     alpha: true,
@@ -95,7 +96,7 @@
   })
 
   $effect(() => {
-    composer.addPass(new RenderPass(scene, $camera))
+    composer.addPass(new RenderPass(scene.current, camera.current))
     composer.addPass(new EffectPass(camera.current, fxaaEffect))
     composer.addPass(
       new EffectPass(camera.current, noiseEffect, bcEffect, bloomEffect, toneMappingEffect)
@@ -108,7 +109,7 @@
 
   // When using PostProcessing, we need to disable autoRender
   $effect(() => {
-    let before = autoRender.current
+    let before = untrack(() => autoRender.current)
     autoRender.set(false)
     return () => {
       autoRender.set(before)
@@ -122,9 +123,7 @@
     { stage: renderStage, autoInvalidate: false }
   )
 
-  const { size } = useThrelte()
-
   $effect(() => {
-    composer.setSize($size.width, $size.height)
+    composer.setSize(size.current.width, size.current.height)
   })
 </script>

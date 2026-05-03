@@ -102,12 +102,12 @@
   )
 
   let matrix = new Matrix4()
-  let width = $derived($size.width)
-  let height = $derived($size.height)
+  let width = $derived(size.current.width)
+  let height = $derived(size.current.height)
   let halfWidth = $derived(width / 2)
   let halfHeight = $derived(height / 2)
-  let fov = $derived($camera.projectionMatrix.elements[5] * halfHeight)
-  let viewportFactor = $derived(getViewportFactor($camera, new Vector3(), $size))
+  let fov = $derived(camera.current.projectionMatrix.elements[5] * halfHeight)
+  let viewportFactor = $derived(getViewportFactor(camera.current, new Vector3(), size.current))
 
   $effect.pre(() => {
     if (wrapperClass) element.className = wrapperClass
@@ -128,7 +128,7 @@
   export const render = () => {
     camera.current.updateMatrixWorld()
     group.updateWorldMatrix(true, false)
-    const vec = transform ? oldPosition : calculatePosition(group, camera.current, $size)
+    const vec = transform ? oldPosition : calculatePosition(group, camera.current, size.current)
 
     if (
       transform ||
@@ -264,7 +264,7 @@
 
   let pos = $derived.by(() => {
     scene.updateMatrixWorld()
-    return calculatePosition(group, $camera, $size)
+    return calculatePosition(group, camera.current, size.current)
   })
 
   const portalAction = (el: HTMLElement) => {

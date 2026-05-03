@@ -1,4 +1,3 @@
-import { fromStore } from 'svelte/store'
 import { useCamera as useDefaultCamera } from '../../../context/fragments/camera.svelte.js'
 import { useDOM } from '../../../context/fragments/dom.svelte.js'
 import { useScheduler } from '../../../context/fragments/scheduler.svelte.js'
@@ -45,11 +44,10 @@ export const useCamera = (
 ) => {
   const { camera: defaultCamera, manual: defaultManual, makeDefaultCameras } = useDefaultCamera()
   const { invalidate } = useScheduler()
-  const { size: sizeStore } = useDOM()
+  const { size } = useDOM()
 
   const camera = $derived(getCamera())
   const manual = $derived(getManual())
-  const size = fromStore(sizeStore)
 
   $effect.pre(() => {
     if (!getMakeDefault()) {

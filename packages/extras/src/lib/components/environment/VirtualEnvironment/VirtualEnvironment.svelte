@@ -20,7 +20,7 @@
   }: VirtualEnvironmentProps = $props()
 
   // Create a parent scene to render the virtual environment into
-  const { scene } = createSceneContext()
+  const scene = createSceneContext()
 
   export const { camera, renderTarget } = useCubeCamera(
     () => near,

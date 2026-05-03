@@ -1,9 +1,8 @@
 import type { RenderTargetOptions } from 'three'
 import { DepthTexture, WebGLRenderTarget } from 'three'
 import { isInstanceOf, useThrelte } from '@threlte/core'
-import { fromStore } from 'svelte/store'
 
-export type UseFBOOptions = RenderTargetOptions & {
+export interface UseFBOOptions extends Omit<RenderTargetOptions, 'depth'> {
   /**
    * if set, the scene depth will be rendered into buffer.depthTexture
    */
@@ -23,9 +22,7 @@ export const useFBO = ({
 
   // first set the width and height because if a depth texture has to be created, it can only have its width and height set in its constructor
   if (size === undefined) {
-    const { dpr: dprStore, size: sizeStore } = useThrelte()
-    const dpr = fromStore(dprStore)
-    const size = fromStore(sizeStore)
+    const { dpr, size } = useThrelte()
 
     $effect.pre(() => {
       target.setSize(dpr.current * size.current.width, dpr.current * size.current.height)
