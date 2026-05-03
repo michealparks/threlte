@@ -7,6 +7,12 @@ const config = {
 
   kit: {
     adapter: adapter()
+  },
+
+  compilerOptions: {
+    experimental: {
+      async: true
+    }
   }
 }
 

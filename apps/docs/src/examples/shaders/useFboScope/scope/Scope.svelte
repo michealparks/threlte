@@ -23,8 +23,6 @@ Title: Sniper Scope NightForce_V2
 
   const group = new Group()
 
-  const gltf = useGltf('/models/scope.glb')
-
   const rotationX = new Tween(-3)
   const position = new Tween<Vector3Tuple>([0.4, -0.15, -1])
 
@@ -37,6 +35,8 @@ Title: Sniper Scope NightForce_V2
       position.set([0.4, -0.15, -1])
     }
   })
+
+  const gltf = await useGltf('/models/scope.glb')
 </script>
 
 <T
@@ -46,13 +46,11 @@ Title: Sniper Scope NightForce_V2
   position={position.current}
   rotation.y={MathUtils.DEG2RAD * rotationX.current}
 >
-  {#await gltf then { nodes, materials }}
-    <T.Mesh
-      geometry={nodes.Object_2.geometry}
-      material={materials.initialShadingGroup}
-      rotation={[-Math.PI / 2, 0, 0]}
-    />
-  {/await}
+  <T.Mesh
+    geometry={gltf.nodes.Object_2.geometry}
+    material={gltf.materials.initialShadingGroup}
+    rotation={[-Math.PI / 2, 0, 0]}
+  />
 
   {@render children?.({ ref: group })}
 </T>

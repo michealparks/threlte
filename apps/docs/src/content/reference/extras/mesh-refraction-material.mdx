@@ -66,15 +66,13 @@ You can either pass in a texture to use as the environment:
   import { MeshRefractionMaterial } from '@threlte/extras'
   import { RGBELoader } from 'three/examples/jsm/loaders/RGBELoader.js'
 
-  const env = useLoader(RGBELoader).load('/hdr/aerodynamics_workshop_1k.hdr')
+  const texture = await useLoader(RGBELoader).load('/hdr/aerodynamics_workshop_1k.hdr')
 </script>
 
-{#await env then texture}
-  <T.Mesh>
-    <MeshRefractionMaterial envMap={texture} />
-    <T.IcosahedronGeometry args={[4, 0]} />
-  </T.Mesh>
-{/await}
+<T.Mesh>
+  <MeshRefractionMaterial envMap={texture} />
+  <T.IcosahedronGeometry args={[4, 0]} />
+</T.Mesh>
 ```
 
 or you can use a cube camera to generate the environment:

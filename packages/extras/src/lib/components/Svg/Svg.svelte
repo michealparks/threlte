@@ -2,7 +2,6 @@
   import { T, useLoader, type Props as ThrelteProps } from '@threlte/core'
   import { DoubleSide, type Group, type Mesh, type MeshBasicMaterial } from 'three'
   import { SVGLoader } from 'three/examples/jsm/loaders/SVGLoader.js'
-  import { useSuspense } from '../../suspense/useSuspense.js'
 
   interface Props extends ThrelteProps<typeof Group> {
     /** Can be a URL or SVG data */
@@ -27,12 +26,11 @@
     ...rest
   }: Props = $props()
 
-  const suspend = useSuspense()
   const loader = useLoader(SVGLoader)
   const svg = $derived(
-    suspend(loader.load(src.startsWith('<svg') ? `data:image/svg+xml;utf8,${src}` : src))
+    await loader.load(src.startsWith('<svg') ? `data:image/svg+xml;utf8,${src}` : src)
   )
-  const paths = $derived($svg?.paths ?? [])
+  const paths = $derived(svg?.paths ?? [])
 
   const strokeGeometries = $derived.by(() =>
     skipStrokes

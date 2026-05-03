@@ -805,7 +805,7 @@ a custom root for the `THREE.AnimationAction`, the callback could be triggered m
 unpredictable behavior. You should reside to using the `actions` store returned from the hook instead.
 
 ```ts
-const { actions } = useGltfAnimations(gltf)
+const { actions } = useGltfAnimations(() => gltf)
 // this animation will play when the gltf store has been populated
 // and the actions store has been set, effectively replacing the
 // callback.

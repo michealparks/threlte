@@ -6,17 +6,12 @@
     TransformControls,
     useTexture,
     OrbitControls,
-    VirtualEnvironment,
-    useSuspense
+    VirtualEnvironment
   } from '@threlte/extras'
   import { RigidBody as RigidBodyRef } from '@dimforge/rapier3d-compat'
   import { Collider, RigidBody } from '@threlte/rapier'
 
   let { controls = false, debug = false } = $props()
-
-  const suspend = useSuspense()
-  const svelteIcon = suspend(useTexture('/icons/svelte.png'))
-  const threlteIcon = suspend(useTexture('/icons/mstile-150x150.png'))
 
   let bodies = $state<RigidBodyRef[]>([])
   let position = $state<Vector3Tuple>([0.5, 0, 0.5])
@@ -37,8 +32,11 @@
       )
     }, 400)
 
-    return clearInterval(intervalId)
+    return () => clearInterval(intervalId)
   })
+
+  const svelteIcon = await useTexture('/icons/svelte.png')
+  const threlteIcon = await useTexture('/icons/mstile-150x150.png')
 </script>
 
 <T.PerspectiveCamera
@@ -68,32 +66,30 @@
   <T.SphereGeometry args={[1, 256, 128]} />
   <T.MeshStandardMaterial roughness={0.1} />
 
-  {#if $svelteIcon}
-    <Decal
-      {position}
-      {debug}
-    >
-      {#snippet children()}
-        <T.MeshStandardMaterial
-          map={$svelteIcon}
-          transparent
-          roughness={0.2}
-          polygonOffset
-          polygonOffsetFactor={-10}
+  <Decal
+    {position}
+    {debug}
+  >
+    {#snippet children()}
+      <T.MeshStandardMaterial
+        map={svelteIcon}
+        transparent
+        roughness={0.2}
+        polygonOffset
+        polygonOffsetFactor={-10}
+      />
+      {#if controls}
+        <TransformControls
+          oncreate={(ref) => {
+            ref.position.fromArray(position)
+          }}
+          onchange={(event) => {
+            if (event.target.object) event.target.object.position.toArray(position)
+          }}
         />
-        {#if controls}
-          <TransformControls
-            oncreate={(ref) => {
-              ref.position.fromArray(position)
-            }}
-            onchange={(event) => {
-              if (event.target.object) event.target.object.position.toArray(position)
-            }}
-          />
-        {/if}
-      {/snippet}
-    </Decal>
-  {/if}
+      {/if}
+    {/snippet}
+  </Decal>
 </T.Mesh>
 
 {#each { length: 20 }, index (index)}
@@ -120,7 +116,7 @@
         {debug}
       >
         <T.MeshStandardMaterial
-          map={$threlteIcon}
+          map={threlteIcon}
           transparent
           roughness={0.2}
           polygonOffset

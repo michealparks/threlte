@@ -2,6 +2,7 @@
   import { Canvas } from '@threlte/core'
   import { Pane, List, Text } from 'svelte-tweakpane-ui'
   import Scene from './Scene.svelte'
+  import { Suspense } from '@threlte/extras'
 
   const sprintKeyOptions = {
     Shift: 'Shift',
@@ -30,10 +31,12 @@
 
 <div>
   <Canvas>
-    <Scene
-      {sprintKey}
-      bind:activeDevice
-    />
+    <Suspense>
+      <Scene
+        {sprintKey}
+        bind:activeDevice
+      />
+    </Suspense>
   </Canvas>
 </div>
 

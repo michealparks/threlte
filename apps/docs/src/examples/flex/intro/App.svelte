@@ -2,7 +2,7 @@
   import { Canvas, T } from '@threlte/core'
   import Scene from './Scene.svelte'
   import { NoToneMapping } from 'three'
-  import { Grid, OrbitControls } from '@threlte/extras'
+  import { Grid, OrbitControls, Suspense } from '@threlte/extras'
   import { Pane, Slider, List } from 'svelte-tweakpane-ui'
 
   let innerWidth = $state(0)
@@ -61,34 +61,36 @@
 
 <div>
   <Canvas toneMapping={NoToneMapping}>
-    <Grid
-      position.z={-10.1}
-      plane="xy"
-      gridSize={800}
-      cellColor="#0A0F19"
-      sectionColor="#481D1A"
-      sectionSize={100}
-      cellSize={10}
-      fadeStrength={0}
-    />
+    <Suspense>
+      <Grid
+        position.z={-10.1}
+        plane="xy"
+        gridSize={800}
+        cellColor="#0A0F19"
+        sectionColor="#481D1A"
+        sectionSize={100}
+        cellSize={10}
+        fadeStrength={0}
+      />
 
-    <T.OrthographicCamera
-      makeDefault
-      position.z={1000}
-      position.x={500}
-      position.y={500}
-      zoom={innerWidth / 1200}
-    >
-      <OrbitControls />
-    </T.OrthographicCamera>
+      <T.OrthographicCamera
+        makeDefault
+        position.z={1000}
+        position.x={500}
+        position.y={500}
+        zoom={innerWidth / 1200}
+      >
+        <OrbitControls />
+      </T.OrthographicCamera>
 
-    <Scene
-      windowWidth={width}
-      windowHeight={height}
-      {rows}
-      {columns}
-      {size}
-    />
+      <Scene
+        windowWidth={width}
+        windowHeight={height}
+        {rows}
+        {columns}
+        {size}
+      />
+    </Suspense>
   </Canvas>
 </div>
 

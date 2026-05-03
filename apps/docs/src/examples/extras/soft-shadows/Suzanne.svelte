@@ -20,75 +20,73 @@ Command: npx @threlte/gltf@1.0.1 ./Suzanne.glb -t -s
     }
   }
 
-  const gltf = useGltf<GLTFResult>('/models/Suzanne.glb')
+  const gltf = await useGltf<GLTFResult>('/models/Suzanne.glb')
 </script>
 
 <T.Group dispose={false}>
-  {#await gltf then gltf}
-    <Sheet name="Suzanne">
-      <Sequence
-        autoplay
-        iterationCount={Infinity}
-      />
-      <SheetObject key="Suzanne">
-        {#snippet children({ Transform })}
-          <Transform>
-            <T.Mesh
-              castShadow
-              receiveShadow
-              geometry={gltf.nodes.Suzanne.geometry}
-              material={gltf.materials.Mat}
-              rotation={[-0.62, 0, 0]}
-            />
-          </Transform>
-        {/snippet}
-      </SheetObject>
-    </Sheet>
-
-    <Sheet name="Icosphere">
-      <Sequence
-        autoplay
-        iterationCount={Infinity}
-      />
-      <SheetObject key="Icosphere">
-        {#snippet children({ Transform })}
-          <Transform>
-            <T.Mesh
-              castShadow
-              receiveShadow
-              geometry={gltf.nodes.Icosphere.geometry}
-              material={gltf.materials.Mat}
-              rotation={[-0.62, 0.09, 1.4]}
-            />
-          </Transform>
-        {/snippet}
-      </SheetObject>
-    </Sheet>
-
-    <Sheet name="Cylinder">
-      <Sequence
-        autoplay
-        iterationCount={Infinity}
-      />
-      <SheetObject key="Cylinder">
-        {#snippet children({ Transform })}
-          <Transform>
-            <T.Mesh
-              castShadow
-              receiveShadow
-              geometry={gltf.nodes.Cylinder.geometry}
-              material={gltf.materials.Mat}
-            />
-          </Transform>
-        {/snippet}
-      </SheetObject>
-    </Sheet>
-
-    <T.Mesh
-      receiveShadow
-      geometry={gltf.nodes.Floor.geometry}
-      material={gltf.materials.Mat}
-      position={[0, -0.1, 0]}
+  <Sheet name="Suzanne">
+    <Sequence
+      autoplay
+      iterationCount={Infinity}
     />
-  {/await}
+    <SheetObject key="Suzanne">
+      {#snippet children({ Transform })}
+        <Transform>
+          <T.Mesh
+            castShadow
+            receiveShadow
+            geometry={gltf.nodes.Suzanne.geometry}
+            material={gltf.materials.Mat}
+            rotation={[-0.62, 0, 0]}
+          />
+        </Transform>
+      {/snippet}
+    </SheetObject>
+  </Sheet>
+
+  <Sheet name="Icosphere">
+    <Sequence
+      autoplay
+      iterationCount={Infinity}
+    />
+    <SheetObject key="Icosphere">
+      {#snippet children({ Transform })}
+        <Transform>
+          <T.Mesh
+            castShadow
+            receiveShadow
+            geometry={gltf.nodes.Icosphere.geometry}
+            material={gltf.materials.Mat}
+            rotation={[-0.62, 0.09, 1.4]}
+          />
+        </Transform>
+      {/snippet}
+    </SheetObject>
+  </Sheet>
+
+  <Sheet name="Cylinder">
+    <Sequence
+      autoplay
+      iterationCount={Infinity}
+    />
+    <SheetObject key="Cylinder">
+      {#snippet children({ Transform })}
+        <Transform>
+          <T.Mesh
+            castShadow
+            receiveShadow
+            geometry={gltf.nodes.Cylinder.geometry}
+            material={gltf.materials.Mat}
+          />
+        </Transform>
+      {/snippet}
+    </SheetObject>
+  </Sheet>
+
+  <T.Mesh
+    receiveShadow
+    geometry={gltf.nodes.Floor.geometry}
+    material={gltf.materials.Mat}
+    position={[0, -0.1, 0]}
+  />
 </T.Group>

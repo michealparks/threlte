@@ -1,16 +1,19 @@
 <script lang="ts">
-  import { GLTF, useGltfAnimations } from '@threlte/extras'
+  import { GLTF, type ThrelteGltf, useGltfAnimations } from '@threlte/extras'
 
   type Props = {
     action: 'idle' | 'run' | 'walk'
   }
+
   let { action = 'idle' }: Props = $props()
 
-  let { gltf, actions } = useGltfAnimations()
+  let gltf = $state<ThrelteGltf>()
+
+  let { actions } = useGltfAnimations(() => gltf)
   let currentAction = 'idle'
 
   $effect(() => {
-    $actions?.['idle']?.play()
+    actions.current?.['idle']?.play()
   })
 
   $effect(() => {
@@ -18,8 +21,8 @@
   })
 
   function transitionTo(next: string, duration = 0.2) {
-    const current = $actions[currentAction]
-    const nextAnim = $actions[next]
+    const current = actions.current[currentAction]
+    const nextAnim = actions.current[next]
     if (!nextAnim || current === nextAnim) return
     nextAnim.enabled = true
     if (current) {
@@ -31,7 +34,7 @@
 </script>
 
 <GLTF
-  bind:gltf={$gltf}
+  bind:gltf
   url="https://threejs.org/examples/models/gltf/Xbot.glb"
   oncreate={(scene) => {
     scene.traverse((child) => {

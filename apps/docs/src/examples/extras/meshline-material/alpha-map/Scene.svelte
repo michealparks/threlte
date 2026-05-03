@@ -9,8 +9,6 @@
   } from '@threlte/extras'
   import { CubicBezierCurve3, DoubleSide, Vector3 } from 'three'
 
-  const texture = useTexture('/brush-texture.png')
-
   // create a smooth bezier curve
   const curve = new CubicBezierCurve3(
     new Vector3(-5, 0, 0),
@@ -21,33 +19,31 @@
 
   // convert curve to an array of 100 points
   const points = curve.getPoints(100)
+
+  const texture = await useTexture('/brush-texture.png')
 </script>
 
 <T.Mesh rotation.z={-0.1}>
   <MeshLineGeometry {points} />
-  {#await texture then alphaMap}
-    <MeshLineMaterial
-      width={1}
-      color={'#fe3d00'}
-      transparent
-      depthTest={false}
-      {alphaMap}
-    />
-  {/await}
+  <MeshLineMaterial
+    width={1}
+    color={'#fe3d00'}
+    transparent
+    depthTest={false}
+    alphaMap={texture}
+  />
 </T.Mesh>
 
-{#await texture then map}
-  <T.Mesh
-    position.y={2}
-    scale={2}
-  >
-    <T.PlaneGeometry />
-    <T.MeshBasicMaterial
-      {map}
-      side={DoubleSide}
-    />
-  </T.Mesh>
-{/await}
+<T.Mesh
+  position.y={2}
+  scale={2}
+>
+  <T.PlaneGeometry />
+  <T.MeshBasicMaterial
+    map={texture}
+    side={DoubleSide}
+  />
+</T.Mesh>
 
 <T.PerspectiveCamera
   makeDefault

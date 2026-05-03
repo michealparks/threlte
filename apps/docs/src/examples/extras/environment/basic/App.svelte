@@ -2,6 +2,7 @@
   import { Canvas } from '@threlte/core'
   import { Checkbox, Folder, List, Pane, Slider } from 'svelte-tweakpane-ui'
   import Scene from './Scene.svelte'
+  import { Suspense } from '@threlte/extras'
 
   let environmentIsBackground = $state(true)
   let useEnvironment = $state(true)
@@ -109,13 +110,15 @@
 
 <div>
   <Canvas>
-    <Scene
-      {environmentUrl}
-      {environmentIsBackground}
-      {materialMetalness}
-      {materialRoughness}
-      {useEnvironment}
-    />
+    <Suspense>
+      <Scene
+        {environmentUrl}
+        {environmentIsBackground}
+        {materialMetalness}
+        {materialRoughness}
+        {useEnvironment}
+      />
+    </Suspense>
   </Canvas>
 </div>
 

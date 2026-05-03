@@ -1,7 +1,6 @@
 <script lang="ts">
   import { LumaSplatsThree } from '@lumaai/luma-web'
-  import { T, asyncWritable, useCache, useTask, useThrelte } from '@threlte/core'
-  import { useSuspense } from '@threlte/extras'
+  import { T, useCache, useTask, useThrelte } from '@threlte/core'
   import type { CubeTexture } from 'three'
   import type { LumaSplatsThreeProps } from './types'
   import { CubeEnvironment } from '@threlte/extras'
@@ -18,33 +17,30 @@
 
   const { renderer, scene } = useThrelte()
   const { remember } = useCache()
-  const suspend = useSuspense()
 
   const captureCubemap = mode === 'env' || mode === 'object-env'
 
-  const splats = suspend(
-    asyncWritable(
-      remember(() => {
-        return new Promise<[LumaSplatsThree, CubeTexture | undefined]>((resolve) => {
-          const splats = new LumaSplatsThree({
-            source,
-            loadingAnimationEnabled,
-            particleRevealEnabled,
-            enableThreeShaderIntegration
-          })
-
-          splats.onLoad = async () => {
-            if (captureCubemap) {
-              splats.captureCubemap(renderer).then((cubemap) => {
-                resolve([splats, cubemap])
-              })
-            } else {
-              resolve([splats, undefined])
-            }
-          }
+  const splats = $derived(
+    await remember(() => {
+      return new Promise<[LumaSplatsThree, CubeTexture | undefined]>((resolve) => {
+        const splats = new LumaSplatsThree({
+          source,
+          loadingAnimationEnabled,
+          particleRevealEnabled,
+          enableThreeShaderIntegration
         })
-      }, [source])
-    )
+
+        splats.onLoad = async () => {
+          if (captureCubemap) {
+            splats.captureCubemap(renderer).then((cubemap) => {
+              resolve([splats, cubemap])
+            })
+          } else {
+            resolve([splats, undefined])
+          }
+        }
+      })
+    }, [source])
   )
 
   let preheat =
@@ -66,19 +62,19 @@
   scene.backgroundBlurriness = 0.5
 </script>
 
-{#if (mode === 'object' || mode === 'object-env') && $splats?.[0]}
+{#if (mode === 'object' || mode === 'object-env') && splats?.[0]}
   <T
-    is={$splats[0]}
+    is={splats[0]}
     oncreate={() => {
       running = true
     }}
     {...rest}
     dispose={false}
   >
-    {@render children?.({ ref: $splats[0] })}
+    {@render children?.({ ref: splats[0] })}
   </T>
 {/if}
 
-{#if $splats?.[1]}
-  <CubeEnvironment texture={$splats[1]} />
+{#if splats?.[1]}
+  <CubeEnvironment texture={splats[1]} />
 {/if}

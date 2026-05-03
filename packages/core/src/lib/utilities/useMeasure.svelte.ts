@@ -15,8 +15,8 @@
  * })
  * ```
  */
-export const useMeasure = (element: HTMLElement) => {
-  const rect = element.getBoundingClientRect()
+export const useMeasure = (element: () => HTMLElement) => {
+  const rect = element().getBoundingClientRect()
 
   let size = $state.raw({ width: rect.width, height: rect.height })
 
@@ -26,14 +26,8 @@ export const useMeasure = (element: HTMLElement) => {
   let lastRectHeight = 0
   let dirty = true
 
-  const observer = new ResizeObserver(() => {
-    dirty = true
-    const rect = element.getBoundingClientRect()
-    size = { width: rect.width, height: rect.height }
-  })
-
   function shouldUpdateSize() {
-    const { clientWidth, clientHeight } = element
+    const { clientWidth, clientHeight } = element()
 
     // super cheap check every frame
     if (!dirty && clientWidth === lastClientWidth && clientHeight === lastClientHeight) {
@@ -45,7 +39,7 @@ export const useMeasure = (element: HTMLElement) => {
     dirty = false
 
     // expensive read only when something likely changed
-    const rect = element.getBoundingClientRect()
+    const rect = element().getBoundingClientRect()
     size = { width: rect.width, height: rect.height }
 
     if (size.width === lastRectWidth && size.height === lastRectHeight) {
@@ -59,7 +53,15 @@ export const useMeasure = (element: HTMLElement) => {
   }
 
   $effect(() => {
-    observer.observe(element)
+    const currentElement = element()
+
+    const observer = new ResizeObserver(() => {
+      dirty = true
+      const rect = currentElement.getBoundingClientRect()
+      size = { width: rect.width, height: rect.height }
+    })
+
+    observer.observe(currentElement)
     return () => observer.disconnect()
   })
 

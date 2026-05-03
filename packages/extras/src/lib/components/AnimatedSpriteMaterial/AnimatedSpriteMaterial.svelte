@@ -1,14 +1,5 @@
 <script lang="ts">
-  import {
-    asyncWritable,
-    type AsyncWritable,
-    isInstanceOf,
-    T,
-    useLoader,
-    useParent,
-    useTask,
-    observe
-  } from '@threlte/core'
+  import { isInstanceOf, T, useLoader, useParent, useTask } from '@threlte/core'
   import {
     DoubleSide,
     FileLoader,
@@ -21,7 +12,6 @@
     type Texture
   } from 'three'
   import { useTexture } from '../../hooks/useTexture.js'
-  import { useSuspense } from '../../suspense/useSuspense.js'
   import type { AnimatedSpriteProps, Frame, FrameTag, SpriteJsonHashData } from './types.js'
 
   let {
@@ -68,12 +58,12 @@
   }
 
   let timerOffset = 0
-  let currentFrame = startFrame
+  let currentFrame = $derived(startFrame)
   let numFrames = 0
-  let flipOffset = flipX ? -1 : 1
+  let flipOffset = $derived(flipX ? -1 : 1)
   let frameWidth = 0
   let frameHeight = 0
-  let texture: Texture | undefined = $state()
+  let texture = $state<Texture>()
   let json: SpriteJsonHashData | undefined
   let frameNames: string[] = []
   let direction: (typeof supportedDirections)[number] = 'forward'
@@ -87,10 +77,8 @@
     is ??= isMesh ? new MeshBasicMaterial() : new SpriteMaterial()
   })
 
-  const suspend = useSuspense()
-
-  const textureStore = suspend(
-    useTexture(textureUrl, {
+  const textureStore = $derived(
+    await useTexture(textureUrl, {
       transform: (value: Texture) => {
         value.matrixAutoUpdate = false
         value.generateMipmaps = false
@@ -102,8 +90,8 @@
     })
   )
 
-  const jsonStore: AsyncWritable<SpriteJsonHashData | undefined> = suspend(
-    dataUrl
+  const jsonStore = $derived(
+    await (dataUrl
       ? useLoader(FileLoader).load(dataUrl, {
           transform: (file) => {
             if (typeof file !== 'string') return
@@ -114,15 +102,7 @@
             }
           }
         })
-      : asyncWritable<SpriteJsonHashData>(
-          new Promise((resolve) => {
-            const unsub = textureStore.subscribe((value) => {
-              if (!value) return
-              unsub()
-              resolve(createData(value))
-            })
-          })
-        )
+      : new Promise((resolve) => resolve(createData(textureStore))))
   )
 
   /**
@@ -275,35 +255,34 @@
     { running: () => running }
   )
 
-  observe.pre(
-    () => [textureStore, jsonStore],
-    ([nextTexture, nextJson]) => {
-      if (nextTexture === undefined || nextJson === undefined) return
+  //   () => [textureStore, jsonStore],
+  // ([nextTexture, nextJson]) => {
+  $effect(() => {
+    if (textureStore === undefined || jsonStore === undefined) return
 
-      texture = nextTexture.clone()
-      json = nextJson
-      frameNames = Object.keys(json.frames)
-      numFrames = frameNames.length
-      spritesheetSize = json.meta.size
+    texture = textureStore.clone()
+    json = jsonStore
+    frameNames = Object.keys(jsonStore.frames)
+    numFrames = frameNames.length
+    spritesheetSize = jsonStore.meta.size
 
-      const { sourceSize } = Object.values(json.frames)[0]
-      frameWidth = sourceSize.w
-      frameHeight = sourceSize.h
+    const { sourceSize } = Object.values(jsonStore.frames)[0]
+    frameWidth = sourceSize.w
+    frameHeight = sourceSize.h
 
-      texture.repeat.set(
-        (1 * flipOffset) / (spritesheetSize.w / frameWidth),
-        1 / (spritesheetSize.h / frameHeight)
-      )
+    texture.repeat.set(
+      (1 * flipOffset) / (spritesheetSize.w / frameWidth),
+      1 / (spritesheetSize.h / frameHeight)
+    )
 
-      setAnimation(animation)
+    setAnimation(animation)
 
-      onload?.()
+    onload?.()
 
-      if (autoplay) {
-        play()
-      }
+    if (autoplay) {
+      play()
     }
-  )
+  })
 
   $effect.pre(() => {
     setAnimation(animation)

@@ -23,10 +23,12 @@ Title: Rusty Spaceship - Orange
   let { fallback, error, children, ref = $bindable(), ...props }: Props = $props()
 
   const dracoLoader = useDraco()
-  const gltf = useGltf('/spaceship-tutorial/models/spaceship-transformed.glb', {
-    dracoLoader
-  })
-  const map = useTexture('/spaceship-tutorial/textures/energy-beam-opacity.png')
+  const [gltf, texture] = await Promise.all([
+    useGltf('/spaceship-tutorial/models/spaceship-transformed.glb', {
+      dracoLoader
+    }),
+    useTexture('/spaceship-tutorial/textures/energy-beam-opacity.png')
+  ])
 
   function alphaFix(material: Material) {
     material.transparent = true
@@ -36,10 +38,8 @@ Title: Rusty Spaceship - Orange
     material.depthWrite = true
   }
 
-  gltf.then((model) => {
-    alphaFix(model.materials.spaceship_racer)
-    alphaFix(model.materials.cockpit)
-  })
+  alphaFix(gltf.materials.spaceship_racer)
+  alphaFix(gltf.materials.cockpit)
 </script>
 
 <T.Group
@@ -47,47 +47,39 @@ Title: Rusty Spaceship - Orange
   dispose={false}
   {...props}
 >
-  {#await gltf}
-    {@render fallback?.()}
-  {:then gltf}
-    <T.Group
-      scale={0.003}
-      rotation={[0, -Math.PI * 0.5, 0]}
-      position={[0.95, 0, 0]}
-    >
-      <T.Mesh
-        castShadow
-        receiveShadow
-        geometry={gltf.nodes.Cube001_spaceship_racer_0.geometry}
-        material={gltf.materials.spaceship_racer}
-      />
-      <T.Mesh
-        castShadow
-        receiveShadow
-        geometry={gltf.nodes.Cube005_cockpit_0.geometry}
-        material={gltf.materials.cockpit}
-      />
+  <T.Group
+    scale={0.003}
+    rotation={[0, -Math.PI * 0.5, 0]}
+    position={[0.95, 0, 0]}
+  >
+    <T.Mesh
+      castShadow
+      receiveShadow
+      geometry={gltf.nodes.Cube001_spaceship_racer_0.geometry}
+      material={gltf.materials.spaceship_racer}
+    />
+    <T.Mesh
+      castShadow
+      receiveShadow
+      geometry={gltf.nodes.Cube005_cockpit_0.geometry}
+      material={gltf.materials.cockpit}
+    />
 
-      {#await map then mapValue}
-        <T.Mesh
-          position={[0, 0, -1350]}
-          rotation.x={Math.PI * 0.5}
-        >
-          <T.CylinderGeometry args={[70, 25, 1600, 15]} />
-          <T.MeshBasicMaterial
-            color={[1.0, 0.4, 0.02]}
-            alphaMap={mapValue}
-            transparent
-            blending={CustomBlending}
-            blendDst={OneFactor}
-            blendEquation={AddEquation}
-          />
-        </T.Mesh>
-      {/await}
-    </T.Group>
-  {:catch err}
-    {@render error?.({ error: err })}
-  {/await}
+    <T.Mesh
+      position={[0, 0, -1350]}
+      rotation.x={Math.PI * 0.5}
+    >
+      <T.CylinderGeometry args={[70, 25, 1600, 15]} />
+      <T.MeshBasicMaterial
+        color={[1.0, 0.4, 0.02]}
+        alphaMap={texture}
+        transparent
+        blending={CustomBlending}
+        blendDst={OneFactor}
+        blendEquation={AddEquation}
+      />
+    </T.Mesh>
+  </T.Group>
 
   {@render children?.({ ref })}
 </T.Group>

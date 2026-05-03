@@ -1,8 +1,7 @@
 <script lang="ts">
-  import { T, asyncWritable, isInstanceOf, useParent, useTask, useThrelte } from '@threlte/core'
+  import { T, isInstanceOf, useParent, useTask, useThrelte } from '@threlte/core'
   import { Color, ShaderMaterial, Uniform, Vector2, Vector3, type Mesh, type Texture } from 'three'
   import { useTexture } from '../../hooks/useTexture.js'
-  import { useSuspense } from '../../suspense/useSuspense.js'
   import { fragmentShader, vertexShader } from './shaders.js'
   import type { ImageMaterialProps } from './types.js'
 
@@ -21,7 +20,7 @@
     opacity = 1,
     toneMapped = true,
     transparent = false,
-    texture,
+    texture: userTexture,
     monochromeColor,
     monochromeStrength,
     colorProcessingTexture,
@@ -34,9 +33,7 @@
 
   const { invalidate, size } = useThrelte()
 
-  const suspend = useSuspense()
-
-  const textureStore = suspend(url ? useTexture(url) : asyncWritable(Promise.resolve(texture)))
+  const texture = $derived(await (url ? useTexture(url) : Promise.resolve(userTexture)))
 
   const parent = useParent()
 
@@ -79,10 +76,7 @@
     invalidate()
   })
   $effect.pre(() => {
-    uniforms.imageBounds.value.set(
-      $textureStore?.image.width ?? 0,
-      $textureStore?.image.height ?? 0
-    )
+    uniforms.imageBounds.value.set(texture?.image.width ?? 0, texture?.image.height ?? 0)
     invalidate()
   })
   $effect.pre(() => {
@@ -130,7 +124,7 @@
     invalidate()
   })
   $effect.pre(() => {
-    uniforms.map.value = $textureStore ?? null
+    uniforms.map.value = texture ?? null
     invalidate()
   })
   $effect.pre(() => {

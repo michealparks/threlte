@@ -6,8 +6,8 @@ order: -750
 
 Threlte works seamlessly with Three.js loaders, and provides a hook,
 [useLoader](/docs/reference/core/use-loader), to help solve common loading issues.
-It caches results to prevent duplicate fetch/parse work and returns an async store,
-[asyncWritable](/docs/reference/core/utilities#asyncwritable) for convenient usage in Svelte.
+It caches results to prevent duplicate fetch/parse work and returns a promise for convenient
+usage in async Svelte components.
 
 Caching cuts network requests, bandwidth, and memory, improving app performance.
 
@@ -50,11 +50,11 @@ the example above.
 ```svelte
 <script>
   import { useGltf } from '@threlte/extras'
+
+  const gltf = await useGltf('/assets/model.gltf')
 </script>
 
-{#await useGltf('/assets/model.gltf') then gltf}
-  <T is={gltf.scene} />
-{/await}
+<T is={gltf.scene} />
 ```
 
 ### Adjusting and reusing models
@@ -119,11 +119,11 @@ The `TextureLoader` is another loader from Three.js that is used for textures.
 ```svelte
 <script>
   import { useTexture } from '@threlte/extras'
+
+  const texture = await useTexture('/assets/texture.png')
 </script>
 
-{#await useTexture('/assets/texture.png') then texture}
-  <T.MeshStandardMaterial map={texture} />
-{/await}
+<T.MeshStandardMaterial map={texture} />
 ```
 
 ### Multiple textures
@@ -205,17 +205,17 @@ effects you can achieve, then use those examples as a guide for your own
 
 ## Async loading
 
-The return value from [useLoader](/docs/reference/core/use-loader) is an
-`AsyncWritable` custom store. Its value will be `undefined` until the asset has
-loaded.
-
-Since the underlying store's value is a promise, you can use it within a Svelte
-`#await` block:
+The return value from [useLoader](/docs/reference/core/use-loader) is a `Promise`
+that will be unresolved until the asset has loaded.
 
 ```svelte
-{#await $texture then value}
-  <T.MeshStandardMaterial map={value} />
-{/await}
+<script>
+  import { useTexture } from '@threlte/extras'
+
+  const map = await useTexture('/path/to/texture.png')
+</script>
+
+<T.MeshStandardMaterial {map} />
 ```
 
 Assets can also be loaded after initialization by calling the `loader.load`

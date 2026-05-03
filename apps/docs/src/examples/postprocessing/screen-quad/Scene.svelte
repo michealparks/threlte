@@ -45,8 +45,6 @@
 		}
 	`
 
-  const gltf = useGltf('/models/spaceships/Bob.gltf')
-
   const uScene = new Uniform(target.texture)
 
   const uTime = new Uniform(0)
@@ -86,6 +84,8 @@
       stage: renderStage
     }
   )
+
+  const gltf = await useGltf('/models/spaceships/Bob.gltf')
 </script>
 
 <T.PerspectiveCamera
@@ -95,9 +95,7 @@
   <OrbitControls />
 </T.PerspectiveCamera>
 
-{#await gltf then { scene }}
-  <T is={scene} />
-{/await}
+<T is={gltf.scene} />
 
 <Environment
   url="/textures/equirectangular/hdr/shanghai_riverside_1k.hdr"

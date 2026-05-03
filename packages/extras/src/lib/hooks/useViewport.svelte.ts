@@ -16,9 +16,7 @@ const origin = new Vector3()
 const position = new Vector3()
 const lastPosition = new Vector3()
 
-export const useViewport = (
-  target?: Vector3 | Vector3Tuple
-): { current: Viewport } & { current: Viewport } => {
+export const useViewport = (target?: Vector3 | Vector3Tuple): { current: Viewport } => {
   const viewport = $state<Viewport>({
     width: 0,
     height: 0,

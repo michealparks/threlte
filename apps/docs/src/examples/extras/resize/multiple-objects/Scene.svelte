@@ -10,9 +10,9 @@
 
   const names = ['Duck', 'Flower', 'Fox']
 
-  const promises = Promise.all(names.map((name) => useGltf(`/models/${name}.glb`)))
-
   const increment = (2 * Math.PI) / names.length
+
+  const gltfs = await Promise.all(names.map((name) => useGltf(`/models/${name}.glb`)))
 </script>
 
 <T.PerspectiveCamera
@@ -25,20 +25,18 @@
 <T.AmbientLight intensity={0.2} />
 <T.DirectionalLight position={[1, 5, 3]} />
 
-{#await promises then objects}
-  {#each objects as { scene }, i}
-    {@const r = increment * i}
-    <T.Group
-      position.x={Math.cos(r)}
-      position.z={Math.sin(r)}
-    >
-      {#if resize}
-        <Resize>
-          <T is={scene} />
-        </Resize>
-      {:else}
+{#each gltfs as { scene }, i}
+  {@const r = increment * i}
+  <T.Group
+    position.x={Math.cos(r)}
+    position.z={Math.sin(r)}
+  >
+    {#if resize}
+      <Resize>
         <T is={scene} />
-      {/if}
-    </T.Group>
-  {/each}
-{/await}
+      </Resize>
+    {:else}
+      <T is={scene} />
+    {/if}
+  </T.Group>
+{/each}

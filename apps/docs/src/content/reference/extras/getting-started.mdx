@@ -127,14 +127,12 @@ to load an asset:
   import { T } from '@threlte/core'
 
   // Place the model in your public folder
-  const model = useGltf('/model.glb')
+  const model = await useGltf('/model.glb')
 </script>
 ```
 
-The hook will return the special Threlte store `AsyncWritable` that makes it easy to consume the
-result of the loader. The store will be updated once the asset is loaded and can be used in the
-template either with the `{#await}` or the `{#if}` block. Let's use the `{#await}` block to
-display a loading message:
+The hook will return a Promise that makes it easy to consume the
+result of the loader in an async component.
 
 ```svelte title="Scene.svelte"
 <script>
@@ -142,14 +140,10 @@ display a loading message:
   import { T } from '@threlte/core'
   import LoadingPlaceholder from './LoadingPlaceholder.svelte'
 
-  const model = useGltf('/model.glb')
+  const model = await useGltf('/model.glb')
 </script>
 
-{#await model}
-  <LoadingPlaceholder />
-{:then value}
-  <T is={value} />
-{/await}
+<T is={value} />
 ```
 
 Keep in mind that the hook `useGltf` caches the result as it's using

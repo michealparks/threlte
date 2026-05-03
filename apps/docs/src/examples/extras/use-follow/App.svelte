@@ -2,6 +2,7 @@
   import { Canvas } from '@threlte/core'
   import { Pane, Slider, Checkbox, Button, Folder, List, Point } from 'svelte-tweakpane-ui'
   import Scene from './Scene.svelte'
+  import { Suspense } from '@threlte/extras'
 
   interface Preset {
     smoothTime: number
@@ -287,25 +288,27 @@
 
 <div>
   <Canvas>
-    <Scene
-      {smoothTime}
-      {distance}
-      {minPolarAngle}
-      {maxPolarAngle}
-      {polarAngle}
-      {azimuthLocked}
-      {azimuthAngle}
-      {pointerLock}
-      {lookAtOffset}
-      {deadZone}
-      {lookAhead}
-      {followSmoothTime}
-      {trackRotation}
-      {trackRotationSmoothTime}
-      {trackRotationOffset}
-      {collision}
-      {following}
-    />
+    <Suspense>
+      <Scene
+        {smoothTime}
+        {distance}
+        {minPolarAngle}
+        {maxPolarAngle}
+        {polarAngle}
+        {azimuthLocked}
+        {azimuthAngle}
+        {pointerLock}
+        {lookAtOffset}
+        {deadZone}
+        {lookAhead}
+        {followSmoothTime}
+        {trackRotation}
+        {trackRotationSmoothTime}
+        {trackRotationOffset}
+        {collision}
+        {following}
+      />
+    </Suspense>
   </Canvas>
 </div>
 

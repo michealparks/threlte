@@ -19,15 +19,13 @@
 
   bvh(() => rest)
 
-  const gltf = useGltf('/models/stanford_bunny.glb')
-  const mesh = $derived($gltf ? ($gltf.nodes['Object_2'] as Mesh) : undefined)
+  const gltf = await useGltf('/models/stanford_bunny.glb')
+  const mesh = $derived(gltf.nodes['Object_2'] as Mesh)
 
   $effect(() => {
-    if (mesh) {
-      const array = new Float32Array(3 * mesh.geometry.getAttribute('position').count).fill(1)
-      const attribute = new BufferAttribute(array, 3).setUsage(DynamicDrawUsage)
-      mesh.geometry.setAttribute('color', attribute)
-    }
+    const array = new Float32Array(3 * mesh.geometry.getAttribute('position').count).fill(1)
+    const attribute = new BufferAttribute(array, 3).setUsage(DynamicDrawUsage)
+    mesh.geometry.setAttribute('color', attribute)
   })
 
   const faces = new Set<Face>()
@@ -74,31 +72,29 @@
   />
 </T.PerspectiveCamera>
 
-{#if $gltf}
-  <T
-    is={$gltf.nodes['Object_2'] as Mesh}
-    scale={10}
-    rotation.x={-Math.PI / 2}
-    position.y={-0.35}
-    onpointermove={({ face }) => {
-      const attribute = mesh?.geometry.getAttribute('color')
+<T
+  is={gltf.nodes['Object_2']}
+  scale={10}
+  rotation.x={-Math.PI / 2}
+  position.y={-0.35}
+  onpointermove={({ face }) => {
+    const attribute = mesh?.geometry.getAttribute('color')
 
-      if (face && attribute) {
-        attribute.setXYZ(face.a, 1, 0, 0)
-        attribute.setXYZ(face.b, 1, 0, 0)
-        attribute.setXYZ(face.c, 1, 0, 0)
-        faces.add(face)
-      }
-    }}
-  >
-    <T.MeshStandardMaterial
-      roughness={0.1}
-      metalness={0.4}
-      vertexColors
-    />
-    <Wireframe />
-  </T>
-{/if}
+    if (face && attribute) {
+      attribute.setXYZ(face.a, 1, 0, 0)
+      attribute.setXYZ(face.b, 1, 0, 0)
+      attribute.setXYZ(face.c, 1, 0, 0)
+      faces.add(face)
+    }
+  }}
+>
+  <T.MeshStandardMaterial
+    roughness={0.1}
+    metalness={0.4}
+    vertexColors
+  />
+  <Wireframe thickness={0.1} />
+</T>
 
 <T.DirectionalLight />
 

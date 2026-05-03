@@ -67,14 +67,12 @@
 
   const { onPointerEnter, onPointerLeave } = useCursor()
 
-  const gltf = useGltf<{
+  const gltf = await useGltf<{
     nodes: {
       Cover: Mesh
     }
     materials: {}
   }>('/models/turntable/cover.glb')
-
-  const coverGeometry = $derived($gltf?.nodes.Cover.geometry)
 </script>
 
 <T.Group {...rest}>
@@ -106,31 +104,29 @@
     position.z={-2.2}
     rotation.x={-coverAngle.current * MathUtils.DEG2RAD}
   >
-    {#if coverGeometry}
-      <T.Mesh
-        geometry={coverGeometry}
-        scale={[3, 0.5, 2.2]}
-        position.y={0.5}
-        position.z={2.2}
-        onclick={() => (coverOpen = !coverOpen)}
-        onpointerenter={onPointerEnter}
-        onpointerleave={onPointerLeave}
-      >
-        <T.MeshStandardMaterial
-          color="#ffffff"
-          roughness={0.08}
-          metalness={0.8}
-          envMapIntensity={1}
-          side={DoubleSide}
-          transparent
-          opacity={0.65}
-        />
-        <Edges
-          color="white"
-          raycast={() => null}
-        />
-      </T.Mesh>
-    {/if}
+    <T.Mesh
+      geometry={gltf.nodes.Cover.geometry}
+      scale={[3, 0.5, 2.2]}
+      position.y={0.5}
+      position.z={2.2}
+      onclick={() => (coverOpen = !coverOpen)}
+      onpointerenter={onPointerEnter}
+      onpointerleave={onPointerLeave}
+    >
+      <T.MeshStandardMaterial
+        color="#ffffff"
+        roughness={0.08}
+        metalness={0.8}
+        envMapIntensity={1}
+        side={DoubleSide}
+        transparent
+        opacity={0.65}
+      />
+      <Edges
+        color="white"
+        raycast={() => null}
+      />
+    </T.Mesh>
   </T.Group>
 
   <!-- SIDE BUTTON -->

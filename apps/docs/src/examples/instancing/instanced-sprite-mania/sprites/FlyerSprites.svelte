@@ -33,19 +33,17 @@
     }
   ]
 
-  const flyerSheetbuilder = buildSpritesheet.from(demonSpriteMeta)
+  const spritesheet = await buildSpritesheet.from(demonSpriteMeta).spritesheet
 </script>
 
-{#await flyerSheetbuilder.spritesheet then spritesheet}
-  <InstancedSprite
-    count={2000}
-    playmode={'FORWARD'}
-    {fps}
-    {billboarding}
-    randomPlaybackOffset={1}
-    castShadow
-    {spritesheet}
-  >
-    <FlyingBehaviour />
-  </InstancedSprite>
-{/await}
+<InstancedSprite
+  count={2000}
+  playmode="FORWARD"
+  {fps}
+  {billboarding}
+  randomPlaybackOffset={1}
+  castShadow
+  {spritesheet}
+>
+  <FlyingBehaviour />
+</InstancedSprite>

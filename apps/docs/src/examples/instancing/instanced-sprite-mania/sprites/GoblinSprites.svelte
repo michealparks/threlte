@@ -58,8 +58,6 @@
     }
   ]
 
-  const goblinSpritesheet = buildSpritesheet.from(goblinSpriteMeta)
-
   let spriteMesh: any = $state()
   const goblinCount = 80
   const goblinPositionSpread = 50
@@ -100,16 +98,16 @@
     goblinId++
     if (goblinId > goblinCount) goblinId = 0
   })
+
+  const spritesheet = await buildSpritesheet.from(goblinSpriteMeta).spritesheet
 </script>
 
-{#await goblinSpritesheet.spritesheet then spritesheet}
-  <InstancedSprite
-    count={goblinCount}
-    playmode={'FORWARD'}
-    {spritesheet}
-    {fps}
-    {billboarding}
-    bind:ref={spriteMesh}
-    castShadow
-  />
-{/await}
+<InstancedSprite
+  count={goblinCount}
+  playmode={'FORWARD'}
+  {spritesheet}
+  {fps}
+  {billboarding}
+  bind:ref={spriteMesh}
+  castShadow
+/>

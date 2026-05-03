@@ -53,8 +53,6 @@
     }
   ] as const satisfies SpritesheetMetadata
 
-  const treeAtlas = buildSpritesheet.from<typeof treeAtlasMeta>(treeAtlasMeta)
-
   const treePositions: Vector3Tuple[] = []
 
   for (let x = 0; x < 5; x++) {
@@ -101,38 +99,38 @@
       sprite.update()
     }
   })
+
+  const spritesheet = await buildSpritesheet.from<typeof treeAtlasMeta>(treeAtlasMeta).spritesheet
 </script>
 
-{#await treeAtlas.spritesheet then spritesheet}
-  <InstancedSprite
-    count={points.length}
-    autoUpdate={false}
-    playmode={'PAUSE'}
-    {billboarding}
-    {spritesheet}
-    bind:ref={sprite}
-    castShadow
-  >
-    {#snippet children({ Instance })}
-      {#each points as [x, z], i}
-        {#if i < points.length / 2}
-          <!-- Pick a random tree from atlas via animation name -->
-          <Instance
-            position={[x - REGION_W / 2, 1.5, z - REGION_Z / 2]}
-            id={i}
-            animationName={pickRandomTreeType()}
-            scale={[3, 3]}
-          />
-        {:else}
-          <!-- Set and freeze a random frame from the spritesheet -->
-          <Instance
-            position={[x - REGION_W / 2, 1.5, z - REGION_Z / 2]}
-            id={i}
-            scale={[3, 3]}
-            frameId={Math.floor(Math.random() * 24)}
-          />
-        {/if}
-      {/each}
-    {/snippet}
-  </InstancedSprite>
-{/await}
+<InstancedSprite
+  count={points.length}
+  autoUpdate={false}
+  playmode={'PAUSE'}
+  {billboarding}
+  {spritesheet}
+  bind:ref={sprite}
+  castShadow
+>
+  {#snippet children({ Instance })}
+    {#each points as [x, z], i}
+      {#if i < points.length / 2}
+        <!-- Pick a random tree from atlas via animation name -->
+        <Instance
+          position={[x - REGION_W / 2, 1.5, z - REGION_Z / 2]}
+          id={i}
+          animationName={pickRandomTreeType()}
+          scale={[3, 3]}
+        />
+      {:else}
+        <!-- Set and freeze a random frame from the spritesheet -->
+        <Instance
+          position={[x - REGION_W / 2, 1.5, z - REGION_Z / 2]}
+          id={i}
+          scale={[3, 3]}
+          frameId={Math.floor(Math.random() * 24)}
+        />
+      {/if}
+    {/each}
+  {/snippet}
+</InstancedSprite>

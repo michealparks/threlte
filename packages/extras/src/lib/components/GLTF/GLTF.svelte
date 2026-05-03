@@ -1,9 +1,9 @@
 <script lang="ts">
   import { T } from '@threlte/core'
   import { useGltf } from '../../hooks/useGltf.js'
-  import { useSuspense } from '../../suspense/useSuspense.js'
   import type { ThrelteGltf } from '../../types/types.js'
   import type { GltfProps } from './types.js'
+  import { untrack } from 'svelte'
 
   type Props = GltfProps & { gltf?: ThrelteGltf | undefined } & ThrelteGltf['materials']
 
@@ -29,11 +29,13 @@
     ...props
   }: Props = $props()
 
-  const loader = useGltf({
-    dracoLoader,
-    meshoptDecoder,
-    ktx2Loader
-  })
+  const loader = $derived(
+    useGltf({
+      dracoLoader,
+      meshoptDecoder,
+      ktx2Loader
+    })
+  )
 
   const onLoad = (data: ThrelteGltf) => {
     if (gltf) onunload?.()
@@ -66,24 +68,23 @@
     onerror?.(error)
   }
 
-  const suspend = useSuspense()
-
-  const loadGltf = async (url: string) => {
+  const loadGltf = async (url: string): Promise<boolean> => {
     try {
       // eslint-disable-next-line svelte/require-store-reactive-access
-      const model = await suspend(loader.load(url))
-      onLoad(model)
+      const model = await loader.load(url)
+      untrack(() => onLoad(model))
+
+      return true
     } catch (error) {
-      onError(error as Error)
+      untrack(() => onError(error as Error))
+      return false
     }
   }
 
-  $effect.pre(() => {
-    loadGltf(url)
-  })
+  const success = $derived(await loadGltf(url))
 </script>
 
-{#if scene}
+{#if success}
   <T
     is={scene}
     {...props}

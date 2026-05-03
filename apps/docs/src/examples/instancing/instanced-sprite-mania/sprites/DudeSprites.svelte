@@ -15,21 +15,19 @@
 
   let { billboarding = false, fps }: Props = $props()
 
-  const player = buildSpritesheet.fromAseprite(
+  const spritesheet = await buildSpritesheet.fromAseprite(
     '/textures/sprites/player.json',
     '/textures/sprites/player.png'
   )
 </script>
 
-{#await player then spritesheet}
-  <InstancedSprite
-    {spritesheet}
-    count={4000}
-    playmode={'FORWARD'}
-    {fps}
-    {billboarding}
-    castShadow
-  >
-    <WalkingBehaviour />
-  </InstancedSprite>
-{/await}
+<InstancedSprite
+  {spritesheet}
+  count={4000}
+  playmode={'FORWARD'}
+  {fps}
+  {billboarding}
+  castShadow
+>
+  <WalkingBehaviour />
+</InstancedSprite>

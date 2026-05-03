@@ -8,7 +8,7 @@
     rotation += delta
   })
 
-  const gltf = useGltf<{
+  const gltf = await useGltf<{
     nodes: {
       'node_damagedHelmet_-6514': Mesh
     }
@@ -16,8 +16,6 @@
       Material_MR: MeshStandardMaterial
     }
   }>('/models/helmet/DamagedHelmet.gltf')
-
-  const helmetGeometry = $derived($gltf?.nodes['node_damagedHelmet_-6514'].geometry)
 </script>
 
 <T.PerspectiveCamera
@@ -27,20 +25,18 @@
 />
 
 <T.Group rotation.y={rotation}>
-  {#if helmetGeometry}
-    <T.Mesh
-      rotation.x={90 * MathUtils.DEG2RAD}
-      geometry={helmetGeometry}
-    >
-      <T.MeshBasicMaterial
-        color={0xff3e00}
-        toneMapped={false}
-      />
-      <Edges
-        thresholdAngle={20}
-        color="white"
-        scale={1.01}
-      />
-    </T.Mesh>
-  {/if}
+  <T.Mesh
+    rotation.x={90 * MathUtils.DEG2RAD}
+    geometry={gltf?.nodes['node_damagedHelmet_-6514'].geometry}
+  >
+    <T.MeshBasicMaterial
+      color={0xff3e00}
+      toneMapped={false}
+    />
+    <Edges
+      thresholdAngle={20}
+      color="white"
+      scale={1.01}
+    />
+  </T.Mesh>
 </T.Group>

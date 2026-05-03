@@ -1,6 +1,5 @@
 import { getContext } from 'svelte'
-import { fromStore } from 'svelte/store'
-import { suspenseContextIdentifier, type SuspenseContext } from './context.js'
+import { key, type SuspenseContext } from './context.js'
 
 /**
  * ### `onReveal`
@@ -21,16 +20,16 @@ import { suspenseContextIdentifier, type SuspenseContext } from './context.js'
  * is revealed.
  */
 export const onReveal = (callback: () => (() => void) | void): void => {
-  const ctx = getContext<SuspenseContext | undefined>(suspenseContextIdentifier)
+  const ctx = getContext<SuspenseContext | undefined>(key)
 
   // Return if there is no context.
   if (!ctx) {
     return
   }
 
-  const suspended = fromStore(ctx?.suspended)
+  const suspended = ctx?.suspended
 
-  $effect.pre(() => {
+  $effect(() => {
     if (!suspended.current) {
       return callback()
     }

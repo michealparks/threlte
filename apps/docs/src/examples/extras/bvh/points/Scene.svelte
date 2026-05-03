@@ -21,14 +21,10 @@
 
   bvh(() => rest)
 
-  const gltf = useGltf('/models/stairs.glb')
+  const gltf = await useGltf('/models/stairs.glb')
 
   const points = $derived.by(() => {
-    if (!$gltf) {
-      return
-    }
-
-    const results = $gltf.nodes['Object'] as Points
+    const results = gltf.nodes['Object'] as Points
     const array = new Float32Array(3 * results.geometry.getAttribute('position').count).fill(1)
     const attribute = new BufferAttribute(array, 3).setUsage(DynamicDrawUsage)
     results.geometry.setAttribute('color', attribute)

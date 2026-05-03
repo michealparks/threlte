@@ -2,7 +2,7 @@
   import { Canvas, T } from '@threlte/core'
   import Scene from './Scene.svelte'
   import Settings from './Settings.svelte'
-  import { OrbitControls } from '@threlte/extras'
+  import { OrbitControls, Suspense } from '@threlte/extras'
 
   let billboarding = $state(false)
   let fps = $state(10)
@@ -10,18 +10,20 @@
 
 <div>
   <Canvas>
-    <T.PerspectiveCamera
-      makeDefault
-      position.z={14}
-      position.y={6}
-    >
-      <OrbitControls />
-    </T.PerspectiveCamera>
+    <Suspense>
+      <T.PerspectiveCamera
+        makeDefault
+        position.z={14}
+        position.y={6}
+      >
+        <OrbitControls />
+      </T.PerspectiveCamera>
 
-    <Scene
-      {billboarding}
-      {fps}
-    />
+      <Scene
+        {billboarding}
+        {fps}
+      />
+    </Suspense>
   </Canvas>
 
   <Settings

@@ -6,7 +6,7 @@
   "catalog": {
     "three": "^0.175.0",
     "@types/three": "^0.175.0",
-    "svelte": "5.53.6",
+    "svelte": "5.55.5",
     "typescript": "5.9.2",
     "vite": "^7.1.4",
     "vitest": "^4.1.2",

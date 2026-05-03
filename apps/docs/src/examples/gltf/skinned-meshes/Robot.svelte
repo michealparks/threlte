@@ -73,8 +73,6 @@ Command: npx @threlte/gltf@3.0.5 apps/docs/public/models/RobotExpressive.glb --t
 
   ref = new Group()
 
-  const gltf = useGltf<GLTFResult>('/models/RobotExpressive.glb')
-
   function cloneScene(scene: THREE.Group) {
     const clone = cloneSkeleton(scene)
     const nodes: Record<string, THREE.Object3D> = {}
@@ -84,10 +82,17 @@ Command: npx @threlte/gltf@3.0.5 apps/docs/public/models/RobotExpressive.glb --t
     return nodes as unknown as GLTFResult['nodes']
   }
 
-  export const { actions, mixer } = useGltfAnimations<ActionName>(gltf, ref)
+  const gltf = await useGltf<GLTFResult>('/models/RobotExpressive.glb')
+
+  export const { actions, mixer } = useGltfAnimations<ActionName>(
+    () => gltf,
+    () => ref
+  )
 
   $effect(() => {
-    if (action) $actions?.[action]?.play()
+    if (action) {
+      actions.current?.[action]?.play()
+    }
   })
 </script>
 
@@ -96,62 +101,56 @@ Command: npx @threlte/gltf@3.0.5 apps/docs/public/models/RobotExpressive.glb --t
   dispose={false}
   {...props}
 >
-  {#await gltf}
-    {@render fallback?.()}
-  {:then gltf}
-    {@const clonedNodes = cloneScene(gltf.scene)}
-    <T.Group name="Root_Scene">
-      <T.Group name="RootNode">
-        <T.Group
-          name="RobotArmature"
-          rotation={[-Math.PI / 2, 0, 0]}
-          scale={100}
-        >
-          <T is={clonedNodes.Bone} />
-        </T.Group>
-        <T.Group
-          name="HandR"
-          position={[0, 2.37, -0.02]}
-          rotation={[-Math.PI / 2, 0, 0]}
-          scale={100}
-        >
-          <T.SkinnedMesh
-            name="HandR_1"
-            geometry={gltf.nodes.HandR_1.geometry}
-            material={gltf.materials.Main}
-            skeleton={clonedNodes.HandR_1.skeleton}
-          />
-          <T.SkinnedMesh
-            name="HandR_2"
-            geometry={gltf.nodes.HandR_2.geometry}
-            material={gltf.materials.Grey}
-            skeleton={clonedNodes.HandR_2.skeleton}
-          />
-        </T.Group>
-        <T.Group
-          name="HandL"
-          position={[0, 2.37, -0.02]}
-          rotation={[-Math.PI / 2, 0, 0]}
-          scale={100}
-        >
-          <T.SkinnedMesh
-            name="HandL_1"
-            geometry={gltf.nodes.HandL_1.geometry}
-            material={gltf.materials.Main}
-            skeleton={clonedNodes.HandL_1.skeleton}
-          />
-          <T.SkinnedMesh
-            name="HandL_2"
-            geometry={gltf.nodes.HandL_2.geometry}
-            material={gltf.materials.Grey}
-            skeleton={clonedNodes.HandL_2.skeleton}
-          />
-        </T.Group>
+  {@const clonedNodes = cloneScene(gltf.scene)}
+  <T.Group name="Root_Scene">
+    <T.Group name="RootNode">
+      <T.Group
+        name="RobotArmature"
+        rotation={[-Math.PI / 2, 0, 0]}
+        scale={100}
+      >
+        <T is={clonedNodes.Bone} />
+      </T.Group>
+      <T.Group
+        name="HandR"
+        position={[0, 2.37, -0.02]}
+        rotation={[-Math.PI / 2, 0, 0]}
+        scale={100}
+      >
+        <T.SkinnedMesh
+          name="HandR_1"
+          geometry={gltf.nodes.HandR_1.geometry}
+          material={gltf.materials.Main}
+          skeleton={clonedNodes.HandR_1.skeleton}
+        />
+        <T.SkinnedMesh
+          name="HandR_2"
+          geometry={gltf.nodes.HandR_2.geometry}
+          material={gltf.materials.Grey}
+          skeleton={clonedNodes.HandR_2.skeleton}
+        />
+      </T.Group>
+      <T.Group
+        name="HandL"
+        position={[0, 2.37, -0.02]}
+        rotation={[-Math.PI / 2, 0, 0]}
+        scale={100}
+      >
+        <T.SkinnedMesh
+          name="HandL_1"
+          geometry={gltf.nodes.HandL_1.geometry}
+          material={gltf.materials.Main}
+          skeleton={clonedNodes.HandL_1.skeleton}
+        />
+        <T.SkinnedMesh
+          name="HandL_2"
+          geometry={gltf.nodes.HandL_2.geometry}
+          material={gltf.materials.Grey}
+          skeleton={clonedNodes.HandL_2.skeleton}
+        />
       </T.Group>
     </T.Group>
-  {:catch err}
-    {@render error?.({ error: err })}
-  {/await}
+  </T.Group>
 
   {@render children?.({ ref })}
 </T>

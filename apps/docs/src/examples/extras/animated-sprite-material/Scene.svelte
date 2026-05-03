@@ -7,8 +7,6 @@
   import { Tween } from 'svelte/motion'
   import { cubicOut } from 'svelte/easing'
 
-  const texture = useTexture('/textures/sprites/bg.png')
-
   let playerPosition = $state<[number, number, number]>([-2.0, -2.75, 0.01])
   let playerAtFire = $derived(Math.abs(playerPosition[0]) < 0.7)
 
@@ -21,6 +19,8 @@
     easing: cubicOut,
     duration: 900
   })
+
+  const texture = await useTexture('/textures/sprites/bg.png')
 </script>
 
 <Suspense>
@@ -51,15 +51,13 @@
   {/each}
 </Suspense>
 
-{#await texture then map}
-  <T.Sprite
-    scale={7.5}
-    position.z={-0.01}
-    position.y={0.4}
-  >
-    <T.MeshBasicMaterial {map} />
-  </T.Sprite>
-{/await}
+<T.Sprite
+  scale={7.5}
+  position.z={-0.01}
+  position.y={0.4}
+>
+  <T.MeshBasicMaterial map={texture} />
+</T.Sprite>
 
 <Suspense>
   <ThrelteLogo show={playerAtFire} />

@@ -24,26 +24,26 @@
     },
     { running: () => running }
   )
+
+  const splat = $derived(await loader.load(src))
 </script>
 
-{#await loader.load(src) then splat}
-  <T
-    {...rest}
-    dispose={false}
-    is={Splat}
-    args={[
-      splat,
-      camera.current,
-      {
-        alphaHash,
-        alphaTest,
-        toneMapped
-      }
-    ]}
-    oncreate={() => {
-      running = true
-    }}
-  >
-    {@render children?.({ ref: Splat })}
-  </T>
-{/await}
+<T
+  {...rest}
+  dispose={false}
+  is={Splat}
+  args={[
+    splat,
+    camera.current,
+    {
+      alphaHash,
+      alphaTest,
+      toneMapped
+    }
+  ]}
+  oncreate={() => {
+    running = true
+  }}
+>
+  {@render children?.({ ref: Splat })}
+</T>

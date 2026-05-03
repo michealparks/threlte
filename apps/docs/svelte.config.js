@@ -8,5 +8,10 @@ export default {
         postcss: true
       }
     }
-  })
+  }),
+  compilerOptions: {
+    experimental: {
+      async: true
+    }
+  }
 }

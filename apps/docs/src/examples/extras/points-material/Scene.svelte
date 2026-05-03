@@ -3,26 +3,27 @@
   import { useGltf, PointsMaterial, OrbitControls, Grid } from '@threlte/extras'
   import { Vector3 } from 'three'
 
-  const gltf = useGltf('/models/pointcloud_plant_in_a_pot.glb')
+  const gltf = await useGltf('/models/pointcloud_plant_in_a_pot.glb')
 </script>
 
 <T.PerspectiveCamera
   makeDefault
   position={[1, 1, 2]}
 >
-  <OrbitControls autoRotate />
+  <OrbitControls
+    autoRotate
+    enableZoom={false}
+  />
 </T.PerspectiveCamera>
 
-{#await gltf then result}
-  <T.Points rotation.x={-Math.PI / 2}>
-    <T is={result.nodes.Object_2.geometry} />
-    <PointsMaterial
-      size={0.05}
-      vertexColors
-      toneMapped={false}
-    />
-  </T.Points>
-{/await}
+<T.Points rotation.x={-Math.PI / 2}>
+  <T is={gltf.nodes.Object_2.geometry} />
+  <PointsMaterial
+    size={0.05}
+    vertexColors
+    toneMapped={false}
+  />
+</T.Points>
 
 <Grid
   position.y={-0.5}

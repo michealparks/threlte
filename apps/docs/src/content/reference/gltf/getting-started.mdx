@@ -86,38 +86,36 @@ Command: npx @threlte/gltf@latest ./stacy.glb
 
   let { fallback, error, children, ref = $bindable(), ...props } = $props()
 
-  ref = new Group()
+  const group = new Group()
 
-  const gltf = useGltf('/stacy.glb')
-  export const { actions, mixer } = useGltfAnimations(gltf, ref)
+  const gltf = await useGltf('/stacy.glb')
+  export const { actions, mixer } = useGltfAnimations(
+    () => gltf,
+    () => group
+  )
 </script>
 
 <T
-  is={ref}
+  is={group}
+  bind:ref
   dispose={false}
   {...props}
 >
-  {#await gltf}
-    {@render fallback?.()}
-  {:then gltf}
-    <T.Group
-      name="Stacy"
-      rotation={[Math.PI / 2, 0, 0]}
-      scale={0.01}
-    >
-      <T is={gltf.nodes.mixamorigHips} />
-      <T.SkinnedMesh
-        name="stacy"
-        geometry={gltf.nodes.stacy.geometry}
-        material={gltf.nodes.stacy.material}
-        skeleton={gltf.nodes.stacy.skeleton}
-        rotation={[-Math.PI / 2, 0, 0]}
-        scale={100}
-      />
-    </T.Group>
-  {:catch err}
-    {@render error?.({ error: err })}
-  {/await}
+  <T.Group
+    name="Stacy"
+    rotation={[Math.PI / 2, 0, 0]}
+    scale={0.01}
+  >
+    <T is={gltf.nodes.mixamorigHips} />
+    <T.SkinnedMesh
+      name="stacy"
+      geometry={gltf.nodes.stacy.geometry}
+      material={gltf.nodes.stacy.material}
+      skeleton={gltf.nodes.stacy.skeleton}
+      rotation={[-Math.PI / 2, 0, 0]}
+      scale={100}
+    />
+  </T.Group>
 
   {@render children?.({ ref })}
 </T>
@@ -156,8 +154,8 @@ Or make the model dynamic. Change its colors for example:
 
 ```svelte
 <T.Mesh
-  geometry={$gltf.nodes.robot.geometry}
-  material={$gltf.materials.metal}
+  geometry={gltf.nodes.robot.geometry}
+  material={gltf.materials.metal}
   material.color="green"
 />
 ```
@@ -165,7 +163,7 @@ Or make the model dynamic. Change its colors for example:
 Or exchange materials:
 
 ```svelte
-<T.Mesh geometry={$gltf.nodes.robot.geometry}>
+<T.Mesh geometry={gltf.nodes.robot.geometry}>
   <T.MeshPhysicalMaterial color="hotpink" />
 </T.Mesh>
 ```
@@ -175,8 +173,8 @@ Make contents conditional:
 ```svelte
 {#if condition}
   <T.Mesh
-    geometry={$gltf.nodes.robot.geometry}
-    material={$gltf.materials.metal}
+    geometry={gltf.nodes.robot.geometry}
+    material={gltf.materials.metal}
   />
 {/if}
 ```
@@ -226,6 +224,7 @@ Command: npx @threlte/gltf@latest ./stacy.glb -t
     | 'wave'
     | 'golf'
     | 'idle'
+
   type GLTFResult = {
     nodes: {
       stacy: THREE.SkinnedMesh
@@ -247,38 +246,36 @@ Command: npx @threlte/gltf@latest ./stacy.glb -t
     error?: Snippet<[{ error: Error }]>
   } = $props()
 
-  ref = new Group()
+  const group = new Group()
 
-  const gltf = useGltf<GLTFResult>('/stacy.glb')
-  export const { actions, mixer } = useGltfAnimations<ActionName>(gltf, ref)
+  const gltf = await useGltf<GLTFResult>('/stacy.glb')
+  export const { actions, mixer } = useGltfAnimations<ActionName>(
+    () => gltf,
+    () => ref
+  )
 </script>
 
 <T
-  is={ref}
+  is={group}
+  bind:ref
   dispose={false}
   {...props}
 >
-  {#await gltf}
-    {@render fallback?.()}
-  {:then gltf}
-    <T.Group
-      name="Stacy"
-      rotation={[Math.PI / 2, 0, 0]}
-      scale={0.01}
-    >
-      <T is={gltf.nodes.mixamorigHips} />
-      <T.SkinnedMesh
-        name="stacy"
-        geometry={gltf.nodes.stacy.geometry}
-        material={gltf.nodes.stacy.material}
-        skeleton={gltf.nodes.stacy.skeleton}
-        rotation={[-Math.PI / 2, 0, 0]}
-        scale={100}
-      />
-    </T.Group>
-  {:catch err}
-    {@render error?.({ error: err })}
-  {/await}
+  <T.Group
+    name="Stacy"
+    rotation={[Math.PI / 2, 0, 0]}
+    scale={0.01}
+  >
+    <T is={gltf.nodes.mixamorigHips} />
+    <T.SkinnedMesh
+      name="stacy"
+      geometry={gltf.nodes.stacy.geometry}
+      material={gltf.nodes.stacy.material}
+      skeleton={gltf.nodes.stacy.skeleton}
+      rotation={[-Math.PI / 2, 0, 0]}
+      scale={100}
+    />
+  </T.Group>
 
   {@render children?.({ ref })}
 </T>
@@ -291,16 +288,19 @@ If your GLTF contains animations it will add [@threlte/extras's
 extracts all clips and prepares them as actions:
 
 ```ts
-const gltf = useGltf('/stacy.glb')
+const gltf = await useGltf('/stacy.glb')
 
-export const { actions, mixer } = useGltfAnimations(gltf, ref)
+export const { actions, mixer } = useGltfAnimations(
+  () => gltf,
+  () => ref
+)
 ```
 
 If you want to play an animation you can do so at any time:
 
 ```ts
 const onEvent = () => {
-  $actions.jump.play()
+  actions.current.jump.play()
 }
 ```
 

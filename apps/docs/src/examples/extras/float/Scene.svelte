@@ -9,7 +9,8 @@
   interactivity()
 
   const dracoLoader = useDraco()
-  const gltf = useGltf<{
+
+  const gltf = await useGltf<{
     nodes: Record<Nodes, Mesh>
     materials: {}
   }>('/models/blobs/blobs.glb', {
@@ -47,22 +48,20 @@
   cellSize={2}
 />
 
-{#await gltf then { nodes }}
-  {#each Object.values(nodes) as node}
-    <Blob>
-      {#snippet children({ hovering })}
-        <T.Mesh>
-          <T.MeshPhysicalMaterial
-            reflectivity={1}
-            metalness={0.9}
-            roughness={0.2}
-            color={hovering ? red : blue}
-          />
-          {#if node.geometry}
-            <T is={node.geometry} />
-          {/if}
-        </T.Mesh>
-      {/snippet}
-    </Blob>
-  {/each}
-{/await}
+{#each Object.values(gltf.nodes) as node}
+  <Blob>
+    {#snippet children({ hovering })}
+      <T.Mesh>
+        <T.MeshPhysicalMaterial
+          reflectivity={1}
+          metalness={0.9}
+          roughness={0.2}
+          color={hovering ? red : blue}
+        />
+        {#if node.geometry}
+          <T is={node.geometry} />
+        {/if}
+      </T.Mesh>
+    {/snippet}
+  </Blob>
+{/each}

@@ -7,7 +7,6 @@
     Sparkles,
     TrackballControls,
     useGltf,
-    useSuspense,
     useTexture
   } from '@threlte/extras'
   import {
@@ -31,16 +30,13 @@
 
   let { camera, controls, margin, animate, enabled }: Props = $props()
 
-  const suspend = useSuspense()
-  const gltf = suspend(useGltf('/models/portal/portal.glb'))
-  const texture = suspend(
-    useTexture('/models/portal/portal_baked.jpg', {
-      transform(result) {
-        result.flipY = false
-        return result
-      }
-    })
-  )
+  const gltf = await useGltf('/models/portal/portal.glb')
+  const texture = await useTexture('/models/portal/portal_baked.jpg', {
+    transform(result) {
+      result.flipY = false
+      return result
+    }
+  })
 
   const poleLightMaterial = new MeshBasicMaterial({ color: 0xff_ff_e5 })
   const bakedMaterial = new MeshPhongMaterial()

@@ -20,11 +20,11 @@
 
   const parentContext = useThrelte()
 
-  createDOMContext({ dom, canvas: parentContext.canvas })
+  createDOMContext(() => ({ dom, canvas: parentContext.canvas }))
+  const scene = createSceneContext()
   createCacheContext()
-  const { scene } = createSceneContext()
-  createParentContext(scene)
-  createParentObject3DContext(scene)
+  createParentContext(() => scene)
+  createParentObject3DContext(() => scene)
   const { camera } = createCameraContext()
   createUserContext()
 

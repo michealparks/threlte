@@ -13,36 +13,36 @@ export interface UseFBOOptions extends Omit<RenderTargetOptions, 'depth'> {
   size?: { width?: number; height?: number }
 }
 
-export const useFBO = ({
-  depth = false,
-  size,
-  ...targetOptions
-}: UseFBOOptions = {}): WebGLRenderTarget => {
-  const target = new WebGLRenderTarget(1, 1, targetOptions)
+export const useFBO = (options?: () => UseFBOOptions | undefined): WebGLRenderTarget => {
+  const { dpr, size: defaultSize } = useThrelte()
 
-  // first set the width and height because if a depth texture has to be created, it can only have its width and height set in its constructor
-  if (size === undefined) {
-    const { dpr, size } = useThrelte()
+  const { size, depth, ...targetOptions } = $derived(options?.() ?? {})
 
-    $effect.pre(() => {
-      target.setSize(dpr.current * size.current.width, dpr.current * size.current.height)
-    })
-  } else {
-    // handle when width and height are undefined or the user set them to negative numbers
-    const width = Math.max(size.width ?? 1, target.width)
-    const height = Math.max(size.height ?? 1, target.height)
-    target.setSize(width, height)
-  }
+  const target = $derived(new WebGLRenderTarget(1, 1, targetOptions))
 
-  if (depth === true) {
-    target.depthTexture = new DepthTexture(target.width, target.height)
-  } else if (isInstanceOf(depth, 'DepthTexture')) {
-    target.depthTexture = depth
-  } else if (depth !== false) {
-    const width = Math.max(depth.width ?? 1, 1)
-    const height = Math.max(depth.height ?? 1, 1)
-    target.depthTexture = new DepthTexture(width, height)
-  }
+  $effect(() => {
+    // first set the width and height because if a depth texture has to be created, it can only have its width and height set in its constructor
+    if (size === undefined) {
+      target.setSize(
+        dpr.current * defaultSize.current.width,
+        dpr.current * defaultSize.current.height
+      )
+    } else {
+      target.setSize(size.width ?? 1, size.height ?? 1)
+    }
+  })
+
+  $effect(() => {
+    if (depth === true) {
+      target.depthTexture = new DepthTexture(target.width, target.height)
+    } else if (isInstanceOf(depth, 'DepthTexture')) {
+      target.depthTexture = depth
+    } else if (depth !== false) {
+      const width = Math.max(depth?.width ?? 1, 1)
+      const height = Math.max(depth?.height ?? 1, 1)
+      target.depthTexture = new DepthTexture(width, height)
+    }
+  })
 
   $effect(() => {
     return () => target.dispose()

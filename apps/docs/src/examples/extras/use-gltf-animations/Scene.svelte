@@ -3,9 +3,9 @@
   import { T } from '@threlte/core'
 
   const dracoLoader = useDraco()
-  const gltf = useGltf('/models/LittlestTokyo.glb', { dracoLoader })
+  const gltf = await useGltf('/models/LittlestTokyo.glb', { dracoLoader })
 
-  export const { actions, mixer } = useGltfAnimations<'Take 001'>(gltf)
+  export const { actions, mixer } = useGltfAnimations<'Take 001'>(() => gltf)
 </script>
 
 <T.PerspectiveCamera
@@ -28,6 +28,4 @@
   isBackground
 />
 
-{#await gltf then { scene }}
-  <T is={scene} />
-{/await}
+<T is={gltf.scene} />

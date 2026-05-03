@@ -8,26 +8,26 @@
     rotation += delta
   })
 
-  const helmetGltf = useGltf<{
-    nodes: {
-      'node_damagedHelmet_-6514': Mesh
-    }
-    materials: {
-      Material_MR: MeshStandardMaterial
-    }
-  }>('/models/helmet/DamagedHelmet.gltf')
-
-  const helmetGeometry = $derived($helmetGltf?.nodes['node_damagedHelmet_-6514'].geometry)
-
   const dracoLoader = useDraco()
-  const suziGltf = useGltf<{
-    nodes: {
-      Suzanne: Mesh
-    }
-    materials: {
-      Material_MR: MeshStandardMaterial
-    }
-  }>('/models/Suzanne.glb', { dracoLoader })
+
+  const [helmetGltf, suziGltf] = await Promise.all([
+    useGltf<{
+      nodes: {
+        'node_damagedHelmet_-6514': Mesh
+      }
+      materials: {
+        Material_MR: MeshStandardMaterial
+      }
+    }>('/models/helmet/DamagedHelmet.gltf'),
+    useGltf<{
+      nodes: {
+        Suzanne: Mesh
+      }
+      materials: {
+        Material_MR: MeshStandardMaterial
+      }
+    }>('/models/Suzanne.glb', { dracoLoader })
+  ])
 </script>
 
 <T.PerspectiveCamera
@@ -58,40 +58,36 @@
 </T.Group>
 
 <T.Group rotation.y={rotation}>
-  {#if helmetGeometry}
-    <T.Mesh
-      rotation.x={90 * MathUtils.DEG2RAD}
-      geometry={helmetGeometry}
-    >
-      <T.MeshBasicMaterial
-        color="#ff3e00"
-        toneMapped={false}
-      />
-      <Edges
-        thresholdAngle={20}
-        color="white"
-        scale={1.01}
-      />
-      <Outlines
-        color="white"
-        thickness={0.04}
-      />
-    </T.Mesh>
-  {/if}
+  <T.Mesh
+    rotation.x={90 * MathUtils.DEG2RAD}
+    geometry={helmetGltf.nodes['node_damagedHelmet_-6514'].geometry}
+  >
+    <T.MeshBasicMaterial
+      color="#ff3e00"
+      toneMapped={false}
+    />
+    <Edges
+      thresholdAngle={20}
+      color="white"
+      scale={1.01}
+    />
+    <Outlines
+      color="white"
+      thickness={0.04}
+    />
+  </T.Mesh>
 </T.Group>
 
-{#if $suziGltf}
-  <T.Group
-    rotation.y={rotation}
-    position.x={3}
-  >
-    <T.Mesh geometry={$suziGltf.nodes['Suzanne'].geometry}>
-      <T.MeshToonMaterial color="turquoise" />
-      <Outlines
-        color="white"
-        screenspace
-        thickness={3}
-      />
-    </T.Mesh>
-  </T.Group>
-{/if}
+<T.Group
+  rotation.y={rotation}
+  position.x={3}
+>
+  <T.Mesh geometry={suziGltf.nodes['Suzanne'].geometry}>
+    <T.MeshToonMaterial color="turquoise" />
+    <Outlines
+      color="white"
+      screenspace
+      thickness={3}
+    />
+  </T.Mesh>
+</T.Group>

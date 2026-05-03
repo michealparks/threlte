@@ -3,7 +3,7 @@
   import { BakeShadows } from '@threlte/extras'
   import { T, useTask } from '@threlte/core'
 
-  type Props = {
+  interface Props {
     bake: boolean
   }
 

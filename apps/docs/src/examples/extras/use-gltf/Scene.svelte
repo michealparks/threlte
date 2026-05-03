@@ -9,7 +9,7 @@
     rotation += 0.005 * f
   })
 
-  const gltf = useGltf<{
+  const gltf = await useGltf<{
     nodes: {
       'node_damagedHelmet_-6514': Object3D
     }
@@ -33,9 +33,5 @@
 />
 
 <T.Group rotation.y={rotation}>
-  {#await gltf}
-    <!-- Place loading placeholder here -->
-  {:then value}
-    <T is={value.nodes['node_damagedHelmet_-6514']} />
-  {/await}
+  <T is={gltf.nodes['node_damagedHelmet_-6514']} />
 </T.Group>

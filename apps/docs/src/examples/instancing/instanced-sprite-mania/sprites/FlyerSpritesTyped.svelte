@@ -14,6 +14,7 @@
   lang="ts"
 >
   import type { SpritesheetMetadata } from '@threlte/extras'
+
   const demonSpriteMeta = [
     {
       url: '/textures/sprites/cacodaemon.png',
@@ -45,20 +46,20 @@
   let { billboarding = false }: Props = $props()
 
   const count = 2000
+
+  const spritesheet = await cacodaemonSpritesheet.spritesheet
 </script>
 
-{#await cacodaemonSpritesheet.spritesheet then spritesheet}
-  <InstancedSprite
-    {count}
-    {billboarding}
-    {spritesheet}
-    castShadow
-    hueShift={{
-      h: 0.3,
-      s: 1.5,
-      v: 1.5
-    }}
-  >
-    <FlyingBehaviourHook />
-  </InstancedSprite>
-{/await}
+<InstancedSprite
+  {count}
+  {billboarding}
+  {spritesheet}
+  castShadow
+  hueShift={{
+    h: 0.3,
+    s: 1.5,
+    v: 1.5
+  }}
+>
+  <FlyingBehaviourHook />
+</InstancedSprite>

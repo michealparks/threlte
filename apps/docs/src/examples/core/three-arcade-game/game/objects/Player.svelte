@@ -40,11 +40,6 @@
     game.playerPosition = positionX
   })
 
-  const gltf = useGltf<{
-    nodes: { Player: Mesh }
-    materials: Record<string, never>
-  }>('/models/ball-game/player/player-simple.glb')
-
   let colliders = $state<Collider[]>([])
 
   useTask(() => {
@@ -53,31 +48,34 @@
       collider.setTranslation({ x: positionX, y: 0, z: positionZ })
     }
   })
+
+  const gltf = await useGltf<{
+    nodes: { Player: Mesh }
+    materials: Record<string, never>
+  }>('/models/ball-game/player/player-simple.glb')
 </script>
 
-{#if $gltf?.nodes.Player}
-  <T.Group>
-    <AutoColliders
-      shape="convexHull"
-      bind:colliders
+<T.Group>
+  <AutoColliders
+    shape="convexHull"
+    bind:colliders
+  >
+    <T.Mesh
+      position.z={positionZ}
+      position.x={positionX}
+      rotation.x={MathUtils.DEG2RAD * -90}
+      rotation.y={MathUtils.DEG2RAD * 90}
+      scale.x={0.5}
+      scale.y={0.3}
     >
-      <T.Mesh
-        position.z={positionZ}
-        position.x={positionX}
-        rotation.x={MathUtils.DEG2RAD * -90}
-        rotation.y={MathUtils.DEG2RAD * 90}
-        scale.x={0.5}
-        scale.y={0.3}
-      >
-        <T is={$gltf.nodes.Player.geometry} />
-        <T.MeshStandardMaterial color="blue" />
+      <T is={gltf.nodes.Player.geometry} />
+      <T.MeshStandardMaterial color="blue" />
 
-        <Edges
-          scale={[1, 1.1, 1.1]}
-          thresholdAngle={10}
-          color={game.baseColor}
-        />
-      </T.Mesh>
-    </AutoColliders>
-  </T.Group>
-{/if}
+      <Edges
+        scale={[1, 1.1, 1.1]}
+        thresholdAngle={10}
+        color={game.baseColor}
+      />
+    </T.Mesh>
+  </AutoColliders>
+</T.Group>

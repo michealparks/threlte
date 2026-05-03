@@ -27,20 +27,20 @@
 
   let { materialColor = 'white', materialWireframe = false, length, segments }: Props = $props()
 
-  const gltf = useGltf<{
-    nodes: { LOD3spShape: Mesh }
-    materials: { 'blinn3-fx': MeshStandardMaterial }
-  }>('/models/Duck.glb').then((gltf) => {
-    gltf.nodes.LOD3spShape.castShadow = true
-    return gltf
-  })
-
   const { scene } = useThrelte()
 
   let helper = $state.raw<DirectionalLightHelper>()
   let light = $state.raw<DirectionalLight>()
 
   let debug = false
+
+  const gltf = await useGltf<{
+    nodes: { LOD3spShape: Mesh }
+    materials: { 'blinn3-fx': MeshStandardMaterial }
+  }>('/models/Duck.glb').then((gltf) => {
+    gltf.nodes.LOD3spShape.castShadow = true
+    return gltf
+  })
 </script>
 
 <Environment url="/textures/equirectangular/hdr/blouberg_sunrise_2_1k.hdr" />
@@ -90,41 +90,39 @@
   </T.Mesh>
 </TransformControls>
 
-{#await gltf then { scene }}
-  <Bounds margin={0.5}>
-    {#each { length: 3 }, index}
-      <T.Group
-        scale={2}
-        position.z={Math.cos(index * MathUtils.degToRad(120)) * 4}
-        position.x={Math.sin(index * MathUtils.degToRad(120)) * 4}
-        position.y={-0}
-        rotation.y={Math.PI}
+<Bounds margin={0.5}>
+  {#each { length: 3 }, index}
+    <T.Group
+      scale={2}
+      position.z={Math.cos(index * MathUtils.degToRad(120)) * 4}
+      position.x={Math.sin(index * MathUtils.degToRad(120)) * 4}
+      position.y={-0}
+      rotation.y={Math.PI}
+      oncreate={(ref) => {
+        ref.lookAt(0, -0.2, 0)
+      }}
+    >
+      <T
+        is={gltf.scene.clone()}
+        rotation.y={-Math.PI / 2}
         oncreate={(ref) => {
-          ref.lookAt(0, -0.2, 0)
-        }}
-      >
-        <T
-          is={scene.clone()}
-          rotation.y={-Math.PI / 2}
-          oncreate={(ref) => {
-            ref.traverse((child) => {
-              child.castShadow = true
-              child.receiveShadow = true
-              console.log(child)
+          ref.traverse((child) => {
+            child.castShadow = true
+            child.receiveShadow = true
+            console.log(child)
 
-              if (isInstanceOf(child, 'Mesh')) {
-                const material = child.material
-                if (isInstanceOf(material, 'MeshStandardMaterial')) {
-                  material.roughness = 0.1
-                }
+            if (isInstanceOf(child, 'Mesh')) {
+              const material = child.material
+              if (isInstanceOf(material, 'MeshStandardMaterial')) {
+                material.roughness = 0.1
               }
-            })
-          }}
-        />
-      </T.Group>
-    {/each}
-  </Bounds>
-{/await}
+            }
+          })
+        }}
+      />
+    </T.Group>
+  {/each}
+</Bounds>
 
 <T.PerspectiveCamera
   makeDefault

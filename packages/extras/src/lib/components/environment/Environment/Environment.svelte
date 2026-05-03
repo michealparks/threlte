@@ -11,11 +11,10 @@
 
 <script lang="ts">
   import { T, useCache, useThrelte } from '@threlte/core'
-  import { EquirectangularReflectionMapping, TextureLoader } from 'three'
+  import { EquirectangularReflectionMapping, Texture, TextureLoader } from 'three'
   import { EXRLoader } from 'three/examples/jsm/loaders/EXRLoader.js'
   import { RGBELoader } from 'three/examples/jsm/loaders/RGBELoader.js'
   import { GroundedSkybox } from 'three/examples/jsm/objects/GroundedSkybox.js'
-  import { useSuspense } from '../../../suspense/useSuspense.js'
   import { useEnvironment } from '../utils/useEnvironment.svelte.js'
   import type { EquirectangularEnvironmentProps } from './types.js'
 
@@ -30,7 +29,6 @@
     url
   }: EquirectangularEnvironmentProps = $props()
 
-  const suspend = useSuspense()
   const cache = useCache()
 
   useEnvironment({
@@ -62,26 +60,18 @@
     return loaders.tex
   })
 
-  $effect.pre(() => {
-    if (url === undefined || loader === undefined) {
-      return
-    }
-
-    const suspendedTexture = suspend(
-      cache.remember(() => {
-        return loader.loadAsync(url)
-      }, [url])
+  const tex = $derived(
+    await cache.remember(
+      () => (loader && url ? loader.loadAsync(url) : Promise.resolve(new Texture())),
+      [url]
     )
+  )
+  texture = tex
+  texture.mapping = EquirectangularReflectionMapping
 
-    suspendedTexture.then((t) => {
-      t.mapping = EquirectangularReflectionMapping
-      texture = t
-    })
-
+  $effect(() => {
     return () => {
-      suspendedTexture.then((texture) => {
-        texture.dispose()
-      })
+      texture.dispose()
     }
   })
 </script>

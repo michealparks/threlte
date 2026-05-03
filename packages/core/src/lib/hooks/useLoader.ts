@@ -1,5 +1,4 @@
 import { useCache } from '../context/fragments/cache.js'
-import { asyncWritable, type AsyncWritable } from '../utilities/asyncWritable.js'
 
 type AsyncLoader = {
   loadAsync: (url: string, onProgress?: (event: ProgressEvent) => void) => Promise<any>
@@ -36,10 +35,10 @@ export type UseLoaderLoadResult<
   Input extends UseLoaderLoadInput,
   ResultType = LoaderResultType<TLoader>
 > = Input extends string
-  ? AsyncWritable<ResultType>
+  ? Promise<ResultType>
   : Input extends string[]
-    ? AsyncWritable<ResultType[]>
-    : AsyncWritable<Record<keyof Input, ResultType>>
+    ? Promise<ResultType[]>
+    : Promise<Record<keyof Input, ResultType>>
 
 type UseLoaderLoadTransform<TLoader extends Loader> = (result: LoaderResultType<TLoader>) => any
 
@@ -137,26 +136,22 @@ export function useLoader<Proto extends LoaderProtoWithoutArgs>(
         return remember(() => loadResource(url), [Proto, url])
       })
 
-      // return an AsyncWritable that resolves to the array of promises
-      const store = asyncWritable(Promise.all(promises))
+      const store = Promise.all(promises)
       return store as any // TODO: Dirty escape hatch
     } else if (typeof input === 'string') {
       const promise = remember(() => loadResource(input), [Proto, input])
 
-      // return an AsyncWritable that resolves to the promise
-      const store = asyncWritable(promise)
+      const store = promise
       return store as any // TODO: Dirty escape hatch
     } else {
       // map over the input object and return an array of promises
       const promises = Object.values(input).map((url) => {
         return remember(() => loadResource(url), [Proto, url])
       })
-      // return an AsyncWritable that resolves to the object of promises
-      const store = asyncWritable(
-        Promise.all(promises).then((results) => {
-          return Object.fromEntries(Object.entries(input).map(([key], i) => [key, results[i]]))
-        })
-      )
+
+      const store = Promise.all(promises).then((results) => {
+        return Object.fromEntries(Object.entries(input).map(([key], i) => [key, results[i]]))
+      })
       return store as any // TODO: Dirty escape hatch
     }
   }

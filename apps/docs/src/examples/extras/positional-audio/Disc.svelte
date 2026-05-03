@@ -17,14 +17,12 @@
     }
   )
 
-  const gltf = useGltf<{
+  const gltf = await useGltf<{
     nodes: {
       Logo: Mesh
     }
     materials: {}
   }>('/models/turntable/disc-logo.glb')
-
-  const logoGeometry = $derived($gltf?.nodes.Logo.geometry)
 </script>
 
 <T.Group {...rest}>
@@ -74,16 +72,14 @@
     </T.Mesh>
 
     <!-- LOGO -->
-    {#if logoGeometry}
-      <T.Mesh
-        geometry={logoGeometry}
-        position.y={0.2 + 0.05 + 0.025 + 0.01}
-      >
-        <T.MeshBasicMaterial
-          color="#ff3e00"
-          toneMapped={false}
-        />
-      </T.Mesh>
-    {/if}
+    <T.Mesh
+      geometry={gltf.nodes.Logo.geometry}
+      position.y={0.2 + 0.05 + 0.025 + 0.01}
+    >
+      <T.MeshBasicMaterial
+        color="#ff3e00"
+        toneMapped={false}
+      />
+    </T.Mesh>
   </T.Group>
 </T.Group>

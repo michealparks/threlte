@@ -14,12 +14,6 @@
 
   let { arcAngle, rotate, sliceColor, startAngle }: SceneProps = $props()
 
-  const dracoLoader = useDraco()
-  const gltf = useGltf<{ nodes: { outerHull: Mesh; axle: Mesh; gears: Mesh }; materials: {} }>(
-    '/models/gears.glb',
-    { dracoLoader }
-  )
-
   const { scene } = useThrelte()
   scene.backgroundBlurriness = 0.5
 
@@ -38,6 +32,12 @@
   const color = '#858080'
 
   const group = new Group()
+
+  const dracoLoader = useDraco()
+  const gltf = await useGltf<{
+    nodes: { outerHull: Mesh; axle: Mesh; gears: Mesh }
+    materials: {}
+  }>('/models/gears.glb', { dracoLoader })
 </script>
 
 <Environment
@@ -90,26 +90,24 @@
   is={group}
   rotation.y={rotation}
 >
-  {#await gltf then { nodes }}
-    {@render mesh(nodes.axle)}
-    {@render mesh(nodes.gears)}
-    <T
-      is={nodes.outerHull}
-      castShadow
-      receiveShadow
-    >
-      <SliceMaterial
-        {arcAngle}
-        {startAngle}
-        {sliceColor}
-        {metalness}
-        {roughness}
-        {envMapIntensity}
-        {color}
-        side={DoubleSide}
-      />
-    </T>
-  {/await}
+  {@render mesh(gltf.nodes.axle)}
+  {@render mesh(gltf.nodes.gears)}
+  <T
+    is={gltf.nodes.outerHull}
+    castShadow
+    receiveShadow
+  >
+    <SliceMaterial
+      {arcAngle}
+      {startAngle}
+      {sliceColor}
+      {metalness}
+      {roughness}
+      {envMapIntensity}
+      {color}
+      side={DoubleSide}
+    />
+  </T>
 </T>
 
 <T.Mesh

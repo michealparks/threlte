@@ -45,7 +45,7 @@ const { camera } = useThrelte()
 renderer.render(scene, camera.current)
 ```
 
-Threlte's camera is a [currentWritable](/reference/core/utilities#currentwritable) so we can use its **.current** property to get the instance. Its important to use the **current** property to avoid having to read from the store every frame.
+We can use the default Threlte camera's **.current** property to get the instance.
 
 4. restore the last render target
 

@@ -6,15 +6,6 @@
 
   transitions()
 
-  const paintings = [
-    '/textures/paintings/klimt.jpg',
-    '/textures/paintings/vangogh.jpg',
-    '/textures/paintings/caravaggio.jpg',
-    '/textures/paintings/swan.jpg'
-  ]
-
-  const allLoaded = Promise.all(paintings.map((src) => useTexture(src)))
-
   let {
     size = 256,
     maxAge = 3500,
@@ -66,6 +57,13 @@
   const swapInterval = 6
   let time = 0
 
+  const paintings = [
+    '/textures/paintings/klimt.jpg',
+    '/textures/paintings/vangogh.jpg',
+    '/textures/paintings/caravaggio.jpg',
+    '/textures/paintings/swan.jpg'
+  ]
+
   useTask((delta) => {
     time += delta * 0.5
 
@@ -81,6 +79,8 @@
   })
 
   let fgIndex = $derived((index + 1) % paintings.length)
+
+  const textures = await Promise.all(paintings.map((src) => useTexture(src)))
 </script>
 
 <T.PerspectiveCamera
@@ -89,29 +89,25 @@
   fov={45}
 />
 
-{#await allLoaded then maps}
-  {#key index}
-    <T.Mesh>
-      <T.PlaneGeometry args={[1.6, 1.6]} />
-      <T.MeshBasicMaterial
-        map={maps[index]}
-        transparent
-        transition={fade}
-      />
-    </T.Mesh>
-  {/key}
+{#key index}
+  <T.Mesh>
+    <T.PlaneGeometry args={[1.6, 1.6]} />
+    <T.MeshBasicMaterial
+      map={textures[index]}
+      transparent
+      transition={fade}
+    />
+  </T.Mesh>
+{/key}
 
-  {#key fgIndex}
-    <T.Mesh position.z={0.001}>
-      <T.PlaneGeometry args={[1.6, 1.6]} />
-      <T.MeshBasicMaterial
-        map={maps[fgIndex]}
-        transparent
-        alphaMap={trailTexture}
-        transition={fade}
-      />
-    </T.Mesh>
-  {/key}
-
-  <!-- Trail-revealed next painting on top -->
-{/await}
+{#key fgIndex}
+  <T.Mesh position.z={0.001}>
+    <T.PlaneGeometry args={[1.6, 1.6]} />
+    <T.MeshBasicMaterial
+      map={textures[fgIndex]}
+      transparent
+      alphaMap={trailTexture}
+      transition={fade}
+    />
+  </T.Mesh>
+{/key}

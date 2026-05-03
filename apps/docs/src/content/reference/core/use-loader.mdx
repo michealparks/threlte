@@ -15,12 +15,12 @@ available.
 ```typescript
 const loader = useLoader(AudioLoader)
 const soundA = loader.load('audio/ambient_ocean.ogg')
-// -> `soundA` is an AsyncWritable<AudioBuffer> that
+// -> `soundA` is an Promise<AudioBuffer> that
 // resolves/is populated once the asset is loaded.
 
 // somewhere else …
 const soundB = loader.load('audio/ambient_ocean.ogg')
-// -> `soundB` is also an AsyncWritable<AudioBuffer>
+// -> `soundB` is also an Promise<AudioBuffer>
 // that resolves/is populated with the same reference
 // as `soundA` once the asset is loaded.
 ```
@@ -90,12 +90,8 @@ as an array to the option `args` of the second argument to `useLoader`:
 </script>
 ```
 
-The return type of `load` is a [custom Threlte store called
-`AsyncWritable`](/docs/reference/core/utilities#asyncwritable) and can be used
-as a regular Svelte store. Its initial value is `undefined` and will be updated
-once the asset is loaded.
-
-The store also exposes the underlying promise methods `then` and `catch` and can therefore be directly awaited:
+The return type of `load` is a promise and can be awaited
+in async Svelte components.
 
 ```svelte
 <script>
@@ -104,16 +100,10 @@ The store also exposes the underlying promise methods `then` and `catch` and can
 
   const { load } = useLoader(TextureLoader)
 
-  const onSomeEvent = async () => {
-    // Load an asset and await the result.
-    const texture = await load('path/to/texture.png')
-  }
+  const map = await load('path/to/texture.png')
 </script>
 
-<!-- Or make use of Svelte's await block -->
-{#await load('path/to/texture.png') then map}
-  <T.MeshStandardMaterial {map} />
-{/await}
+<T.MeshStandardMaterial {map} />
 ```
 
 ### Loading multiple assets

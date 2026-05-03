@@ -23,8 +23,8 @@
   intensity={2.5}
 />
 
-<Suspense final>
-  {#snippet fallback()}
+<Suspense>
+  {#snippet pending()}
     <Text
       position.z={-8}
       text="Loading..."
@@ -38,10 +38,10 @@
     />
   {/snippet}
 
-  {#snippet error({ errors })}
+  {#snippet failed({ error })}
     <Text
       position.z={-8}
-      text={errors.map((e) => e).join(', ')}
+      text={String(error)}
       fontSize={1}
       color="white"
       anchorX="50%"

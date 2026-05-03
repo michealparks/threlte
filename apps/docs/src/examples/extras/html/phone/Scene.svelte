@@ -5,14 +5,12 @@
   import Geometries from './Geometries.svelte'
   import { RoundedPlaneGeometry } from './RoundedPlaneGeometry'
 
-  const gltf = useGltf<{
+  const gltf = await useGltf<{
     nodes: {
       phone: Mesh
     }
     materials: {}
   }>('/models/phone/phone.glb')
-
-  const phoneGeometry = $derived($gltf?.nodes.phone.geometry)
 
   const url = window.origin
 </script>
@@ -60,18 +58,16 @@
     </div>
   </HTML>
 
-  {#if phoneGeometry}
-    <T.Mesh
-      scale={5.65}
-      geometry={phoneGeometry}
-    >
-      <T.MeshStandardMaterial
-        color="#FF3F00"
-        metalness={0.9}
-        roughness={0.1}
-      />
-    </T.Mesh>
-  {/if}
+  <T.Mesh
+    scale={5.65}
+    geometry={gltf.nodes.phone.geometry}
+  >
+    <T.MeshStandardMaterial
+      color="#FF3F00"
+      metalness={0.9}
+      roughness={0.1}
+    />
+  </T.Mesh>
 </Float>
 
 <Geometries />

@@ -182,8 +182,7 @@ provided via `mappings`. Defaults to `true`.
 
 ## Connection Status
 
-The `connected` property is a `currentWritable` that updates when a gamepad
-connects or disconnects.
+The `connected` property updates when a gamepad connects or disconnects.
 
 ```svelte
 <script lang="ts">
@@ -193,7 +192,7 @@ connects or disconnects.
   const { connected } = gamepad
 </script>
 
-<p>{$connected ? 'Gamepad connected' : 'No gamepad'}</p>
+<p>{connected.current ? 'Gamepad connected' : 'No gamepad'}</p>
 ```
 
 The raw unmapped [Gamepad](https://developer.mozilla.org/en-US/docs/Web/API/Gamepad)

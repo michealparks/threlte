@@ -16,21 +16,18 @@
   }
 
   const { scene } = useThrelte()
-  const cube = useGltf<CubeGltf>('/cube.glb')
-  const env = useTexture('/oil-on-water.png', {
+
+  const gltf = await useGltf<CubeGltf>('/cube.glb')
+  cubeGeometry.set(gltf.nodes.Cube.geometry)
+
+  const texture = await useTexture('/oil-on-water.png', {
     transform(texture) {
       texture.mapping = EquirectangularReflectionMapping
       texture.colorSpace = SRGBColorSpace
     }
   })
-
-  cube.then((gltf) => {
-    cubeGeometry.set(gltf.nodes.Cube.geometry)
-  })
-  env.then((texture) => {
-    scene.environment = texture
-    scene.environmentIntensity = 10
-  })
+  scene.environment = texture
+  scene.environmentIntensity = 10
 </script>
 
 <ScrollSheet
@@ -56,6 +53,6 @@
   />
 </ScrollSheet>
 
-{#if $cubeGeometry && $env}
+{#if gltf && texture}
   <Scene />
 {/if}

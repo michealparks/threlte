@@ -1,11 +1,14 @@
 <script lang="ts">
   import { Canvas } from '@threlte/core'
   import Scene from './Scene.svelte'
+  import { Suspense } from '@threlte/extras'
 </script>
 
 <div>
   <Canvas>
-    <Scene />
+    <Suspense>
+      <Scene />
+    </Suspense>
   </Canvas>
   <ul>
     <li>Press <b>S</b> to toggle scope mode.</li>

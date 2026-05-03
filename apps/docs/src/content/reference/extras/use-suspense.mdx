@@ -25,9 +25,9 @@ Because [`useLoader().load()`](/docs/reference/core/use-loader) returns an
 
 ```svelte
 <script>
-  const suspend = useSuspense()
+  import { useTexture } from '@threlte/extras'
 
-  const promise = suspend(useTexture('/texture.png'))
+  const promise = await useTexture('/texture.png')
 </script>
 ```
 
@@ -39,6 +39,6 @@ The hook can be used to get the `suspended`-state of the closest `<Suspense>` bo
 <script>
   const { suspended } = useSuspense()
 
-  $inspect($suspended)
+  $inspect(suspended.current)
 </script>
 ```

@@ -10,15 +10,13 @@
     PlaneGeometry
   } from 'three'
 
-  const gltf = useGltf('/models/Duck.glb')
-
   const { renderer, scene } = useThrelte()
-  const fbo = useFBO({
+  const fbo = useFBO(() => ({
     size: {
       width: 1024,
       height: 2048
     }
-  })
+  }))
 
   const group = new Group()
 
@@ -52,6 +50,8 @@
     planeMesh.visible = true
     renderer.setRenderTarget(lastRenderTarget)
   })
+
+  const gltf = await useGltf('/models/Duck.glb')
 </script>
 
 <T.PerspectiveCamera
@@ -80,8 +80,6 @@
 
 <T is={group}>
   <T.Group position.y={-1}>
-    {#await gltf then { scene }}
-      <T is={scene} />
-    {/await}
+    <T is={gltf.scene} />
   </T.Group>
 </T>

@@ -18,7 +18,7 @@
     }
   }
 
-  const gltf = useGltf<GLTFResult>(
+  const gltf = await useGltf<GLTFResult>(
     '/models/helmet/DamagedHelmet.gltf?v=' + Math.random().toString() // force a reload on every pageload
   )
 </script>
@@ -37,7 +37,5 @@
 />
 
 <T.Group rotation.y={rotation}>
-  {#await gltf then { nodes }}
-    <T is={nodes['node_damagedHelmet_-6514']} />
-  {/await}
+  <T is={gltf.nodes['node_damagedHelmet_-6514']} />
 </T.Group>
