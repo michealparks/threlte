@@ -6,7 +6,6 @@
   import { baseFov, scoping, zoomedFov } from '../Controls.svelte'
   import fragmentShader from './scope_fs.glsl?raw'
   import vertexShader from './scope_vs.glsl?raw'
-  import { untrack } from 'svelte'
 
   const { camera, renderer, scene, size } = useThrelte()
 

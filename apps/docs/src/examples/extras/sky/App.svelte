@@ -9,6 +9,15 @@
 
   const entries = Object.entries(presets)
 
+  let setEnvironment = $state(true)
+  let azimuth = $state(0)
+  let elevation = $state(0)
+  let exposure = $state(0)
+  let mieCoefficient = $state(0)
+  let mieDirectionalG = $state(0)
+  let rayleigh = $state(0)
+  let turbidity = $state(0)
+
   const presetSpring = Spring.of(
     () => ({
       azimuth,
@@ -25,15 +34,6 @@
       stiffness: 0.05
     }
   )
-
-  let setEnvironment = $state(true)
-  let azimuth = $state(0)
-  let elevation = $state(0)
-  let exposure = $state(0)
-  let mieCoefficient = $state(0)
-  let mieDirectionalG = $state(0)
-  let rayleigh = $state(0)
-  let turbidity = $state(0)
 
   const applyPreset = (preset: Preset) => {
     azimuth = preset.azimuth
