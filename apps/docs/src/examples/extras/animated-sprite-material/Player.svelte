@@ -1,6 +1,6 @@
 <script lang="ts">
   import { T, useTask } from '@threlte/core'
-  import { AnimatedSpriteMaterial, Suspense } from '@threlte/extras'
+  import { AnimatedSpriteMaterial } from '@threlte/extras'
   import { Mesh, MeshStandardMaterial } from 'three'
 
   type Props = {
@@ -63,15 +63,13 @@
   onkeyup={handleKeyup}
 />
 
-<Suspense>
-  <T is={mesh}>
-    <AnimatedSpriteMaterial
-      is={new MeshStandardMaterial()}
-      {animation}
-      textureUrl="/textures/sprites/player.png"
-      dataUrl="/textures/sprites/player.json"
-      bind:this={sprite}
-    />
-    <T.PlaneGeometry args={[0.5, 0.5]} />
-  </T>
-</Suspense>
+<T is={mesh}>
+  <AnimatedSpriteMaterial
+    is={new MeshStandardMaterial()}
+    {animation}
+    textureUrl="/textures/sprites/player.png"
+    dataUrl="/textures/sprites/player.json"
+    bind:this={sprite}
+  />
+  <T.PlaneGeometry args={[0.5, 0.5]} />
+</T>

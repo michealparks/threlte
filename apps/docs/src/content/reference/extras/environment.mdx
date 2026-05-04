@@ -117,7 +117,7 @@ Any textures that are loaded by `<Environment>` are suspended so they may be use
 </script>
 
 <Suspense>
-  {#snippet fallback()}
+  {#snippet pending()}
     <Text text="loading environment" />
   {/snippet}
   <Environment url="https://url-of-your-file.hdr" />

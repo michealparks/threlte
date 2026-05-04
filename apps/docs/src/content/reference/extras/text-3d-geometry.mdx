@@ -77,7 +77,7 @@ rendering until the provided font is loaded:
 <script lang="ts">
   import { T } from '@threlte/core'
   import { Text3DGeometry, Suspense } from '@threlte/extras'
-  import Fallback from './Fallback.svelte'
+  import Pending from './Pending.svelte'
 </script>
 
 <Suspense>
@@ -89,8 +89,8 @@ rendering until the provided font is loaded:
     <T.MeshStandardMaterial />
   </T.Mesh>
 
-  {#snippet fallback()}
-    <Fallback />
+  {#snippet pending()}
+    <Pending />
   {/snippet}
 </Suspense>
 ```

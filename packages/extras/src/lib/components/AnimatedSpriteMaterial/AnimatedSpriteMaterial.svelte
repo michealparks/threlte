@@ -63,8 +63,6 @@
   let flipOffset = $derived(flipX ? -1 : 1)
   let frameWidth = 0
   let frameHeight = 0
-  let texture = $state<Texture>()
-  let json: SpriteJsonHashData | undefined
   let frameNames: string[] = []
   let direction: (typeof supportedDirections)[number] = 'forward'
   let frameTag: FrameTag | undefined
@@ -76,34 +74,6 @@
   $effect.pre(() => {
     is ??= isMesh ? new MeshBasicMaterial() : new SpriteMaterial()
   })
-
-  const textureStore = $derived(
-    await useTexture(textureUrl, {
-      transform: (value: Texture) => {
-        value.matrixAutoUpdate = false
-        value.generateMipmaps = false
-        value.premultiplyAlpha = false
-        value.wrapS = value.wrapT = RepeatWrapping
-        value.magFilter = value.minFilter = filter === 'nearest' ? NearestFilter : LinearFilter
-        return value
-      }
-    })
-  )
-
-  const jsonStore = $derived(
-    await (dataUrl
-      ? useLoader(FileLoader).load(dataUrl, {
-          transform: (file) => {
-            if (typeof file !== 'string') return
-            try {
-              return JSON.parse(file)
-            } catch {
-              return
-            }
-          }
-        })
-      : new Promise((resolve) => resolve(createData(textureStore))))
-  )
 
   /**
    * Creates metadata if no JSON file is supplied.
@@ -148,6 +118,34 @@
     return data
   }
 
+  const texture = $derived(
+    await useTexture(textureUrl, {
+      transform: (value: Texture) => {
+        value.matrixAutoUpdate = false
+        value.generateMipmaps = false
+        value.premultiplyAlpha = false
+        value.wrapS = value.wrapT = RepeatWrapping
+        value.magFilter = value.minFilter = filter === 'nearest' ? NearestFilter : LinearFilter
+        return value
+      }
+    })
+  )
+
+  const json = $derived<SpriteJsonHashData>(
+    dataUrl
+      ? await useLoader(FileLoader).load(dataUrl, {
+          transform: (file) => {
+            if (typeof file !== 'string') return
+            try {
+              return JSON.parse(file)
+            } catch {
+              return {}
+            }
+          }
+        })
+      : createData(texture)
+  )
+
   const setFrame = (frame: Frame['frame']) => {
     const horizontalFrames = spritesheetSize.w / frameWidth
     const verticalFrames = spritesheetSize.h / frameHeight
@@ -189,7 +187,6 @@
    */
   export const play = async () => {
     playQueued = true
-    await Promise.all([textureStore, jsonStore])
     if (!playQueued) return
     timerOffset = performance.now() - delay
     running = true
@@ -205,7 +202,6 @@
 
   useTask(
     () => {
-      if (!json) return
       const now = performance.now()
       const diff = now - timerOffset
       const name = frameNames[currentFrame]
@@ -255,18 +251,12 @@
     { running: () => running }
   )
 
-  //   () => [textureStore, jsonStore],
-  // ([nextTexture, nextJson]) => {
   $effect(() => {
-    if (textureStore === undefined || jsonStore === undefined) return
-
-    texture = textureStore.clone()
-    json = jsonStore
-    frameNames = Object.keys(jsonStore.frames)
+    frameNames = Object.keys(json.frames)
     numFrames = frameNames.length
-    spritesheetSize = jsonStore.meta.size
+    spritesheetSize = json.meta.size
 
-    const { sourceSize } = Object.values(jsonStore.frames)[0]
+    const { sourceSize } = Object.values(json.frames)[0]
     frameWidth = sourceSize.w
     frameHeight = sourceSize.h
 
@@ -284,7 +274,7 @@
     }
   })
 
-  $effect.pre(() => {
+  $effect(() => {
     setAnimation(animation)
     if (autoplay) {
       play()

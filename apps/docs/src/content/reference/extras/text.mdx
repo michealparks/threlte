@@ -83,8 +83,8 @@ The `<Text>` component uses [troika-three-text](https://github.com/protectwise/t
     characters="ABCDEFGHIJKLMNOPQRSTUVWXYZ"
   />
 
-  {#snippet fallback()}
-    <!-- show fallback content while font data is loading -->
+  {#snippet pending()}
+    <!-- show pending content while font data is loading -->
   {/snippet}
 </Suspense>
 ```

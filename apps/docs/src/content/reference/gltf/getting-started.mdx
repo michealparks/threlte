@@ -355,14 +355,14 @@ _suspense-ready_:
 
 ```svelte
 <script>
-  import Model from './Model.svelte'
-  import Fallback from './Fallback.svelte'
   import { Suspense } from '@threlte/extras'
+  import Model from './Model.svelte'
+  import Pending from './Pending.svelte'
 </script>
 
 <Suspense>
-  {#snippet fallback()}
-    <Fallback />
+  {#snippet pending()}
+    <Pending />
   {/snippet}
   <Model />
 </Suspense>

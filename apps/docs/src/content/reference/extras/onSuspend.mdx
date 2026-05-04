@@ -21,16 +21,14 @@ wrapped in a `<Suspense>` boundary.
   import { T } from '@threlte/core'
   import { onSuspend, useGltf } from '@threlte/extras'
 
-  const gltf = useGltf('model.gltf')
-
   onSuspend(() => {
     console.log('The component has been suspended')
   })
+
+  const gltf = await useGltf('model.gltf')
 </script>
 
-{#await gltf then { scene }}
-  <T is={scene}>
-{/await}
+<T is={gltf.scene}>
 ```
 
 <Tip type="tip">

@@ -2,6 +2,7 @@
   import type { AsciiRendererProps } from './types.js'
   import { AsciiEffect } from 'three/examples/jsm/effects/AsciiEffect.js'
   import { useTask, useThrelte } from '@threlte/core'
+  import { untrack } from 'svelte'
 
   const defaultCharacters = ' .:-+*=%@#'
 
@@ -97,7 +98,7 @@
   })
 
   $effect(() => {
-    const lastAutoRender = threlteAutoRender.current
+    const lastAutoRender = untrack(() => threlteAutoRender.current)
     threlteAutoRender.set(!autoRender)
     return () => {
       threlteAutoRender.set(lastAutoRender)

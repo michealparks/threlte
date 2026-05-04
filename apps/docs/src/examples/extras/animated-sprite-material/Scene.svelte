@@ -1,11 +1,12 @@
 <script lang="ts">
   import { T } from '@threlte/core'
-  import { AnimatedSpriteMaterial, Suspense, useTexture } from '@threlte/extras'
+  import { AnimatedSpriteMaterial, Suspense } from '@threlte/extras'
   import Fire from './Fire.svelte'
   import Player from './Player.svelte'
   import ThrelteLogo from './ThrelteLogo.svelte'
   import { Tween } from 'svelte/motion'
   import { cubicOut } from 'svelte/easing'
+  import Background from './Background.svelte'
 
   let playerPosition = $state<[number, number, number]>([-2.0, -2.75, 0.01])
   let playerAtFire = $derived(Math.abs(playerPosition[0]) < 0.7)
@@ -19,20 +20,24 @@
     easing: cubicOut,
     duration: 900
   })
-
-  const texture = await useTexture('/textures/sprites/bg.png')
 </script>
-
-<Suspense>
-  <Fire />
-</Suspense>
 
 <T.AmbientLight
   color="#6697C7"
   intensity={0.3}
 />
 
+<T.PerspectiveCamera
+  makeDefault
+  position.z={7}
+  position.y={cameraPosY.current}
+  fov={fov.current}
+/>
+
 <Suspense>
+  <Background />
+  <Fire />
+
   {#each { length: 9 }, index}
     <T.Sprite
       scale={0.5}
@@ -49,25 +54,8 @@
       />
     </T.Sprite>
   {/each}
-</Suspense>
 
-<T.Sprite
-  scale={7.5}
-  position.z={-0.01}
-  position.y={0.4}
->
-  <T.MeshBasicMaterial map={texture} />
-</T.Sprite>
-
-<Suspense>
   <ThrelteLogo show={playerAtFire} />
+
+  <Player bind:position={playerPosition} />
 </Suspense>
-
-<Player bind:position={playerPosition} />
-
-<T.PerspectiveCamera
-  makeDefault
-  position.z={7}
-  position.y={cameraPosY.current}
-  fov={fov.current}
-/>

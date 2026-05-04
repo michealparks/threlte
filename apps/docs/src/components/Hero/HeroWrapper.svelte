@@ -18,6 +18,7 @@
   } from './scrollPos'
   // import { debug } from './state'
   import state from './state.json'
+  import { Suspense } from '@threlte/extras'
 
   const onScroll = () => {
     // get normalized scroll position in document. 0 should equal top of page, 1
@@ -76,7 +77,9 @@
           })
         }}
       >
-        <App />
+        <Suspense>
+          <App />
+        </Suspense>
       </Canvas>
     </div>
 
