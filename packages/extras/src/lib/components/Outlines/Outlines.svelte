@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { isInstanceOf, T, useParent, useThrelte } from '@threlte/core'
+  import { isInstanceOf, T, useParentObject3D, useThrelte } from '@threlte/core'
   import {
     BackSide,
     Color,
@@ -26,6 +26,7 @@
     polygonOffset = false,
     polygonOffsetFactor = 0,
     renderOrder = 0,
+    geometry: userGeometry,
     children,
     ref = $bindable(),
     ...props
@@ -50,15 +51,17 @@
     fragmentShader
   })
 
-  const parent = useParent()
+  const parent = useParentObject3D()
 
   let geometry = $derived.by(() => {
+    if (userGeometry) return userGeometry
     if (!isInstanceOf(parent.current, 'Mesh')) return undefined
     return toCreasedNormals(parent.current.geometry, angle)
   })
 
   let mesh = $derived.by<undefined | Mesh | SkinnedMesh | InstancedMesh>(() => {
     if (!isInstanceOf(parent.current, 'Mesh')) return
+
     if (isInstanceOf(parent.current, 'SkinnedMesh')) {
       const nextMesh = new SkinnedMesh()
       nextMesh.bind(parent.current.skeleton, parent.current.bindMatrix)

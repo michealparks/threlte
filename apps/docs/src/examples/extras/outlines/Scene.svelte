@@ -85,6 +85,7 @@
   <T.Mesh geometry={suziGltf.nodes['Suzanne'].geometry}>
     <T.MeshToonMaterial color="turquoise" />
     <Outlines
+      geometry={suziGltf.nodes['Suzanne'].geometry}
       color="white"
       screenspace
       thickness={3}

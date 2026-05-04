@@ -36,8 +36,7 @@
    * Chromatic Aberration
    */
   const chromaticAberrationEffect = new ChromaticAberrationEffect()
-  chromaticAberrationEffect.offset.x = 0.0008
-  chromaticAberrationEffect.offset.y = 0
+  chromaticAberrationEffect.offset.set(0.0008, 0)
 
   /**
    * Tone Mapping
@@ -96,7 +95,7 @@
   })
 
   $effect(() => {
-    composer.addPass(new RenderPass(scene.current, camera.current))
+    composer.addPass(new RenderPass(scene, camera.current))
     composer.addPass(new EffectPass(camera.current, fxaaEffect))
     composer.addPass(
       new EffectPass(camera.current, noiseEffect, bcEffect, bloomEffect, toneMappingEffect)

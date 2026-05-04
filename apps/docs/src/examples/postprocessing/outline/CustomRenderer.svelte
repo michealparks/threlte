@@ -35,7 +35,11 @@
     blur: true
   }
 
-  const outlineEffect = new OutlineEffect(scene, undefined, outlineEffectOptions)
+  const outlineEffect = new OutlineEffect(
+    scene,
+    untrack(() => camera.current),
+    outlineEffectOptions
+  )
   $effect(() => {
     outlineEffect.selection.add(mesh)
     return () => {
@@ -43,7 +47,10 @@
     }
   })
 
-  const outlineEffectPass = new EffectPass(undefined, outlineEffect)
+  const outlineEffectPass = new EffectPass(
+    untrack(() => camera.current),
+    outlineEffect
+  )
   composer.addPass(outlineEffectPass)
 
   $effect(() => {

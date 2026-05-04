@@ -1,5 +1,5 @@
 import type { Props } from '@threlte/core'
-import type { ColorRepresentation, Group } from 'three'
+import type { BufferGeometry, ColorRepresentation, Group } from 'three'
 
 export type OutlinesProps = Props<Group> & {
   /**
@@ -57,4 +57,6 @@ export type OutlinesProps = Props<Group> & {
    * @default 0
    */
   renderOrder?: number
+
+  geometry?: BufferGeometry
 }
