@@ -109,16 +109,19 @@ Command: npx gltfjsx@0.0.1 ./stacy.glb
   import { T } from '@threlte/core'
   import { useGltf, useGltfAnimations } from '@threlte/extras'
 
-  export const ref = new Group()
+  let { ref = $bindable(), children, ...rest } = $props()
+
+  const group = new Group()
 
   const gltf = useGltf('/stacy.glb')
-  export const { actions, mixer } = useGltfAnimations(gltf, ref)
+  export const { actions, mixer } = useGltfAnimations(() => $gltf, () => group)
 </script>
 
 {#if $gltf}
   <T
-    is={ref}
-    {...$$restProps}
+    is={group}
+    bind:ref
+    {...rest}
   >
     <T.Group name="Scene">
       <T.Group
@@ -138,7 +141,7 @@ Command: npx gltfjsx@0.0.1 ./stacy.glb
       </T.Group>
     </T.Group>
 
-    <slot {ref} />
+    {@render children?.({ ref })}
   </T>
 {/if}
 ```
@@ -223,14 +226,12 @@ Command: npx gltfjsx@0.0.1 ./stacy.glb -t
 <script lang="ts">
   import type * as THREE from 'three'
   import { Group } from 'three'
-  import { T, type Props, type Events, type Slots } from '@threlte/core'
+  import { T, type Props } from '@threlte/core'
   import { useGltf, useGltfAnimations } from '@threlte/extras'
 
-  type $$Props = Props<THREE.Group>
-  type $$Events = Events<THREE.Group>
-  type $$Slots = Slots<THREE.Group>
+  let { ref = $bindable(), children, ...rest }: Props<Group> = $props()
 
-  export const ref = new Group()
+  ref = new Group()
 
   type ActionName =
     | 'pockets'
@@ -251,13 +252,13 @@ Command: npx gltfjsx@0.0.1 ./stacy.glb -t
   }
 
   const gltf = useGltf<GLTFResult>('/stacy.glb')
-  export const { actions, mixer } = useGltfAnimations<ActionName>(gltf, ref)
+  export const { actions, mixer } = useGltfAnimations<ActionName>(() => $gltf, () => ref)
 </script>
 
 {#if $gltf}
   <T
     is={ref}
-    {...$$restProps}
+    {...rest}
   >
     <T.Group name="Scene">
       <T.Group
@@ -289,14 +290,14 @@ If your GLTF contains animations it will add [@threlte/extras's `useGltfAnimatio
 ```ts
 const gltf = useGltf('/stacy.glb')
 
-export const {(actions, mixer)} = useGltfAnimations(gltf, ref)
+export const { actions, mixer } = useGltfAnimations(() => $gltf)
 ```
 
 If you want to play an animation you can do so at any time:
 
 ```ts
 const onEvent = () => {
-  $actions.jump.play()
+  actions.current.jump.play()
 }
 ```
 

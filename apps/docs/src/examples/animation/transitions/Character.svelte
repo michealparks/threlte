@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { GLTF, useGltfAnimations } from '@threlte/extras'
+  import { GLTF, useGltfAnimations, type ThrelteGltf } from '@threlte/extras'
   import type { CharacterActions } from './types'
 
   interface Props {
@@ -8,24 +8,26 @@
 
   let { actionKey = 'idle' }: Props = $props()
 
-  let { gltf, actions } = useGltfAnimations()
+  let gltf = $state.raw<ThrelteGltf>()
+
+  let { actions } = useGltfAnimations(() => gltf)
 
   let currentActionKey: CharacterActions = 'idle'
 
   $effect(() => {
     // This effect acts like an init default pose
-    $actions.idle?.play()
+    actions.current.idle?.play()
   })
 
   $effect(() => {
     transitionTo(actionKey, 0.3)
   })
 
+  // https://github.com/mrdoob/three.js/blob/master/examples/webgl_animation_skinning_blending.html
   function transitionTo(actionKey: CharacterActions, duration = 1) {
-    const currentAction = $actions[currentActionKey]
-    const nextAction = $actions[actionKey]
+    const currentAction = actions.current[currentActionKey]
+    const nextAction = actions.current[actionKey]
     if (!nextAction || currentAction === nextAction) return
-    // Function inspired by: https://github.com/mrdoob/three.js/blob/master/examples/webgl_animation_skinning_blending.html
     nextAction.enabled = true
     if (currentAction) {
       currentAction.crossFadeTo(nextAction, duration, true)
@@ -37,7 +39,7 @@
 </script>
 
 <GLTF
-  bind:gltf={$gltf}
+  bind:gltf
   url="https://threejs.org/examples/models/gltf/Xbot.glb"
   oncreate={(scene) => {
     scene.traverse((child) => {

@@ -23,19 +23,21 @@ Without any arguments, `useGltfAnimations` returns a store which can be bound to
 
 ```svelte
 <script lang="ts">
-  import { GLTF, useGltfAnimations } from '@threlte/extras'
+  import { GLTF, useGltfAnimations, type ThrelteGltf } from '@threlte/extras'
 
-  const { gltf, actions, mixer } = useGltfAnimations<'All Animations'>()
+  let gltf = $state.raw<ThrelteGltf>()
+
+  const { actions, mixer } = useGltfAnimations<'All Animations'>(() => gltf)
   mixer.timeScale = 0.5
 
   export const triggerAnimation = () => {
-    $actions['All Animations']?.play()
+    actions.current['All Animations']?.play()
   }
 </script>
 
 <GLTF
   url="/path/to/model.glb"
-  bind:gltf={$gltf}
+  bind:gltf
 />
 ```
 
@@ -49,10 +51,10 @@ For cases where you want to reuse parts of the GLTF such as materials, nodes, or
   import { useGltfAnimations, useGltf } from '@threlte/extras'
 
   const gltf = useGltf('/path/to/model.glb')
-  const { actions, mixer } = useGltfAnimations<'All Animations'>(gltf)
+  const { actions, mixer } = useGltfAnimations<'All Animations'>(() => $gltf)
 
   $effect(() => {
-    $actions['All Animations']?.play()
+    actions.current['All Animations']?.play()
   })
 </script>
 
@@ -74,32 +76,15 @@ For cases where you want to reuse parts of the GLTF such as materials, nodes, or
 
   const group = new Group()
 
-  const { root } = useGltfAnimations(gltf, group)
-  // $root === group
+  export const { actions } = useGltfAnimations(
+    () => $gltf,
+    () => group
+  )
 </script>
 
 {#await gltf then { scene }}
   <T is={group}>
     <T is={scene} />
   </T>
-{/await}
-```
-
-You can also set the root store without passing in the second argument
-
-```svelte
-<script>
-  import { useGltfAnimations, useGltf } from '@threlte/extras'
-  import { Group } from 'three'
-
-  const gltf = useGltf('/path/to/model.glb')
-
-  const { root } = useGltfAnimations(gltf)
-</script>
-
-{#await gltf then { scene }}
-  <T.Group bind:ref={$root}>
-    <T is={scene} />
-  </T.Group>
 {/await}
 ```
