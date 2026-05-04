@@ -1,4 +1,4 @@
-import { Camera, Vector3, type Vector3Tuple } from 'three'
+import { Vector3, type Vector3Tuple } from 'three'
 import { isInstanceOf, useTask, useThrelte } from '@threlte/core'
 
 export interface Viewport {
@@ -16,9 +16,7 @@ const origin = new Vector3()
 const position = new Vector3()
 const lastPosition = new Vector3()
 
-export const useViewport = (
-  target?: Vector3 | Vector3Tuple
-): { current: Viewport } & { current: Viewport } => {
+export const useViewport = (target?: Vector3 | Vector3Tuple): { current: Viewport } => {
   const viewport = $state<Viewport>({
     width: 0,
     height: 0,
@@ -28,43 +26,12 @@ export const useViewport = (
 
   const { camera, size, renderStage, scheduler } = useThrelte()
 
-  const updateViewport = (
-    size: { width: number; height: number },
-    camera: Camera,
-    distance: number
-  ) => {
-    const { width, height } = size
-
-    if (Array.isArray(target)) {
-      origin.fromArray(target)
-    } else if (target !== undefined) {
-      origin.copy(target)
-    }
-
-    viewport.distance = distance
-
-    if (isInstanceOf(camera, 'OrthographicCamera')) {
-      viewport.width = width / camera.zoom
-      viewport.height = height / camera.zoom
-      viewport.factor = 1
-    } else if (isInstanceOf(camera, 'PerspectiveCamera')) {
-      const fov = (camera.fov * Math.PI) / 180 // convert vertical fov to radians
-      const h = 2 * Math.tan(fov / 2) * distance // visible height
-      const w = h * (width / height)
-      viewport.width = w
-      viewport.height = h
-      viewport.factor = width / w
-    }
-  }
-
   useTask(
     () => {
       camera.current.getWorldPosition(position)
 
       if (!position.equals(lastPosition)) {
-        const distance = position.distanceTo(origin)
-
-        updateViewport(size.current, camera.current, distance)
+        viewport.distance = position.distanceTo(origin)
         lastPosition.copy(position)
       }
     },
@@ -74,9 +41,27 @@ export const useViewport = (
     }
   )
 
-  $effect.pre(() => {
-    const distance = camera.current.getWorldPosition(position).distanceTo(origin)
-    updateViewport(size.current, camera.current, distance)
+  $effect(() => {
+    const { width, height } = size.current
+
+    if (Array.isArray(target)) {
+      origin.fromArray(target)
+    } else if (target !== undefined) {
+      origin.copy(target)
+    }
+
+    if (isInstanceOf(camera, 'OrthographicCamera')) {
+      viewport.width = width / camera.zoom
+      viewport.height = height / camera.zoom
+      viewport.factor = 1
+    } else if (isInstanceOf(camera, 'PerspectiveCamera')) {
+      const fov = (camera.fov * Math.PI) / 180 // convert vertical fov to radians
+      const h = 2 * Math.tan(fov / 2) * viewport.distance // visible height
+      const w = h * (width / height)
+      viewport.width = w
+      viewport.height = h
+      viewport.factor = width / w
+    }
   })
 
   return {
