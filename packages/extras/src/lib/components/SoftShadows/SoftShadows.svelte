@@ -153,14 +153,12 @@
     scene.traverse((object) => {
       const material = (object as Mesh).material
 
-      if (material && !isInstanceOf(material, 'Material')) {
-        return
-      }
-
       if (Array.isArray(material)) {
-        for (const m of material) forceFreshCompile(m)
-      } else {
-        forceFreshCompile(material as Material)
+        for (const m of material) {
+          forceFreshCompile(m)
+        }
+      } else if (isInstanceOf(material, 'Material')) {
+        forceFreshCompile(material)
       }
     })
 
