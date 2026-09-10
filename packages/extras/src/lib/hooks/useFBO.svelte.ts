@@ -4,7 +4,7 @@ import { isInstanceOf, useThrelte } from '@threlte/core'
 import { fromStore } from 'svelte/store'
 import { untrack } from 'svelte'
 
-export type UseFBOOptions = RenderTargetOptions & {
+export type UseFBOOptions = Omit<RenderTargetOptions, 'depth'> & {
   /**
    * if set, the scene depth will be rendered into buffer.depthTexture
    */
@@ -17,6 +17,9 @@ export type UseFBOOptions = RenderTargetOptions & {
 
 const isGetter = (value: unknown): value is () => UseFBOOptions | undefined =>
   typeof value === 'function'
+
+const isDepthTexture = (value: UseFBOOptions['depth']): value is DepthTexture =>
+  isInstanceOf(value, 'DepthTexture')
 
 /**
  * Creates a `WebGLRenderTarget` whose `size` and `depth` configuration is
@@ -89,7 +92,7 @@ export function useFBO(
       return () => created.dispose()
     }
 
-    if (isInstanceOf(depth, 'DepthTexture')) {
+    if (isDepthTexture(depth)) {
       target.depthTexture = depth
       return
     }
