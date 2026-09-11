@@ -51,7 +51,7 @@
 
   const { renderer, scene } = useThrelte()
 
-  interface Props {
+  export interface SoftShadowsProps {
     /** Size of the light source (the larger the softer the light), default: 25 */
     size?: number
     /** Depth focus, use it to shift the focal point (where the shadow is the sharpest), default: 0 (the beginning) */
@@ -60,7 +60,7 @@
     samples?: number
   }
 
-  let { size = 25, focus = 0, samples = 10 }: Props = $props()
+  let { size = 25, focus = 0, samples = 10 }: SoftShadowsProps = $props()
 
   // 1.25 is folded into `size` so the inner filter loop avoids one multiply.
   const filterScale = $derived(size * 1.25)

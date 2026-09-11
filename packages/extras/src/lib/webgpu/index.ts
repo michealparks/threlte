@@ -1,18 +1,10 @@
 /**
- * `@threlte/extras/webgpu` mirrors `@threlte/extras`, minus everything that is
- * built on raw GLSL. `WebGPURenderer` compiles materials through the node
- * system, so anything relying on `ShaderMaterial`, `onBeforeCompile` or
- * `ShaderChunk` patching can't be used with it.
+ * `@threlte/extras/webgpu` provides WebGPU-compatible implementations where
+ * available. Components awaiting a WebGPU implementation are exported as
+ * typed stubs that throw a clear error when instantiated.
  *
- * Omitted from this entrypoint:
- * `AnimatedSpriteMaterial`, `InstancedSprite`, `useInstancedSprite`,
- * `buildSpritesheet`, `ContactShadows`, `CSM`, `FakeGlowMaterial`, `Gizmo`,
- * `ImageMaterial`, `MeshLineMaterial`, `MeshRefractionMaterial`, `Outlines`,
- * `PerfMonitor`, `PointsMaterial`, `ShadowAlpha`, `Sky`, `SoftShadows`,
- * `Sparkles`, `Stars`, `Text`, `UvMaterial`, `Wireframe` and `Wobble`.
- *
- * Migrating these components to TSL is in progress. Each one gets a `webgpu`
- * folder next to its GLSL original, and is exported from here once it lands.
+ * Migrating these components to TSL is in progress. Each implementation lives
+ * in a `webgpu` folder next to its WebGL counterpart.
  */
 
 // Hooks
@@ -47,9 +39,34 @@ export {
 export { default as Grid } from '../components/Grid/webgpu/Grid.svelte'
 export { default as MeshDiscardMaterial } from '../components/MeshDiscardMaterial/webgpu/MeshDiscardMaterial.svelte'
 
+// abstractions awaiting WebGPU implementations
+export { default as AnimatedSpriteMaterial } from '../components/AnimatedSpriteMaterial/webgpu/AnimatedSpriteMaterial.svelte'
+export { default as AsciiRenderer } from '../components/AsciiRenderer/webgpu/AsciiRenderer.svelte'
+export { default as BakeShadows } from '../components/BakeShadows/webgpu/BakeShadows.svelte'
+export { default as ContactShadows } from '../components/ContactShadows/webgpu/ContactShadows.svelte'
+export { default as CSM } from '../components/CSM/webgpu/CSM.svelte'
+export { default as CubeCamera } from '../components/CubeCamera/webgpu/CubeCamera.svelte'
+export { default as FakeGlowMaterial } from '../components/FakeGlowMaterial/webgpu/FakeGlowMaterial.svelte'
+export { default as ImageMaterial } from '../components/ImageMaterial/webgpu/ImageMaterial.svelte'
+export { default as InstancedSprite } from '../components/InstancedSprite/webgpu/InstancedSprite.svelte'
+export { default as MeshLineMaterial } from '../components/MeshLine/webgpu/MeshLineMaterial.svelte'
+export { default as MeshRefractionMaterial } from '../components/MeshRefractionMaterial/webgpu/MeshRefractionMaterial.svelte'
+export { default as Outlines } from '../components/Outlines/webgpu/Outlines.svelte'
+export { default as PerfMonitor } from '../components/PerfMonitor/webgpu/PerfMonitor.svelte'
+export { default as PointsMaterial } from '../components/PointsMaterial/webgpu/PointsMaterial.svelte'
+export { default as ShadowAlpha } from '../components/ShadowAlpha/webgpu/ShadowAlpha.svelte'
+export { default as Sky } from '../components/Sky/webgpu/Sky.svelte'
+export { default as SoftShadows } from '../components/SoftShadows/webgpu/SoftShadows.svelte'
+export { default as Sparkles } from '../components/Sparkles/webgpu/Sparkles.svelte'
+export { default as Stars } from '../components/Stars/webgpu/Stars.svelte'
+export { default as Text } from '../components/Text/webgpu/Text.svelte'
+export { default as UvMaterial } from '../components/UvMaterial/webgpu/UvMaterial.svelte'
+export { default as VirtualEnvironment } from '../components/environment/VirtualEnvironment/webgpu/VirtualEnvironment.svelte'
+export { default as Wireframe } from '../components/Wireframe/webgpu/Wireframe.svelte'
+export { default as Wobble } from '../components/Wobble/webgpu/Wobble.svelte'
+
 // abstractions
 export {
-  AsciiRenderer,
   BackdropGeometry,
   Decal,
   CameraControls,
@@ -59,9 +76,10 @@ export {
   HUD,
   Float,
   GLTF,
+  Gizmo,
+  type GizmoOptions,
   CubeEnvironment,
   Environment,
-  VirtualEnvironment,
   Bounds,
   RoundedBoxGeometry,
   TransformControls,
@@ -77,10 +95,8 @@ export {
   SVG,
   Text3DGeometry,
   Mask,
-  BakeShadows,
   Detailed,
   Resize,
-  CubeCamera,
   LinearGradientTexture,
   RadialGradientTexture,
   type ColorStop,
