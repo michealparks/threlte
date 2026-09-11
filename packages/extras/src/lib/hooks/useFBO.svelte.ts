@@ -18,9 +18,6 @@ export type UseFBOOptions = Omit<RenderTargetOptions, 'depth'> & {
 const isGetter = (value: unknown): value is () => UseFBOOptions | undefined =>
   typeof value === 'function'
 
-const isDepthTexture = (value: UseFBOOptions['depth']): value is DepthTexture =>
-  isInstanceOf(value, 'DepthTexture')
-
 /**
  * Creates a `WebGLRenderTarget` whose `size` and `depth` configuration is
  * tracked through runes — pass `options` as a getter and the FBO updates when
@@ -92,7 +89,7 @@ export function useFBO(
       return () => created.dispose()
     }
 
-    if (isDepthTexture(depth)) {
+    if (isInstanceOf(depth, 'DepthTexture')) {
       target.depthTexture = depth
       return
     }
